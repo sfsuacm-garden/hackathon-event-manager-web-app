@@ -20,13 +20,18 @@ Thank you for your interest in contributing to this project! To keep our develop
   **Naming convention:** `bugfix/<short-description>`  
   Example: `bugfix/fix-login-error`
 
+- **Operation branches**  
+  infrastructure, CI/CD pipeline setups, and other environment or tooling configurations are handled off `ops` branches.  
+  **Naming convention:** `ops/<short-description>`  
+  Example: `ops/new-ci-flow`
+
 ## Workflow
 
-1. Create a new feature or bugfix branch following the naming conventions above.  
-2. Commit your changes with clear, descriptive messages.  
-3. Open a Pull Request (PR) from your branch into `development`.  
-4. Request reviews from your team members.  
-5. After approval and passing all tests, merge your PR into `development`.  
+1. Create a new feature or bugfix branch following the naming conventions above.
+2. Commit your changes with clear, descriptive messages.
+3. Open a Pull Request (PR) from your branch into `development`.
+4. Request reviews from your team members.
+5. After approval and passing all tests, merge your PR into `development`.
 6. Periodically, changes from `development` will be merged into `main` once they are stable.
 
 ---
