@@ -12,3 +12,6 @@ Please read and follow our [Code of Conduct](./CODE_OF_CONDUCT.md) to help us ma
 ## Detailed Requirements
 For the full Software Requirements Specification (SRS) with detailed functional and non-functional requirements, 
 see [here](https://docs.google.com/document/d/1d-R3v54gno-AsiLacKj1ANVN69Lg3ToY25hd6JroHCk/edit?tab=t.0).
+
+## License
+This project is licensed under the [MIT License](./LICENSE).
