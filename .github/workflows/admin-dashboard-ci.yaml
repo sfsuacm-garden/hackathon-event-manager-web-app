@@ -1,4 +1,4 @@
-name: API CI
+name: Applicant Portal CI
 
 on:
   push:
@@ -23,14 +23,14 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./app/api
+        working-directory: ./app/applicant-portal
         # Installs project dependencies defined in package.json
 
       - name: Run ESLint
         run: npm run lint
-        working-directory: ./app/api
+        working-directory: ./app/applicant-portal
         # Runs the ESLint command defined in package.json scripts to check code quality
 
       - name: Build
         run: npm run build
-        working-directory: ./app/api
+        working-directory: ./app/applicant-portal
