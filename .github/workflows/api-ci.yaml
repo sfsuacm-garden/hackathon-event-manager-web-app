@@ -23,14 +23,14 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./application/api
+        working-directory: ./app/api
         # Installs project dependencies defined in package.json
 
       - name: Run ESLint
         run: npm run lint
-        working-directory: ./application/api
+        working-directory: ./app/api
         # Runs the ESLint command defined in package.json scripts to check code quality
 
       - name: Build
         run: npm run build
-        working-directory: ./application/api
+        working-directory: ./app/api
