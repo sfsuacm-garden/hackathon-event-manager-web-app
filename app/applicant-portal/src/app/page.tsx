@@ -2,18 +2,18 @@
 // src/pages/index.tsx (or src/App.tsx if CRA)
 
 import React from "react";
-import { Button } from "@/components/shadcn/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/shadcn/ui/card";
+} from "@/components/ui/card";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <main className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle>Welcome to Shadcn UI</CardTitle>
