@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* LIGHT MODE
 :root {
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.1649 0.0352 281.8285);
@@ -62,8 +63,9 @@
     0px 8px 10px -3px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
-}
+} */
 
+/* DARK MODE DEFAULT */
 :root {
   --background: oklch(0.1649 0.0352 281.8285);
   --foreground: oklch(0.9513 0.0074 260.7315);
