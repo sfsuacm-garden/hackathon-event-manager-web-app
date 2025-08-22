@@ -1,0 +1,36 @@
+name: API CI
+
+on:
+  push:
+    branches: ["**"] # Trigger workflow on push to any branch
+  pull_request:
+    branches: ["**"] # Trigger workflow on pull requests targeting any branch
+  workflow_dispatch: # Allow manual triggering from GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    steps:
+      - uses: actions/checkout@v4
+        # Checks out your repository so the workflow can access the code
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+        # Sets up Node.js version 22 on the runner
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./app/api
+        # Installs project dependencies defined in package.json
+
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: ./app/api
+        # Runs the ESLint command defined in package.json scripts to check code quality
+
+      - name: Build
+        run: npm run build
+        working-directory: ./app/api
