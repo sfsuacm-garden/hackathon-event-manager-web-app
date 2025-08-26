@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model applications {
+  id                              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                        String?             @db.Uuid
+  user_id                         String?             @db.Uuid
+  status                          String?             @default("pending")
+  school                          String?
+  graduation_year                 Int?
+  experience_level                String?
+  submission_data                 Json?
+  created_at                      DateTime?           @default(now()) @db.Timestamp(6)
+  public_status                   application_status?
+  internal_status                 application_status?
+  school_id                       String?             @db.Uuid
+  dob                             String?
+  phone_number                    String?
+  level_of_study                  String?
+  country_of_residence            String?
+  linkedin_url                    String?
+  mlh_authorized_promo_email      Boolean?
+  mlh_authorized_data_share       Boolean?
+  mlh_code_of_conduct_aggreemeant Boolean?
+  dietary_vegetarian              Boolean?
+  dietary_vegan                   Boolean?
+  dietary_celiac_disease          Boolean?
+  dietary_kosher                  Boolean?
+  dietary_halal                   Boolean?
+  gender                          String?
+  pronouns                        String?
+  race_ethnicity                  String?
+  sexual_orientation              String?
+  education_level                 String?
+  tshirt_size                     t_shirt_size?
+  major_field_of_study            String?
+  events                          events?             @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles                        profiles?           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([event_id, user_id])
+}
+
+model events {
+  id                     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String
+  description            String?
+  start_date             DateTime?       @db.Timestamp(6)
+  end_date               DateTime?       @db.Timestamp(6)
+  created_at             DateTime?       @default(now()) @db.Timestamp(6)
+  is_event_live          Boolean?
+  is_team_managment_open Boolean?
+  applications           applications[]
+  mailing_lists          mailing_lists[]
+  teams                  teams[]
+}
+
+model mailing_list_members {
+  mailing_list_id String        @db.Uuid
+  user_id         String        @db.Uuid
+  mailing_lists   mailing_lists @relation(fields: [mailing_list_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles        profiles      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([mailing_list_id, user_id])
+}
+
+model mailing_lists {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id             String?                @db.Uuid
+  name                 String
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  mailing_list_members mailing_list_members[]
+  events               events?                @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model profiles {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String                 @unique
+  full_name            String
+  role                 String
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  applications         applications[]
+  mailing_list_members mailing_list_members[]
+  team_members         team_members[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model schools {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  email_domain String
+  country_code String   @unique @db.VarChar
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model team_members {
+  team_id   String    @db.Uuid
+  user_id   String    @db.Uuid
+  is_admin  Boolean?
+  joined_at DateTime? @db.Timestamp(6)
+  teams     teams     @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profiles  profiles  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([team_id, user_id])
+}
+
+model teams {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id     String?        @db.Uuid
+  name         String?
+  created_at   DateTime?      @default(now()) @db.Timestamp(6)
+  team_members team_members[]
+  events       events?        @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum application_status {
+  pending
+  rejected
+  accepted
+  waitlisted
+}
+
+enum t_shirt_size {
+  US_XS
+  US_S
+  US_M
+  US_L
+  US_XL
+  US_XXL
+  UK_6
+  UK_8
+  UK_10
+  UK_12
+  UK_14
+  UK_16
+}
