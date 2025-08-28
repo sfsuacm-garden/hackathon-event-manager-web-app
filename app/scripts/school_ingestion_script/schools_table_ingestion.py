@@ -16,10 +16,11 @@ class DBHandler:
         self.supabase_client: Client = create_client(supabase_url, supabase_private_key)
 
 class School:
-    def __init__(self, name: str, country_code: str, domains: list[str]):
+    def __init__(self, name: str, country_code: str, domains: list[str], state_province : str):
         self.name = name
         self.country_code = country_code
         self.domains = domains
+        self.state_province = state_province
 
     def get_dict(self):
         return {
@@ -42,6 +43,7 @@ class SchoolsIngestor:
             school: School = School(
                 name=school_info["name"],
                 country_code=school_info["alpha_two_code"],
+                state_province=school_info["state-province"],
                 domains=school_info["domains"]
             )
 
@@ -59,6 +61,7 @@ class SchoolsIngestor:
             schools_as_dict.append({
                 "id": school_id,
                 "name":school.name,
+                "state_province": school.state_province,
                 "country_code": school.country_code
             })
 
