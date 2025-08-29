@@ -3,25 +3,7 @@
  *
  *
  */
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/lib/icons";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import TeamMemberCard from "./components/MemberCard";
 import TeamView from "./components/TeamView";
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from "@/components/shadcn/ui/alert";
-import { Terminal } from "lucide-react";
 
 export default function MyDashboardView() {
   return (

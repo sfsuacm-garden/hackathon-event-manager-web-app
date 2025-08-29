@@ -3,15 +3,7 @@
  *
  * Provide status updates and team actionable items.
  */
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Avatar,
   AvatarFallback,
