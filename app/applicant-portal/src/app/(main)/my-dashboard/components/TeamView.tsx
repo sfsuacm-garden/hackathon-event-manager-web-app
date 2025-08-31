@@ -12,7 +12,6 @@ import {
   AlertTitle,
   AlertDescription,
 } from "@/components/shadcn/ui/alert";
-import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
 export default function TeamView() {
@@ -21,6 +20,7 @@ export default function TeamView() {
   const isTeamFull = false;
   const isTeamEmpty = false;
   const isTeamAdmin = false;
+  const isTeamManagementUnlocked = false;
 
   if (error) {
     return (
@@ -39,31 +39,17 @@ export default function TeamView() {
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex flex-col w-full justify-between md:flex-row md:items-end gap-2 ">
-        <div>
-          {loading ? (
-            <div>
-              <Skeleton className="h-4 w-40 rounded" />
-
-              <Skeleton className="h-4 w-60 rounded mt-2" />
-            </div>
-          ) : (
-            <div>
-              <p>Teams lock in</p>
-              <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-                3 months 5 days and 4 hours
-              </code>
-            </div>
-          )}
-        </div>
-
-        <Button
-          variant="secondary"
-          size="lg"
-          className="w-full md:w-auto"
-          disabled={isTeamFull || loading}
-        >
-          <Icons.copy /> Copy Invite Link
-        </Button>
+        <p>Your Team</p>
+        {(isTeamManagementUnlocked || !loading) && (
+          <Button
+            variant="secondary"
+            size="lg"
+            className="w-full md:w-auto"
+            disabled={isTeamFull}
+          >
+            <Icons.copy /> Copy Invite Link
+          </Button>
+        )}
       </div>
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
@@ -81,7 +67,7 @@ export default function TeamView() {
         </div>
       )}
 
-      {!isTeamEmpty && !loading && (
+      {!isTeamEmpty && !loading && !isTeamManagementUnlocked && (
         <Button variant="outline" size="lg">
           <Icons.logOut /> Leave Team
         </Button>

@@ -30,6 +30,7 @@ export default function TeamMemberCard({
   const loading = false;
   const error = false;
   const isMemberUser = false;
+  const isTeamManagementUnlocked = false;
 
   const member = {
     name: "John Smith",
@@ -115,12 +116,18 @@ export default function TeamMemberCard({
                   <Skeleton className="h-6 w-16 rounded-md" />
                 ) : (
                   <>
-                    <StatusBadge status={"REJECTED"} />
-                    {isTeamMemberOwner && !isMemberUser && (
-                      <Button variant="outline" size="icon" className="size-8">
-                        <Icons.ellipsisVertical />
-                      </Button>
-                    )}
+                    <StatusBadge status={"WAITLISTED"} />
+                    {isTeamMemberOwner &&
+                      !isMemberUser &&
+                      isTeamManagementUnlocked && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="size-8"
+                        >
+                          <Icons.ellipsisVertical />
+                        </Button>
+                      )}
                   </>
                 )}
               </div>

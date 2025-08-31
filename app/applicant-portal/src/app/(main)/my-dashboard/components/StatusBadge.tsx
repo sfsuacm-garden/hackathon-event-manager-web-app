@@ -23,7 +23,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
       icon: <Icons.badgeCheck />,
       variant: "default",
     },
-    WAITLISTED: { label: "Waitlisted", icon: null, variant: "outline" },
+    WAITLISTED: { label: "Waitlisted", icon: null, variant: "secondary" },
   };
 
   const { label, icon, variant } = statusConfig[status];
