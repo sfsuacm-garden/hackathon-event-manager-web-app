@@ -9,6 +9,10 @@ import {
   Copy,
   EllipsisVertical,
   LogOut,
+  AlertCircle,
+  Menu,
+  BadgeCheckIcon,
+  BadgeX,
 } from "lucide-react";
 
 export const Icons = {
@@ -21,4 +25,9 @@ export const Icons = {
   copy: Copy,
   ellipsisVertical: EllipsisVertical,
   logOut: LogOut,
+  alert: AlertCircle,
+  menu: Menu,
+  badgeCheck: BadgeCheckIcon,
+  badgeX: BadgeX
+
 };
