@@ -15,15 +15,20 @@ import {
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import { Separator } from "@/components/shadcn/ui/separator";
 import { TEAM_MAX_MEMBERS } from "@/lib/constants";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/ui/tooltip";
 
 export default function TeamView() {
   const error = false;
   const loading = false;
-  const isTeamFull = false;
-  const isTeamEmpty = false;
   const isTeamAdmin = true;
   const isTeamManagementUnlocked = false;
-  const teamCount = 3;
+  const teamCount = 4;
+  const isTeam = teamCount > 1;
+  const isTeamFull = teamCount > 3;
 
   if (error) {
     return (
@@ -49,20 +54,33 @@ export default function TeamView() {
           </code>
         </div>
 
-        {(isTeamManagementUnlocked || !loading) && (
-          <Button
-            variant="secondary"
-            size="lg"
-            className="w-full md:w-auto"
-            disabled={isTeamFull}
-          >
-            <Icons.copy /> Copy Invite Link
-          </Button>
-        )}
+        {/* TODO Currently, the tooltip does not appear when the button is
+        disabled. The tooltip should appear on hover when the button is
+        disabled. */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {(isTeamManagementUnlocked || !loading) && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full md:w-auto"
+                disabled={isTeamFull}
+              >
+                <Icons.copy /> Copy Invite Link
+              </Button>
+            )}
+          </TooltipTrigger>
+
+          {isTeamFull && (
+            <TooltipContent>
+              <span>{isTeamFull ? "Team is full" : "Copy invite link"}</span>
+            </TooltipContent>
+          )}
+        </Tooltip>
       </div>
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
-          {[...Array(2)].map((_, idx) => (
+          {[...Array(teamCount)].map((_, idx) => (
             <TeamMemberCard key={idx} userId={""} isTeamAdmin={isTeamAdmin} />
           ))}
         </div>
@@ -72,7 +90,7 @@ export default function TeamView() {
         </div>
       )}
 
-      {!isTeamEmpty && !loading && !isTeamManagementUnlocked && (
+      {!isTeam && !loading && !isTeamManagementUnlocked && (
         <Button variant="outline" size="lg">
           <Icons.logOut /> Leave Team
         </Button>

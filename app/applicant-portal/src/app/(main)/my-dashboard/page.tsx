@@ -31,10 +31,11 @@ export default function MyDashboardView() {
                   the hackathon.
                 </p>
               ) : (
-                <div className="flex gap-x-2 items-baseline">
+                <div className="flex  items-baseline flex-col md:flex-row gap-2">
                   <small className="text-sm leading-none font-medium">
                     Team moving locks in
                   </small>
+
                   <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
                     3 months 5 days and 4 hours
                   </code>
