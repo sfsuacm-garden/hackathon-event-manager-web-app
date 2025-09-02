@@ -13,7 +13,6 @@ import {
   AlertDescription,
 } from "@/components/shadcn/ui/alert";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { Separator } from "@/components/shadcn/ui/separator";
 import { TEAM_MAX_MEMBERS } from "@/lib/constants";
 import {
   Tooltip,
