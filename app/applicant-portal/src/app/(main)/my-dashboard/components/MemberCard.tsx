@@ -16,6 +16,22 @@ import { Icons } from "@/lib/icons";
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import { cn } from "@/lib/shadcn/utils";
 import StatusBadge from "./StatusBadge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn/ui/alert-dialog";
 
 interface TeamMemberCardProps {
   userId: string;
@@ -30,7 +46,7 @@ export default function TeamMemberCard({
   const loading = false;
   const error = false;
   const isMemberUser = false;
-  const isTeamManagementUnlocked = false;
+  const isTeamManagementUnlocked = true;
 
   const member = {
     name: "John Smith",
@@ -120,13 +136,39 @@ export default function TeamMemberCard({
                     {isTeamAdmin &&
                       !isMemberUser &&
                       isTeamManagementUnlocked && (
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="size-8"
-                        >
-                          <Icons.ellipsisVertical />
-                        </Button>
+                        <AlertDialog>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="size-8"
+                                >
+                                  <Icons.x />
+                                </Button>
+                              </AlertDialogTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span>Remove member</span>
+                            </TooltipContent>
+                          </Tooltip>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Remove member?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove this member from
+                                your team? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction>Remove</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                   </>
                 )}

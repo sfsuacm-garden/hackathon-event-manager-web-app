@@ -19,7 +19,7 @@ export default function TeamView() {
   const loading = false;
   const isTeamFull = false;
   const isTeamEmpty = false;
-  const isTeamAdmin = false;
+  const isTeamAdmin = true;
   const isTeamManagementUnlocked = false;
 
   if (error) {

@@ -13,6 +13,7 @@ import {
   Menu,
   BadgeCheckIcon,
   BadgeX,
+  X,
 } from "lucide-react";
 
 export const Icons = {
@@ -28,6 +29,7 @@ export const Icons = {
   alert: AlertCircle,
   menu: Menu,
   badgeCheck: BadgeCheckIcon,
-  badgeX: BadgeX
+  badgeX: BadgeX,
+  x: X,
 
 };
