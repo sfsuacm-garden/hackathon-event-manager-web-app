@@ -19,12 +19,12 @@ import StatusBadge from "./StatusBadge";
 
 interface TeamMemberCardProps {
   userId: string;
-  isTeamMemberOwner: boolean;
+  isTeamAdmin: boolean;
 }
 
 export default function TeamMemberCard({
   userId,
-  isTeamMemberOwner,
+  isTeamAdmin: isTeamAdmin,
   className,
 }: TeamMemberCardProps & React.ComponentProps<"div">) {
   const loading = false;
@@ -99,8 +99,8 @@ export default function TeamMemberCard({
                   ) : (
                     <>
                       <h3 className="text-sm font-semibold">
-                        {" "}
                         {!isMemberUser ? member.name : "You"}
+                        {" - Team Admin"}
                       </h3>
                       <p className="text-sm">{member.email}</p>
                       <div className="text-muted-foreground text-xs">
@@ -117,7 +117,7 @@ export default function TeamMemberCard({
                 ) : (
                   <>
                     <StatusBadge status={"WAITLISTED"} />
-                    {isTeamMemberOwner &&
+                    {isTeamAdmin &&
                       !isMemberUser &&
                       isTeamManagementUnlocked && (
                         <Button

@@ -54,11 +54,7 @@ export default function TeamView() {
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
           {[...Array(2)].map((_, idx) => (
-            <TeamMemberCard
-              key={idx}
-              userId={""}
-              isTeamMemberOwner={isTeamAdmin}
-            />
+            <TeamMemberCard key={idx} userId={""} isTeamAdmin={isTeamAdmin} />
           ))}
         </div>
       ) : (
