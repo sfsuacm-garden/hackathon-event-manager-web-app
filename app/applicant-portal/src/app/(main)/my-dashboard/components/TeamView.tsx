@@ -13,6 +13,8 @@ import {
   AlertDescription,
 } from "@/components/shadcn/ui/alert";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import { Separator } from "@/components/shadcn/ui/separator";
+import { TEAM_MAX_MEMBERS } from "@/lib/constants";
 
 export default function TeamView() {
   const error = false;
@@ -21,6 +23,7 @@ export default function TeamView() {
   const isTeamEmpty = false;
   const isTeamAdmin = true;
   const isTeamManagementUnlocked = false;
+  const teamCount = 3;
 
   if (error) {
     return (
@@ -39,7 +42,13 @@ export default function TeamView() {
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex flex-col w-full justify-between md:flex-row md:items-end gap-2 ">
-        <p>Your Team</p>
+        <div className="flex gap-x-2 items-baseline">
+          <small className="text-sm leading-none font-medium">Your Team</small>
+          <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+            {teamCount}/{TEAM_MAX_MEMBERS}
+          </code>
+        </div>
+
         {(isTeamManagementUnlocked || !loading) && (
           <Button
             variant="secondary"
