@@ -89,7 +89,7 @@ export default function TeamView() {
         </div>
       )}
 
-      {!isTeam && !loading && !isTeamManagementUnlocked && (
+      {isTeam && !loading && !isTeamManagementUnlocked && (
         <Button variant="outline" size="lg">
           <Icons.logOut /> Leave Team
         </Button>

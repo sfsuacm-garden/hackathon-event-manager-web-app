@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="max-w-full flex justify-start md:justify-center py-4 md:py-16">
+        <div className="max-w-full flex justify-start md:justify-center py-2 md:py-8">
           <div className="max-w-md md:flex flex-col items-center justify-center gap-16 hidden">
             <NavigationBar navigationOptions={components} />
           </div>
