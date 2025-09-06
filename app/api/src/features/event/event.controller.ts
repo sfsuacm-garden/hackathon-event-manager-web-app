@@ -2,18 +2,18 @@ import type { Request, Response } from "express";
 
 import { z } from "zod";
 import prisma from "../../config/prismaClient";
-import { EventArgsObjectSchema, EventArgsObjectZodSchema, EventCreateInputObjectSchema, EventWhereUniqueInputObjectSchema } from "../../zod/schemas";
+import { EventArgsObjectSchema, EventWhereUniqueInputObjectSchema } from "../../zod/schemas";
+import { listEventsQuerySchema } from "./event.schemas";
+import { idParamsSchema } from "../../common/common.schema";
 
 
-export async function getEvent(req: Request, res: Response) {
+export async function getEventById(req: Request, res: Response) {
   try {
-    const id = req.params.id;
-
     // Validate Prisma query arguments
-    const where = EventWhereUniqueInputObjectSchema.parse({id})
+     const { id } = idParamsSchema.parse(req.params);
 
     // Fetch event
-    const event = await prisma.events.findUnique({where});
+    const event = await prisma.event.findUnique({ where: { id } });
 
     if (!event) return res.status(404).json({ error: "Event not found" });
 
@@ -28,3 +28,23 @@ export async function getEvent(req: Request, res: Response) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function getEventsByQuery(req: Request, res: Response) {
+
+  try {
+  const {where, pagination} = listEventsQuerySchema.parse(req.query);
+  const events = await prisma.event.findMany({ where, skip: pagination.offset, take: pagination.limit,  orderBy: { createdAt: "desc" } });
+  res.json(events);
+  } catch (err) {
+     if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: err.issues });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }                                    
+}
+
+      
+
+
+  
