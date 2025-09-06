@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "start": "npm run build && node dist/server.js",
-    "build": "npm run lint:check && tsc && npx prisma generate",
+    "build": "npx prisma generate && npm run lint:check && tsc",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "lint:check": "eslint src/**/*.ts --max-warnings 0",
