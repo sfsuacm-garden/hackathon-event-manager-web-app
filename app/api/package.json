@@ -14,7 +14,7 @@
     "openapi-ts": "openapi-ts"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
