@@ -1,7 +1,9 @@
-import express, { type Application } from 'express';
+import express, { type Application, type Request, type Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import helmet from 'helmet';
+import { router } from './features/event/event.routes';
+
 
 const app: Application = express();
 
@@ -10,9 +12,10 @@ app.use(helmet());
 // Swagger docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Example route
-app.get('/users', (req, res) => {
-  res.json([{ id: 1, name: 'John Doe' }]);
+app.use('/events', router)
+
+app.get('/ping', (req: Request, res: Response) => {
+  res.status(200).json({ message: 'pong' });
 });
 
 export default app;
