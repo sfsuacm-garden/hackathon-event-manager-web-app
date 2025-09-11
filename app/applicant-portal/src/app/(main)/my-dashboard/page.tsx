@@ -7,6 +7,7 @@
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import TeamView from "./components/TeamView";
 
+//TODO needs an error state for when unable to get team management unlocked
 export default function MyDashboardPage() {
   const loading = false;
   const isTeamManagementUnlocked = false;
