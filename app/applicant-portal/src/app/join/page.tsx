@@ -18,8 +18,7 @@ import {
 import { Icons } from "@/lib/icons";
 
 export default function JoinPage() {
-  var firstName = "John";
-  var lastName = "Smith";
+  var teamName = "TeamName01";
 
   const member = {
     name: "John Smith",
@@ -35,7 +34,7 @@ export default function JoinPage() {
         <CardHeader>
           <CardTitle>
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-              You are Joining {firstName} {lastName}'s Team{" "}
+              You are joining {teamName}
             </h3>
           </CardTitle>
           <CardDescription>
@@ -48,15 +47,22 @@ export default function JoinPage() {
           <Alert variant="default">
             <Icons.alert className="text-accent" />
             <AlertDescription className=" text-accent">
-              It looks like you are currently already in a team. Joining this
-              new team will remove you from your previous team.
+              <p>
+                It looks like you are currently already in a team. Joining{" "}
+                <b>{teamName}</b> will
+                <span>
+                  {" "}
+                  <b>remove</b>{" "}
+                </span>
+                you from your previous team.
+              </p>
             </AlertDescription>
           </Alert>
           <Card>
             <CardContent>
               <div className="flex gap-x-2 items-baseline">
                 <small className="text-sm leading-none font-semibold">
-                  {firstName} {lastName} Team
+                  {teamName} Team
                 </small>
                 <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
                   {1}/{4}
