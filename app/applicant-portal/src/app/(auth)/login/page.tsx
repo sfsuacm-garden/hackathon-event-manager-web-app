@@ -1,17 +1,22 @@
-// src/app/(auth)/login/page.tsx
+
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn/ui/tabs';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/shadcn/ui/tabs';
 import { Label } from '@/components/shadcn/ui/label';
 import { Input } from '@/components/shadcn/ui/input';
 import { Button } from '@/components/ui/button';
+
+type Role = 'hacker' | 'judge' | 'mentor';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,13 +31,75 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  
+  const [role, setRole] = useState<Role | null>(null);
+  useEffect(() => {
+    const fromQuery = (search.get('role') as Role | null) ?? null;
+    if (fromQuery) {
+      setRole(fromQuery);
+      try {
+        localStorage.setItem('pendingRole', fromQuery);
+      } catch {}
+      return;
+    }
+    try {
+      const ls = localStorage.getItem('pendingRole') as Role | null;
+      if (ls) setRole(ls);
+    } catch {}
+  }, [search]);
+
+  async function routeByProfileRole() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      router.replace('/dashboard');
+      return;
+    }
+   
+    const metaRole = user.user_metadata?.role as Role | undefined;
+    if (metaRole) {
+      router.replace(roleToPath(metaRole));
+      return;
+    }
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (profileErr) {
+      router.replace('/dashboard');
+      return;
+    }
+    const r = profile?.role as Role | undefined;
+    router.replace(roleToPath(r));
+  }
+
+  function roleToPath(r?: Role) {
+    switch (r) {
+      case 'judge':
+        return '/judge/apply';
+      case 'mentor':
+        return '/mentor/apply';
+      case 'hacker':
+        return '/apply';
+      default:
+        return '/dashboard';
+    }
+  }
+
   async function handlePasswordSignIn(e: React.FormEvent) {
     e.preventDefault();
-    setPending(true); setError(null); setMessage(null);
+    setPending(true);
+    setError(null);
+    setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
-      router.replace('/dashboard');
+      await routeByProfileRole();
     } catch (err: any) {
       setError(err?.message || 'Authentication failed');
     } finally {
@@ -40,41 +107,97 @@ export default function LoginPage() {
     }
   }
 
-  async function handleSignUp(e: React.FormEvent) {
+  async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
-    setPending(true); setError(null); setMessage(null);
+    setPending(true);
+    setError(null);
+    setMessage(null);
     try {
-      if (password !== confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/(auth)/callback` },
+        options: {
+
+          emailRedirectTo: `${window.location.origin}/(auth)/callback`,
+          
+          data: role ? { role } : undefined,
+        },
       });
       if (error) throw error;
-      setMessage('Account created. Check email to confirm.');
+      setMessage('Magic link sent. Check email to finish signing in.');
     } catch (err: any) {
-      setError(err?.message || 'Signup failed');
+      setError(err?.message || 'Could not send magic link');
     } finally {
       setPending(false);
     }
   }
+
+  async function handleSignUp(e: React.FormEvent) {
+  e.preventDefault();
+  setPending(true);
+  setError(null);
+  setMessage(null);
+
+  try {
+    if (password !== confirmPassword) {
+      throw new Error("Passwords do not match");
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: role ? { role } : undefined,
+      },
+    });
+    if (error) throw error;
+
+    
+    if (data.user?.id && role) {
+      await supabase
+        .from("profiles")
+        .upsert(
+          { id: data.user.id, email, full_name: "", role },
+          { onConflict: "id" }
+        );
+    }
+
+    
+    if (data.session) {
+      router.replace("/application");
+    } else {
+      // fallback in case session isn’t returned for some reason
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInErr) throw signInErr;
+      router.replace("/application");
+    }
+  } catch (err: any) {
+    setError(err?.message || "Signup failed");
+  } finally {
+    setPending(false);
+  }
+}
 
   return (
     <main className="mx-auto flex min-h-[80vh] w-full max-w-md items-center px-4">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Welcome to SF Hacks</CardTitle>
-          
+          <p className="text-sm text-muted-foreground">
+            {role ? `Continuing as ${role}.` : 'Choose a role to personalize your portal.'}
+          </p>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="password" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="password">Password</TabsTrigger>
+              <TabsTrigger value="magic">Magic Link</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
 
+            {/* Password login */}
             <TabsContent value="password" className="mt-6">
               <form onSubmit={handlePasswordSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -105,6 +228,30 @@ export default function LoginPage() {
               </form>
             </TabsContent>
 
+            {/* Magic link login */}
+            <TabsContent value="magic" className="mt-6">
+              <form onSubmit={handleMagicLink} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-magic">Email</Label>
+                  <Input
+                    id="email-magic"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={pending}>
+                  {pending ? 'Sending…' : 'Send magic link'}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  A one-time sign-in link will be sent to the email above.
+                </p>
+              </form>
+            </TabsContent>
+
+            {/* Email + password signup */}
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
@@ -149,8 +296,6 @@ export default function LoginPage() {
 
           {message && <p className="mt-4 text-sm text-green-700">{message}</p>}
           {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
-
-         
         </CardContent>
       </Card>
     </main>
