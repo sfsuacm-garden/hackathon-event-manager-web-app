@@ -14,6 +14,11 @@ export const paginationSchema = z.object({
     .default(0)
 });
 
+type Pagination = {
+  limit: number
+  offset: number
+}
+
 export const idParamsSchema = z.object({
   id: z.uuid()
 });

@@ -1,0 +1,1 @@
+export type { trpcRouter } from '../../api/src/features/_app.ts';
