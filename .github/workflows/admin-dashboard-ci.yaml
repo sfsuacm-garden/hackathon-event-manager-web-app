@@ -26,6 +26,15 @@ jobs:
         working-directory: ./app/applicant-portal
         # Installs project dependencies defined in package.json
 
+      - name: Install dependencies for API
+        run: npm install
+        working-directory: ./app/api
+        # Installs project dependencies defined in package.json
+
+      - name: Build API
+        run: npm run build
+        working-directory: ./app/api
+
       - name: Run ESLint
         run: npm run lint
         working-directory: ./app/applicant-portal
