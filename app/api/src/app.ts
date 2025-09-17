@@ -19,15 +19,9 @@ const app: Application = express();
 app.use(express.json());
 app.use(helmet());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true, // if you need cookies
-  })
-);
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+//TODO seperate the creation of the middleware into its own file.
 app.use('/trpc', createExpressMiddleware({
   router: trpcRouter,
   createContext: ({req, res}) => ({req, res})
