@@ -19,9 +19,7 @@ import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
 export default function JoinPage() {
-  var isTeamManagementUnlocked = true;
-  var isUserOnTeam = false;
-  var isTeamValid = true;
+  var isUserOnTeam = true;
   var isTeamFull = true;
   var teamName = "TeamName01";
   var isLoading = false;
@@ -96,7 +94,7 @@ export default function JoinPage() {
         )}
 
         <CardContent className="flex flex-col gap-4">
-          {isUserOnTeam && (
+          {isUserOnTeam && !isTeamFull && (
             <Alert variant="default">
               <Icons.alert className="text-accent" />
               <AlertDescription className=" text-accent">
