@@ -7,7 +7,6 @@
 
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import TeamView from "./components/TeamView";
-import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
 
 export default function MyDashboardView() {
@@ -20,7 +19,6 @@ export default function MyDashboardView() {
     return;
   }
 
-  const loading = false;
   const isTeamManagementUnlocked = data?.isTeamManagementOpen;
   return (
     <main className="min-h-1/2 flex items-center justify-center p-4">
@@ -30,7 +28,7 @@ export default function MyDashboardView() {
             My Team
           </h3>
           <p>View and manage your application and your team.</p>
-          {loading ? (
+          {isLoading ? (
             <div>
               <Skeleton className="h-4 w-60 rounded mt-2" />
             </div>
