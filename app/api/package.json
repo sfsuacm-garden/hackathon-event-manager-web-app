@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.82.3",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.2.1",
     "@types/swagger-jsdoc": "^6.0.4",

@@ -1,3 +1,4 @@
+"use client";
 /**
  * My Dashboard Page
  *
@@ -6,10 +7,20 @@
 
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import TeamView from "./components/TeamView";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/utils/trpc";
 
 export default function MyDashboardView() {
+  const { data, isLoading, error } = trpc.events.getById.useQuery({
+    id: "8924dd52-1358-4853-9871-c9e0fe46cb30",
+  });
+
+  if (error) {
+    return;
+  }
+
   const loading = false;
-  const isTeamManagementUnlocked = false;
+  const isTeamManagementUnlocked = data?.isTeamManagementOpen;
   return (
     <main className="min-h-1/2 flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto flex flex-col items-center gap-16">

@@ -6,8 +6,11 @@ import helmet from 'helmet';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { trpcRouter } from './features/_app';
 import apiRouter from './features/apiApps';
+import cors from "cors";
 
 dotenv.config();
+
+
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +18,13 @@ const app: Application = express();
 
 app.use(express.json());
 app.use(helmet());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true, // if you need cookies
+  })
+);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
