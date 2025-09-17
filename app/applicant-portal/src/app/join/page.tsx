@@ -1,5 +1,4 @@
 "use client";
-import { Avatar, AvatarImage } from "@/components/shadcn/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,20 +18,11 @@ import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
 export default function JoinPage() {
-  var isUserOnTeam = true;
-  var isTeamFull = true;
-  var teamName = "TeamName01";
-  var isLoading = false;
-  var error = false;
-
-  const member = {
-    name: "John Smith",
-    email: "jsmith@sfsu.edu",
-    joined: "April 2nd, 5:00pm",
-    avatarUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe-UxhlswN7mS_tqXj0L9a00hL_NHisSSqn4Mm6FW8BuvQI_8wHrLG7pUlkvozlpwASp0&usqp=CAU",
-    initials: 200,
-  };
+  const isUserOnTeam = true;
+  const isTeamFull = true;
+  const teamName = "TeamName01";
+  const isLoading = false;
+  const error = false;
 
   //TODO enhance loading experience
   if (isLoading) {
@@ -95,7 +85,7 @@ export default function JoinPage() {
 
         <CardContent className="flex flex-col gap-4">
           {isUserOnTeam && !isTeamFull && (
-            <Alert variant="default">
+            <Alert variant={"default"}>
               <Icons.alert className="text-accent" />
               <AlertDescription className=" text-accent">
                 <p>
