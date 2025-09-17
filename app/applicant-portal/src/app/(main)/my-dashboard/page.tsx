@@ -12,9 +12,10 @@ import { trpc } from "@/utils/trpc";
 
 export default function MyDashboardView() {
   const { data, isLoading, error } = trpc.events.getById.useQuery({
-    id: "8924dd52-1358-4853-9871-c9e0fe46cb30",
+    id: process.env.EVENT_ID || "",
   });
 
+  // TODO There needs to be an error and a loading state for this page.
   if (error) {
     return;
   }
@@ -26,7 +27,7 @@ export default function MyDashboardView() {
       <div className="w-full max-w-md mx-auto flex flex-col items-center gap-16">
         <div className="flex flex-col gap-2 items-center text-center">
           <h3 className="scroll-m-20 text-xl font-semibold tracking-tight">
-            My Dashboard
+            My Team
           </h3>
           <p>View and manage your application and your team.</p>
           {loading ? (
