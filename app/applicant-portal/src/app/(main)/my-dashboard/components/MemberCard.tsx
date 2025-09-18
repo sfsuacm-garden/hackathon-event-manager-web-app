@@ -15,7 +15,7 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Icons } from "@/lib/icons";
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import { cn } from "@/lib/shadcn/utils";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../components/StatusBadge";
 import {
   Tooltip,
   TooltipContent,

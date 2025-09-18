@@ -1,8 +1,6 @@
 "use client";
 /**
  * My Dashboard Page
- *
- *
  */
 
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
@@ -14,12 +12,12 @@ export default function MyDashboardView() {
     id: process.env.EVENT_ID || "",
   });
 
-  // TODO There needs to be an error and a loading state for this page.
   if (error) {
-    return;
+    return <p>Error loading dashboard.</p>;
   }
 
-  const isTeamManagementUnlocked = data?.isTeamManagementOpen;
+  const isTeamManagementUnlocked = data?.isTeamManagementOpen ?? false;
+
   return (
     <main className="min-h-1/2 flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto flex flex-col items-center gap-16">
@@ -36,26 +34,14 @@ export default function MyDashboardView() {
             <div className="mt-4">
               {!isTeamManagementUnlocked ? (
                 <p className="text-muted-foreground text-sm text-center">
-                  Teams are locked. This means your application for seeing if
-                  you can join the hackathon cannot be changed. This does not
-                  mean you can not meet new people and change your team during
-                  the hackathon.
+                  Teams are locked. This means your application for seeing if…
                 </p>
               ) : (
-                <div className="flex flex-col gap-2 items-center ">
-                  <small className="text-sm leading-none font-medium">
-                    Team moving locks in
-                  </small>
-                  <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-                    3 months 5 days and 4 hours
-                  </code>
-                </div>
+                <TeamView />
               )}
             </div>
           )}
         </div>
-
-        <TeamView />
       </div>
     </main>
   );
