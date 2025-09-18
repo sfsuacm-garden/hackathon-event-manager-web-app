@@ -2,11 +2,11 @@ import z from "zod";
 import { DEFAULT_QUERY_LIMIT_SMALL } from "../../utils/constants";
 import { paginationSchema } from "../../common/common.schema";
 import { clean } from "../../utils/clean";
+import type { Pagination } from "@supabase/supabase-js";
 
 
 
-
-export const listEventsQuerySchema = paginationSchema.extend({
+export const getEventsByQuerySchema = paginationSchema.extend({
   id: z.string().optional(),
   name: z.string().optional(),
   description: z.string().optional(),
@@ -52,4 +52,7 @@ export const listEventsQuerySchema = paginationSchema.extend({
     };
 });
 
-export type ListEventsQuerySchema = z.infer<typeof listEventsQuerySchema>;
+
+
+
+export type GetEventsQuerySchema = z.infer<typeof getEventsByQuerySchema>;

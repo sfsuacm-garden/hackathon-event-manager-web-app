@@ -3,44 +3,51 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import prisma from "../../config/prismaClient";
 import { EventArgsObjectSchema, EventWhereUniqueInputObjectSchema } from "../../zod/schemas";
-import { listEventsQuerySchema } from "./event.schemas";
+import { type GetEventsQuerySchema } from "./event.schemas";
 import { idParamsSchema } from "../../common/common.schema";
+import { TRPCError } from "@trpc/server";
 
 
-export async function getEventById(req: Request, res: Response) {
+export async function getEventById(id: string) {
   try {
-    // Validate Prisma query arguments
-     const { id } = idParamsSchema.parse(req.params);
-
-    // Fetch event
+   
     const event = await prisma.event.findUnique({ where: { id } });
 
-    if (!event) return res.status(404).json({ error: "Event not found" });
-
-    // Validate output before sending
-    const validatedEvent = EventArgsObjectSchema.parse(event)
-    res.json(validatedEvent);
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: err.issues });
+     if (!event) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: `Event with ID ${id} not found`
+      });
     }
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    return event;
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
+    
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to fetch event',
+      cause: error
+    });
   }
 }
 
-export async function getEventsByQuery(req: Request, res: Response) {
+export async function getEventsByQuery(query: GetEventsQuerySchema) {
 
   try {
-  const {where, pagination} = listEventsQuerySchema.parse(req.query);
-  const events = await prisma.event.findMany({ where, skip: pagination.offset, take: pagination.limit,  orderBy: { createdAt: "desc" } });
-  res.json(events);
-  } catch (err) {
-     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: err.issues });
-    }
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+  const events = await prisma.event.findMany({ where: query.where, skip: query.pagination.offset, take: query.pagination.limit,  orderBy: { createdAt: "desc" } });
+  return events;
+
+  } catch (error) {
+   if (error instanceof TRPCError) throw error;
+    
+    console.log(error) 
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to fetch event',
+      cause: error
+    });
+
+   
   }                                    
 }
 

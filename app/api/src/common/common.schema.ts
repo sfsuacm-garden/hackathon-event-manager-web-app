@@ -14,6 +14,7 @@ export const paginationSchema = z.object({
     .default(0)
 });
 
+
 export const idParamsSchema = z.object({
   id: z.uuid()
 });
