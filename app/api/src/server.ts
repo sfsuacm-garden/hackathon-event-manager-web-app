@@ -1,8 +1,8 @@
-import app from './app';
+import app from "./app";
+import { type Request, type Response } from 'express';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
