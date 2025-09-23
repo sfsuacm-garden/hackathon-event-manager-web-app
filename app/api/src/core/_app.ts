@@ -1,9 +1,9 @@
 import { initTRPC } from '@trpc/server';
-import { eventRouter } from './event/event.routes';
-
-const t = initTRPC.create();
+import { eventRouter } from '../features/event/event.routes';
+import { t } from './trpc';
 
 export const trpcRouter = t.router({
+  //TODO change event directory to be plural.
   events: eventRouter
 });
 

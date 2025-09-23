@@ -1,7 +1,7 @@
 import z from "zod";
-import { DEFAULT_QUERY_LIMIT_SMALL } from "../../utils/constants";
+import { DEFAULT_QUERY_LIMIT_SMALL } from "../../common/constants";
 import { paginationSchema } from "../../common/common.schema";
-import { clean } from "../../utils/clean";
+import { clean } from "../../common/clean";
 import type { Pagination } from "@supabase/supabase-js";
 
 

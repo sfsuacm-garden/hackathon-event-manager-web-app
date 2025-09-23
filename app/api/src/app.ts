@@ -4,9 +4,10 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import helmet from 'helmet';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { trpcRouter } from './features/_app';
-import apiRouter from './features/apiApps';
+import { trpcRouter } from './core/_app';
 import cors from "cors";
+import { createContext } from './core/context';
+import apiRouter from './core/apiApps';
 
 dotenv.config();
 
@@ -22,7 +23,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 //TODO seperate the creation of the middleware into its own file.
 app.use('/trpc', createExpressMiddleware({
   router: trpcRouter,
-  createContext: ({req, res}) => ({req, res})
+  createContext: createContext
 }))
 
 app.use('/api', apiRouter)

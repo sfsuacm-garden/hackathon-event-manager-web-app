@@ -1,5 +1,5 @@
 import z from 'zod';
-import { DEFAULT_QUERY_LIMIT_SMALL } from '../utils/constants';
+import { DEFAULT_QUERY_LIMIT_SMALL } from './constants';
 
 export const paginationSchema = z.object({
   limit: z
