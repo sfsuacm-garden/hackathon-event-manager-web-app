@@ -5,13 +5,10 @@ import { swaggerSpec } from './swagger';
 import helmet from 'helmet';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { trpcRouter } from './core/_app';
-import cors from 'cors';
 import { createContext } from './core/context';
 import apiRouter from './core/apiApps';
 
 dotenv.config();
-
-const PORT = process.env.PORT || 3000;
 
 const app: Application = express();
 
