@@ -1,4 +1,3 @@
-import { initTRPC } from '@trpc/server';
 import { eventRouter } from '../features/event/event.routes';
 import { t } from './trpc';
 

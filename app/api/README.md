@@ -1,4 +1,5 @@
 # API Directory
+
 This folder contains the API route handlers for the Hackathon Event Manager web app.
 
 ## Purpose
@@ -15,6 +16,7 @@ DATABASE_URL
 DIRECT_URL
 PORT
 ```
+
 ## Installation
 
 1. Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed.
@@ -26,37 +28,44 @@ PORT
 
    This will install all required dependencies for the API.
 
-
 - **Development:**  
   Start the API server in development mode with hot-reloading:
+
   ```bash
   npm run dev
   ```
+
   This uses `tsx` to watch for changes in `src/server.ts` and automatically restarts the server.
 
 - **Prisma Setup:**  
    Ensure your Prisma schema exists at:
 
-   ```bash
-   app/api/prisma/schema.prisma
-   ```
-   Generate the Prisma client
-   ```bash
-   npx prisma generate
-   ```
+  ```bash
+  app/api/prisma/schema.prisma
+  ```
+
+  Generate the Prisma client
+
+  ```bash
+  npx prisma generate
+  ```
 
 - **Production Build:**  
   Build the API for production:
+
   ```bash
   npm run build
   ```
+
   This runs lint checks and compiles TypeScript files to the `dist` directory.
 
 - **Start (Production):**  
   Start the built API server:
+
   ```bash
   npm start
   ```
+
   This runs the build and then starts the server from the compiled output.
 
 - **Lint:**  
