@@ -18,3 +18,8 @@ export const paginationSchema = z.object({
 export const idParamsSchema = z.object({
   id: z.uuid()
 });
+
+export const teamIdUserIdParamsSchema = z.object({
+  teamId: z.uuid(),
+  userId: z.uuid()
+});
