@@ -13,14 +13,174 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum ApplicationStatus {
+model Application {
+  id                        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId                   String              @map("event_id") @db.Uuid
+  userId                    String              @map("user_id") @db.Uuid
+  status                    String?             @default("pending")
+  school                    String?
+  graduationYear            Int?                @map("graduation_year")
+  experienceLevel           String?             @map("experience_level")
+  submissionData            Json?               @map("submission_data")
+  createdAt                 DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
+  publicStatus              application_status? @map("public_status")
+  internalStatus            application_status? @map("internal_status")
+  schoolId                  String?             @map("school_id") @db.Uuid
+  dob                       String?
+  phoneNumber               String?             @map("phone_number")
+  levelOfStudy              String?             @map("level_of_study")
+  countryOfResidence        String?             @map("country_of_residence")
+  linkedinUrl               String?             @map("linkedin_url")
+  mlhAuthorizedPromoEmail   Boolean?            @map("mlh_authorized_promo_email")
+  mlhAuthorizedDataShare    Boolean?            @map("mlh_authorized_data_share")
+  mlhCodeOfConductAgreement Boolean?            @map("mlh_code_of_conduct_aggreemeant")
+  dietaryVegetarian         Boolean?            @map("dietary_vegetarian")
+  dietaryVegan              Boolean?            @map("dietary_vegan")
+  dietaryCeliacDisease      Boolean?            @map("dietary_celiac_disease")
+  dietaryKosher             Boolean?            @map("dietary_kosher")
+  dietaryHalal              Boolean?            @map("dietary_halal")
+  gender                    String?
+  pronouns                  String?
+  raceEthnicity             String?             @map("race_ethnicity")
+  sexualOrientation         String?             @map("sexual_orientation")
+  educationLevel            String?             @map("education_level")
+  tshirtSize                t_shirt_size?       @map("tshirt_size")
+  majorFieldOfStudy         String?             @map("major_field_of_study")
+
+  event                     Event               @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile                   UserProfile         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([eventId, userId])
+  @@map("applications")
+}
+
+model Event {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  description          String?
+  startDate            DateTime?        @map("start_date") @db.Timestamp(6)
+  endDate              DateTime?        @map("end_date") @db.Timestamp(6)
+  createdAt            DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
+  isEventLive          Boolean?         @map("is_event_live")
+  isTeamManagementOpen Boolean?         @map("is_team_managment_open")
+
+  applications         Application[]
+  eventProfiles        EventProfile[]
+  mailingLists         MailingList[]
+  teams                Team[]
+
+  @@map("events")
+}
+
+model MailingListMember {
+  mailingListId String      @map("mailing_list_id") @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  mailingList   MailingList @relation(fields: [mailingListId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([mailingListId, userId])
+  @@map("mailing_list_members")
+}
+
+model MailingList {
+  id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String?             @map("event_id") @db.Uuid
+  name      String
+  createdAt DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
+
+  members   MailingListMember[]
+  event     Event?              @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("mailing_lists")
+}
+
+model School {
+  id        String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  countryCode String              @map("country_code")
+  createdAt DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  stateProvince String?           @map("state_province")
+
+  emailDomains SchoolEmailDomain[]
+
+  @@map("schools")
+}
+
+model TeamMember {
+  teamId   String      @map("team_id") @db.Uuid
+  userId   String      @map("user_id") @db.Uuid
+  isAdmin  Boolean?    @map("is_admin")
+  joinedAt DateTime?   @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("joined_at") @db.Timestamp(6)
+
+  team     Team        @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile  UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([teamId, userId])
+  @@map("team_members")
+}
+
+model Team {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String?      @map("event_id") @db.Uuid
+  name      String?
+  createdAt DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
+
+  members   TeamMember[]
+  event     Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("teams")
+}
+
+model EventProfile {
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  profileId   String               @map("profile_id") @db.Uuid
+  eventId     String               @map("event_id") @db.Uuid
+  role        participation_level? @default(hacker)
+
+  event       Event                @relation(fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profile     UserProfile          @relation(fields: [profileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([profileId, eventId])
+  @@map("event_profiles")
+}
+
+model SchoolEmailDomain {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  domain    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@map("school_email_domains")
+}
+
+model UserProfile {
+  id        String              @id(map: "profiles_pkey") @default(dbgenerated("auth.uid()")) @db.Uuid
+  createdAt DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
+
+  applications   Application[]
+  eventProfiles  EventProfile[]
+  mailingLists   MailingListMember[]
+  teamMembers    TeamMember[]
+
+  @@map("user_profiles")
+}
+
+enum application_status {
   pending
   rejected
   accepted
   waitlisted
 }
 
-enum TShirtSize {
+enum participation_level {
+  hacker
+  judge
+  organizer
+}
+
+enum t_shirt_size {
   US_XS
   US_S
   US_M
@@ -33,133 +193,4 @@ enum TShirtSize {
   UK_12
   UK_14
   UK_16
-}
-
-model Application {
-  id                        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId                   String?          @map("event_id") @db.Uuid
-  userId                    String?          @map("user_id") @db.Uuid
-  status                    String?          @default("pending")
-  school                    String?
-  graduationYear            Int?             @map("graduation_year")
-  experienceLevel           String?          @map("experience_level")
-  submissionDate             DateTime?       @map("submission_date")
-  createdAt                 DateTime?        @default(now()) @map("created_at")
-  publicStatus              ApplicationStatus? @map("public_status")
-  internalStatus            ApplicationStatus? @map("internal_status")
-  schoolId                  String?          @map("school_id") @db.Uuid
-  dob                       String?
-  phoneNumber               String?          @map("phone_number")
-  levelOfStudy              String?          @map("level_of_study")
-  countryOfResidence        String?          @map("country_of_residence")
-  linkedinUrl               String?          @map("linkedin_url")
-  mlhAuthorizedPromoEmail   Boolean?         @map("mlh_authorized_promo_email")
-  mlhAuthorizedDataShare    Boolean?         @map("mlh_authorized_data_share")
-  mlhCodeOfConductAgreement Boolean?         @map("mlh_code_of_conduct_aggreemeant")
-  dietaryVegetarian          Boolean?        @map("dietary_vegetarian")
-  dietaryVegan               Boolean?        @map("dietary_vegan")
-  dietaryCeliacDisease       Boolean?        @map("dietary_celiac_disease")
-  dietaryKosher              Boolean?        @map("dietary_kosher")
-  dietaryHalal               Boolean?        @map("dietary_halal")
-  gender                     String?
-  pronouns                   String?
-  raceEthnicity              String?         @map("race_ethnicity")
-  sexualOrientation          String?         @map("sexual_orientation")
-  educationLevel             String?         @map("education_level")
-  tshirtSize                 TShirtSize?     @map("tshirt_size")
-  majorFieldOfStudy          String?         @map("major_field_of_study")
-
-  events                     Event?          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  profiles                   Profile?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, userId])
-  @@map("applications")
-}
-
-model Event {
-  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                   String
-  description            String?
-  startDate              DateTime?     @map("start_date") @db.Timestamp(6)
-  endDate                DateTime?     @map("end_date") @db.Timestamp(6)
-  createdAt              DateTime?     @default(now()) @map("created_at") @db.Timestamp(6)
-  isEventLive            Boolean?      @map("is_event_live")
-  isTeamManagementOpen   Boolean?      @map("is_team_managment_open")
-
-  applications           Application[]
-  mailingLists           MailingList[]
-  teams                  Team[]
-
-  @@map("events")
-}
-
-model MailingListMember {
-  mailingListId String       @map("mailing_list_id") @db.Uuid
-  userId        String       @map("user_id") @db.Uuid
-  mailingList   MailingList  @relation(fields: [mailingListId], references: [id], onDelete: Cascade)
-  profiles      Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([mailingListId, userId])
-  @@map("mailing_list_members")
-}
-
-model MailingList {
-  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId        String?              @map("event_id") @db.Uuid
-  name           String
-  createdAt      DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
-
-  mailingListMembers MailingListMember[]
-  events             Event?            @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@map("mailing_lists")
-}
-
-model Profile {
-  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email                String               @unique
-  fullName             String               @map("full_name")
-  role                 String
-  createdAt            DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
-
-  applications         Application[]
-  mailingListMembers   MailingListMember[]
-  teamMembers          TeamMember[]
-
-  @@map("profiles")
-}
-
-model School {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  emailDomain  String   @map("email_domain")
-  countryCode  String   @unique @map("country_code") @db.VarChar
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  @@map("schools")
-}
-
-model TeamMember {
-  teamId   String   @map("team_id") @db.Uuid
-  userId   String   @map("user_id") @db.Uuid
-  isAdmin  Boolean? @map("is_admin")
-  joinedAt DateTime? @map("joined_at") @db.Timestamp(6)
-
-  teams    Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  profiles Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([teamId, userId])
-  @@map("team_members")
-}
-
-model Team {
-  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId      String?      @map("event_id") @db.Uuid
-  name         String?
-  createdAt    DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
-
-  teamMembers  TeamMember[]
-  events       Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@map("teams")
 }

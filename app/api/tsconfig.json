@@ -13,7 +13,7 @@
     "allowImportingTsExtensions": false,
     "lib": ["ES2022"],
     "types": ["node"],
-    
+
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
@@ -30,7 +30,7 @@
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
-    
+
     // Recommended Options
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
