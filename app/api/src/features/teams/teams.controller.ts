@@ -1,6 +1,6 @@
-import { TRPCError } from "@trpc/server";
-import prisma from "../../config/prismaClient";
-import { PrismaClient } from "@prisma/client/extension";
+import { TRPCError } from '@trpc/server';
+import prisma from '../../config/prismaClient';
+import { PrismaClient } from '@prisma/client/extension';
 
 export async function getTeamById(id: string) {
   try {
@@ -13,6 +13,7 @@ export async function getTeamById(id: string) {
     }
 
     return team;
+
   } catch (error) {
     if (error instanceof TRPCError) throw error;
     throw new TRPCError({
@@ -23,52 +24,61 @@ export async function getTeamById(id: string) {
   }
 }
 
-export async function joinTeam(teamId: string, profileId: string) {
+export async function joinTeam(teamId: string, profileId: string, eventId: string) {
   try {
     const teamMember = await prisma.$transaction(async (tx) => {
       const requestedTeam = await tx.team.findUnique({
         where: {
-          id: teamId
+          id: teamId,
+          eventId: eventId
         },
         include: {
-          teamMembers: true
+          members: true
         }
       });
 
       if (!requestedTeam) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `Team with ID ${teamId} not found`
+          message: `Team with ID ${teamId} in event with id ${eventId} not found`
         });
       }
 
-      if (requestedTeam.teamMembers.length >= 4) { //make an enum or some shit somewhere config or some shit
+      if (requestedTeam.members.length >= 4) { //make an enum or some shit somewhere config or some shit
         throw new TRPCError({
           code: 'CONFLICT',
           message: `Team with ID ${teamId} is full`
         });
       }
 
-      const userCurrTeamInfo = await tx.teamMember.findUnique({ where: { userId: profileId } });
-      if (!userCurrTeamInfo) {
+      // We use find first here because prism throws a fit with findUnique. 
+      // Theoretically, should only be one team member entry per event per user
+      const prevTeamUserInfo = await tx.teamMember.findFirst({ 
+        where: {
+          userId: profileId,
+          eventId: eventId
+        }
+      });
+      if (!prevTeamUserInfo) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `User with ID ${profileId} not found`
         });
       }
 
-      if (userCurrTeamInfo.teamId === teamId) {
+      if (prevTeamUserInfo.teamId === teamId) {
         throw new TRPCError({
           code: 'CONFLICT',
           message: `User with ID ${profileId} is already part of team with ID ${teamId}`
         });
       }
 
-      const prevTeamId = userCurrTeamInfo.teamId;
-
-      const updateTeamMember = await tx.teamMember.update({
+      const newTeamUserInfo = await tx.teamMember.update({
         where: {
-          userId: profileId
+          teamId_userId: {
+            teamId: prevTeamUserInfo.teamId,
+            userId: profileId
+          }
         },
         data: {
           teamId: teamId
@@ -77,23 +87,24 @@ export async function joinTeam(teamId: string, profileId: string) {
 
       const prevTeamNumMembers = await tx.teamMember.count({
         where: {
-          teamId: userCurrTeamInfo.teamId
+          teamId: prevTeamUserInfo.teamId
         }
       });
 
       //delete the team if previous team member count is 0
-      if (updateTeamMember && prevTeamNumMembers < 1) { // refactor into a leave team function helper
+      if (newTeamUserInfo && prevTeamNumMembers < 1) { // refactor into a leave team function helper
         const deletedTeam = await tx.team.delete({
           where: {
-            id: prevTeamId
+            id: prevTeamUserInfo.teamId
           }
         });
-
         console.log(`[SUCCESS] Deleted team with ID ${deletedTeam.id}`);
+      } else if (prevTeamUserInfo.isAdmin) {
+        reassignAdminToEarliestJoiningMember(tx, prevTeamUserInfo.teamId);
       }
 
       console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
-      return updateTeamMember;
+      return newTeamUserInfo;
     });
 
     console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
@@ -116,10 +127,10 @@ export async function leaveTeam(teamId: string, userId: string) {
 
       const prevTeamMemberAndTeamInfo = await tx.teamMember.findUnique({
         where: {
-          userId: userId
-        },
-        include: {
-          teams: true
+          teamId_userId: {
+            teamId: teamId,
+            userId: userId
+          }
         }
       });
       if (!prevTeamMemberAndTeamInfo) {
@@ -129,11 +140,13 @@ export async function leaveTeam(teamId: string, userId: string) {
         });
       }
 
-      //create team
-      const newTeamInfo = await createTeam(tx, "new Team", prevTeamMemberAndTeamInfo.eventId);
+      const newTeamInfo = await createTeam(tx, 'new Team', prevTeamMemberAndTeamInfo.eventId);
       await tx.teamMember.update({
         where: {
-          userId: userId
+          teamId_userId: {
+            userId: userId,
+            teamId: teamId
+          }
         },
         data: {
           teamId: newTeamInfo.id,
@@ -141,13 +154,12 @@ export async function leaveTeam(teamId: string, userId: string) {
         }
       });
 
-      //previous team checks
       const prevTeam = await tx.team.findUnique({
         where: {
           id: prevTeamMemberAndTeamInfo.teamId
         },
         include: {
-          teamMembers: true
+          members: true
         }
       });
 
@@ -158,35 +170,14 @@ export async function leaveTeam(teamId: string, userId: string) {
         });
       }
 
-      if (prevTeam.teamMembers.length < 1) {
+      if (prevTeam.members.length < 1) {
         await tx.team.delete({
           where: {
             id: prevTeam.id
           }
         });
       } else if (prevTeamMemberAndTeamInfo.isAdmin) {
-        const nextEarliestTeamMember = await tx.teamMember.findMany({
-          where: {
-            teamId: prevTeamMemberAndTeamInfo.teamId,
-            NOT: {
-              userId: userId
-            }
-          },
-          orderBy: {
-            joinedAt: 'desc'
-          },
-          take: 1 // we want the most earliest team member
-        });
-        if (nextEarliestTeamMember) {
-          tx.teamMember.update({
-            where: {
-              userId: nextEarliestTeamMember[0]?.userId
-            },
-            data: {
-              isAdmin: true
-            }
-          });
-        }
+        reassignAdminToEarliestJoiningMember(tx, teamId);
       }
 
     });
@@ -201,9 +192,9 @@ export async function leaveTeam(teamId: string, userId: string) {
   }
 }
 
-//because this is mostly used as a helper and often used in a sequence of sql operations
-//intended to be done in a single transaction, we pass a transaction obejct to it or a regular prisma
-//client object so there is the option inside transaction or outside.
+// HELPER FUNCTIONS
+// helper functions have a prisma client passed in because they can either be ran inside of a transaction
+// or outside of a transaction and I could not think of a better way to control that dual behavior.
 async function createTeam(prismaClient: PrismaClient, adminName: string, eventId: string) {
   const newTeam = await prismaClient.teams.create({
     data: {
@@ -213,4 +204,29 @@ async function createTeam(prismaClient: PrismaClient, adminName: string, eventId
   });
 
   return newTeam;
+}
+
+async function reassignAdminToEarliestJoiningMember(tx: PrismaClient, teamId: string) {
+  const nextEarliestTeamMember = await tx.teamMember.findMany({
+    where: {
+      teamId: teamId
+    },
+    orderBy: {
+      joinedAt: 'desc'
+    },
+    take: 1 // we want the most earliest team member
+  });
+  if (nextEarliestTeamMember && nextEarliestTeamMember[0]) {
+    tx.teamMember.update({
+      where: {
+        teamId_userId: {
+          userId: nextEarliestTeamMember[0].userId,
+          teamId: nextEarliestTeamMember[0].teamId
+        }
+      },
+      data: {
+        isAdmin: true
+      }
+    });
+  }
 }
