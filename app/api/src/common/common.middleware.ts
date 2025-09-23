@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { t } from "../core/trpc";
 import prisma from "../config/prismaClient";
 
-const requireUser = t.middleware(({ ctx, next }) => {
+export const requireAuth = t.middleware(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -15,15 +15,46 @@ const requireUser = t.middleware(({ ctx, next }) => {
   });
 });
 
-const requireEventAccess = t.middleware(({ctx, next}) => {
+export const requireEventAccess = requireAuth.unstable_pipe(({ctx, next}) => {
+  if(!ctx.event) {
+    throw new TRPCError({code: "UNAUTHORIZED"})
+  }
 
+  prisma.eventProfile.findUnique({where: {profileId_eventId: {
+    profileId: ctx.user?.id,
+    eventId: ctx.event.id
+  }}})
+
+  return next({
+    ctx: {
+      ...ctx,
+      event: ctx.event,
+    }
+  })
 })
 
-const
+export const requireEventUnlocked = t.middleware(({ctx, next}) => {
 
-const requireTeamManagement = t.middleware(({ctx, next}) => {
-    prisma.event.
+  if(!ctx.event) {
+    throw new TRPCError({code: "UNAUTHORIZED"})
+  }
+
+  if (!ctx.event.isTeamManagementOpen) {
+    throw new TRPCError({code: "UNAUTHORIZED"})
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+    }
+  })
 })
 
-// Export a helper "protectedProcedure"
-export const protectedProcedure = t.procedure.use(requireUser);
+// Protected base procedure
+export const protectedProcedure = t.procedure.use(requireAuth);
+
+// event-scoped procedure
+export const eventProcedure = protectedProcedure.use(requireEventAccess);
+
+// team-management scoped procedure
+export const teamManagementProcedure = eventProcedure.use(requireEventUnlocked);

@@ -101,7 +101,7 @@ model School {
   createdAt DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
   stateProvince String?           @map("state_province")
 
-  emailDomains school_email_domains[]
+  emailDomains SchoolEmailDomain[]
 
   @@map("schools")
 }
