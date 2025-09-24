@@ -140,7 +140,7 @@ export async function leaveTeam(teamId: string, userId: string) {
         });
       }
 
-      const newTeamInfo = await createTeam(tx, 'new Team', prevTeamMemberAndTeamInfo.eventId);
+      const newTeamInfo = await createTeam(tx, prevTeamMemberAndTeamInfo.eventId);
       await tx.teamMember.update({
         where: {
           teamId_userId: {
@@ -192,14 +192,83 @@ export async function leaveTeam(teamId: string, userId: string) {
   }
 }
 
+export async function kickTeamMember(memberKickingId: string, kickedMemberId: string, teamId: string, eventId: string) {
+  try {
+    await prisma.$transaction(async (tx) => {
+      const memberKickingInfo = await fetchTeamMemberByTeam(tx, memberKickingId, teamId);
+      const kickedMemberInfo = await fetchTeamMemberByTeam(tx, kickedMemberId, teamId);
+
+      if(!memberKickingInfo.isAdmin) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: `Member with id ${memberKickingId} does not have permissions to kick ${kickedMemberId}}`
+        });
+      }
+
+      if (memberKickingId === kickedMemberId) { //if team admin somehow finds a way to try to kick themselves insted of leaving team, they are dumbass.
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Team admin with ID ${memberKickingId} cannot kick themselves`
+        });
+      }
+
+      const newTeam = await createTeam(tx, eventId);
+      await tx.teamMember.update({
+        where: {
+          teamId_userId: {
+            teamId: teamId,
+            userId: kickedMemberInfo.userId
+          }
+        },
+        data: {
+          teamId: newTeam.id
+        }
+      });
+    });
+  } catch(error) {
+    if (error instanceof TRPCError) throw error;
+
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to fetch event',
+      cause: error
+    });
+  } 
+}
+
 // HELPER FUNCTIONS
 // helper functions have a prisma client passed in because they can either be ran inside of a transaction
 // or outside of a transaction and I could not think of a better way to control that dual behavior.
-async function createTeam(prismaClient: PrismaClient, adminName: string, eventId: string) {
+async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId: string) {
+  const teamMember = await tx.teamMember.findUnique({
+    where: {
+      teamId_userId: {
+        userId: memberId,
+        teamId: teamId
+      }
+    }
+  });
+  if (!teamMember) {
+    throw new TRPCError({
+      code: 'NOT_FOUND',
+      message: `User with id ${memberId} could not be found`
+    });
+  }
+
+  return teamMember;
+}
+
+async function createTeam(prismaClient: PrismaClient, eventId: string) {
+  const numTeamsInEvent = await prismaClient.teams.count({
+    where: {
+      eventId: eventId
+    },
+  });
+
   const newTeam = await prismaClient.teams.create({
     data: {
       eventId: eventId,
-      name: adminName + "'s team"
+      name: `New Team #${numTeamsInEvent}`
     }
   });
 
