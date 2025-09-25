@@ -1,13 +1,13 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "start": "npm run build && node dist/server.js",
-    "build": "npx prisma generate && npm run lint:check && tsc",
+    "build": "npx prisma generate && npm run lint:check && npx tsup src/server.ts --format esm --out-dir dist --target es2022 --sourcemap --clean --dts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "lint:check": "eslint src/**/*.ts --max-warnings 0",
@@ -54,6 +54,7 @@
     "prisma": "^6.14.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   }
