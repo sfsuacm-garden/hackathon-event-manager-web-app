@@ -1,17 +1,10 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/shadcn/ui/tabs';
 import { Label } from '@/components/shadcn/ui/label';
 import { Input } from '@/components/shadcn/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,13 +18,14 @@ export default function LoginPage() {
 
   const prefillEmail = search.get('email') || '';
   const [email, setEmail] = useState(prefillEmail);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [phase, setPhase] = useState<'request' | 'verify'>('request');
+
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  
   const [role, setRole] = useState<Role | null>(null);
   useEffect(() => {
     const fromQuery = (search.get('role') as Role | null) ?? null;
@@ -48,6 +42,19 @@ export default function LoginPage() {
     } catch {}
   }, [search]);
 
+  function roleToPath(r?: Role) {
+    switch (r) {
+      case 'judge':
+        return '/judge/application';
+      case 'mentor':
+        return '/mentor/application';
+      case 'hacker':
+        return '/application';
+      default:
+        return '/dashboard';
+    }
+  }
+
   async function routeByProfileRole() {
     const {
       data: { user },
@@ -56,59 +63,99 @@ export default function LoginPage() {
       router.replace('/dashboard');
       return;
     }
-   
     const metaRole = user.user_metadata?.role as Role | undefined;
     if (metaRole) {
       router.replace(roleToPath(metaRole));
       return;
     }
-    const { data: profile, error: profileErr } = await supabase
-      .from('profiles')
+    const { data: profile } = await supabase
+      .from('profiles') // change to 'user_profiles' if needed
       .select('role')
       .eq('id', user.id)
       .maybeSingle();
-    if (profileErr) {
-      router.replace('/dashboard');
-      return;
-    }
-    const r = profile?.role as Role | undefined;
+    const r = (profile?.role as Role | undefined) ?? undefined;
     router.replace(roleToPath(r));
   }
 
-  function roleToPath(r?: Role) {
-    switch (r) {
-      case 'judge':
-        return '/judge/apply';
-      case 'mentor':
-        return '/mentor/apply';
-      case 'hacker':
-        return '/apply';
-      default:
-        return '/dashboard';
-    }
-  }
-
-  async function handlePasswordSignIn(e: React.FormEvent) {
+ 
+  async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
     setPending(true);
     setError(null);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      if (!email) throw new Error('Enter an email');
+      if (!fullName.trim()) throw new Error('Enter full name');
+
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: {
+          shouldCreateUser: true,
+          data: { full_name: fullName, ...(role ? { role } : {}) },
+         
+        },
       });
       if (error) throw error;
-      await routeByProfileRole();
+
+      setMessage('A 6-digit code was emailed. Enter it below.');
+      setPhase('verify');
     } catch (err: any) {
-      setError(err?.message || 'Authentication failed');
+      setError(err?.message || 'Could not send code');
     } finally {
       setPending(false);
     }
   }
 
-  async function handleMagicLink(e: React.FormEvent) {
+  // verify the OTP, upsert profile, then route
+  async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
+    setPending(true);
+    setError(null);
+    setMessage(null);
+    try {
+      if (!otp || otp.length < 6) throw new Error('Enter the 6-digit code');
+
+      const { data: verifyData, error: verifyErr } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email', // email OTP verification
+      });
+      if (verifyErr) throw verifyErr;
+
+      const userId = verifyData.user?.id;
+      if (userId) {
+        const { error: upErr } = await supabase
+          .from('user_profiles') 
+          .upsert(
+            {
+              id: userId,
+              email,
+              full_name: fullName,
+              ...(role ? { role } : {}),
+            },
+            { onConflict: 'id' }
+          );
+        if (upErr) {
+          
+          
+          console.warn('Profile upsert failed:', upErr.message);
+        }
+      }
+
+      if (role) {
+        await supabase.auth.updateUser({ data: { role } });
+      }
+
+      await routeByProfileRole();
+    } catch (err: any) {
+      setError(err?.message || 'Verification failed');
+    } finally {
+      setPending(false);
+    }
+  }
+
+  // I resend a 6-digit email OTP (still no redirect)
+  async function handleResend() {
     setPending(true);
     setError(null);
     setMessage(null);
@@ -116,183 +163,106 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-
-          emailRedirectTo: `${window.location.origin}/(auth)/callback`,
-          
-          data: role ? { role } : undefined,
+          shouldCreateUser: true,
+          data: { full_name: fullName, ...(role ? { role } : {}) },
+          // no emailRedirectTo here
         },
       });
       if (error) throw error;
-      setMessage('Magic link sent. Check email to finish signing in.');
+      setMessage('A new code was sent.');
     } catch (err: any) {
-      setError(err?.message || 'Could not send magic link');
+      setError(err?.message || 'Could not resend code');
     } finally {
       setPending(false);
     }
   }
 
-  async function handleSignUp(e: React.FormEvent) {
-  e.preventDefault();
-  setPending(true);
-  setError(null);
-  setMessage(null);
-
-  try {
-    if (password !== confirmPassword) {
-      throw new Error("Passwords do not match");
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: role ? { role } : undefined,
-      },
-    });
-    if (error) throw error;
-
-    
-    if (data.user?.id && role) {
-      await supabase
-        .from("profiles")
-        .upsert(
-          { id: data.user.id, email, full_name: "", role },
-          { onConflict: "id" }
-        );
-    }
-
-    
-    if (data.session) {
-      router.replace("/application");
-    } else {
-      // fallback in case session isn’t returned for some reason
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInErr) throw signInErr;
-      router.replace("/application");
-    }
-  } catch (err: any) {
-    setError(err?.message || "Signup failed");
-  } finally {
-    setPending(false);
-  }
-}
+  const titleByPhase = useMemo(
+    () => (phase === 'request' ? 'Sign in or Create account' : 'Enter the code'),
+    [phase]
+  );
 
   return (
     <main className="mx-auto flex min-h-[80vh] w-full max-w-md items-center px-4">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Welcome to SF Hacks</CardTitle>
+          <CardTitle>{titleByPhase}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {role ? `Continuing as ${role}.` : 'Choose a role to personalize your portal.'}
+            {role ? `Continuing as ${role}.` : 'Choose a role to personalize the portal.'}
           </p>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="password" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="magic">Magic Link</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
-            </TabsList>
+          {phase === 'request' ? (
+            <form onSubmit={handleSendCode} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="full-name">Full name</Label>
+                <Input
+                  id="full-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={pending}>
+                {pending ? 'Sending…' : 'Send code'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyCode} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">6-digit code</Label>
+                <Input
+                  id="otp"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => {
+                    const next = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setOtp(next);
+                  }}
+                  className="text-center font-mono tracking-[0.5em]"
+                  placeholder="••••••"
+                />
+              </div>
 
-            {/* Password login */}
-            <TabsContent value="password" className="mt-6">
-              <form onSubmit={handlePasswordSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-pass">Email</Label>
-                  <Input
-                    id="email-pass"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={pending}>
-                  {pending ? 'Signing in…' : 'Sign in'}
-                </Button>
-              </form>
-            </TabsContent>
+              <Button type="submit" className="w-full" disabled={pending}>
+                {pending ? 'Verifying…' : 'Verify and continue'}
+              </Button>
 
-            {/* Magic link login */}
-            <TabsContent value="magic" className="mt-6">
-              <form onSubmit={handleMagicLink} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-magic">Email</Label>
-                  <Input
-                    id="email-magic"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={pending}>
-                  {pending ? 'Sending…' : 'Send magic link'}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  A one-time sign-in link will be sent to the email above.
-                </p>
-              </form>
-            </TabsContent>
-
-            {/* Email + password signup */}
-            <TabsContent value="signup" className="mt-6">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
-                  <Input
-                    id="email-signup"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-new">Password</Label>
-                  <Input
-                    id="password-new"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-confirm">Confirm password</Label>
-                  <Input
-                    id="password-confirm"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={pending}>
-                  {pending ? 'Creating…' : 'Create account'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => setPhase('request')}
+                  className="underline underline-offset-2"
+                  disabled={pending}
+                >
+                  Edit email or name
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  className="underline underline-offset-2"
+                  disabled={pending}
+                >
+                  Resend code
+                </button>
+              </div>
+            </form>
+          )}
 
           {message && <p className="mt-4 text-sm text-green-700">{message}</p>}
           {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
