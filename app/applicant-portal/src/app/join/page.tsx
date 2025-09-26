@@ -12,10 +12,10 @@ import { Separator } from "@radix-ui/react-separator";
 import {
   Alert,
   AlertDescription,
-  AlertTitle,
 } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import ErrorState from "../(main)/components/ErrorState.tsx"
 
 export default function JoinPage() {
   const isUserOnTeam = true;
@@ -23,7 +23,6 @@ export default function JoinPage() {
   const teamName = "TeamName01";
   const isLoading = false;
   const error = true;
-  let errorType = "SERVER_ERROR"
 
   //TODO enhance loading experience
   if (isLoading) {
@@ -40,34 +39,31 @@ export default function JoinPage() {
 
   //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
   if (error) {
-    const getErrorConfig = (type: string) => {
-      switch (type) {
-        case "INVALID_LINK":
-          return {
-            title: "Invalid Team Invitation",
-            description: "This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.",
-            primary: {
-              label: "Back to Dashboard",
-              link: "my-dashboard"
-            }
-          };
-        default:
-          return {
-            title: "Unable to Process Invitation",
-            description: "We're having trouble processing this team invitation. Please try again later.",
-            primary: {
-              label: "Back to Dashboard",
-              link: "my-dashboard"
-            }
-          };
-      }
-    };
-
-    const errorConfig = getErrorConfig(errorType);
-
+    // Determine error type for better messaging
+    const isInvalidLink = true;
+    const isServerError = true;
+    
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
-        <ErrorState {...errorConfig} />
+        <ErrorState
+          title={{
+            text: isInvalidLink ? "Invalid Team Invitation" : "Unable to Process Invitation",
+            styling: "text-red-500 text-lg"
+          }}
+          description={{
+            text: 
+              isInvalidLink 
+                ? "This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation."
+                : isServerError
+                ? "We're experiencing technical difficulties. Please try again later."
+                : "Something went wrong while processing this team invitation. Please try again later."
+          }}
+          primary={{
+            text: "Back to Dashboard",
+            link: "/my-dashboard"
+          }}
+          variant="default"
+        />
       </main>
     );
   }

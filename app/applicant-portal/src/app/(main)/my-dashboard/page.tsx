@@ -6,13 +6,6 @@
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import TeamView from "./components/TeamView";
 import { trpc } from "@/utils/trpc";
-// import {
-//   Alert,
-//   AlertDescription,
-//   AlertTitle,
-// } from "@/components/shadcn/ui/alert";
-// import { Button } from "@/components/ui/button";
-// import { Icons } from "@/lib/icons";
 import ErrorState from "../components/ErrorState";
 
 export default function MyDashboardView() {
@@ -22,24 +15,29 @@ export default function MyDashboardView() {
 
   if (error) {
     // Determine error type for better messaging
-    const isNotFound = 'NOT_FOUND';
-    const isServerError = 'INTERNAL_SERVER_ERROR';
+    const isNotFound = true;
+    const isServerError = true;
     
     return (
-      <main className="min-h-1/2 flex items-center justify-center p-4">
+      <main className="min-h-full flex items-center justify-center p-4">
         <ErrorState
-          title={isNotFound ? "Event Not Found" : "Unable to Load Dashboard"}
-          description={
-            isNotFound 
-              ? "The event you're looking for doesn't exist or has been removed."
-              : isServerError
-              ? "We're experiencing technical difficulties. Please try again in a moment."
-              : "Something went wrong while loading your dashboard."
-          }
-          buttonInfo={{
-            label: "Back to Home",
+          title={{
+            text: isNotFound ? "Event Not Found" : "Unable to Load Dashboard",
+            styling: "text-red-500 text-lg"
+          }}
+          description={{
+            text:
+              isNotFound 
+                ? "The event you're looking for doesn't exist or has been removed."
+                : isServerError
+                ? "We're experiencing technical difficulties. Please try again later."
+                : "Something went wrong while loading your dashboard."
+          }}
+          primary={{
+            text: "Back to Home",
             link: "/"
           }}
+          variant="default"
         />
       </main>
     );
