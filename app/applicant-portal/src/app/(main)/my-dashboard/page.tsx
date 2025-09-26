@@ -6,6 +6,14 @@
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import TeamView from "./components/TeamView";
 import { trpc } from "@/utils/trpc";
+// import {
+//   Alert,
+//   AlertDescription,
+//   AlertTitle,
+// } from "@/components/shadcn/ui/alert";
+// import { Button } from "@/components/ui/button";
+// import { Icons } from "@/lib/icons";
+import ErrorState from "../components/ErrorState";
 
 export default function MyDashboardView() {
   const { data, isLoading, error } = trpc.events.getById.useQuery({
@@ -13,9 +21,29 @@ export default function MyDashboardView() {
   });
 
   if (error) {
-    return <p>Error loading dashboard.</p>;
+    // Determine error type for better messaging
+    const isNotFound = 'NOT_FOUND';
+    const isServerError = 'INTERNAL_SERVER_ERROR';
+    
+    return (
+      <main className="min-h-1/2 flex items-center justify-center p-4">
+        <ErrorState
+          title={isNotFound ? "Event Not Found" : "Unable to Load Dashboard"}
+          description={
+            isNotFound 
+              ? "The event you're looking for doesn't exist or has been removed."
+              : isServerError
+              ? "We're experiencing technical difficulties. Please try again in a moment."
+              : "Something went wrong while loading your dashboard."
+          }
+          buttonInfo={{
+            label: "Back to Home",
+            link: "/"
+          }}
+        />
+      </main>
+    );
   }
-
   const isTeamManagementUnlocked = data?.isTeamManagementOpen ?? false;
 
   return (

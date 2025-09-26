@@ -22,7 +22,8 @@ export default function JoinPage() {
   const isTeamFull = true;
   const teamName = "TeamName01";
   const isLoading = false;
-  const error = false;
+  const error = true;
+  let errorType = "SERVER_ERROR"
 
   //TODO enhance loading experience
   if (isLoading) {
@@ -39,17 +40,34 @@ export default function JoinPage() {
 
   //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
   if (error) {
+    const getErrorConfig = (type: string) => {
+      switch (type) {
+        case "INVALID_LINK":
+          return {
+            title: "Invalid Team Invitation",
+            description: "This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.",
+            primary: {
+              label: "Back to Dashboard",
+              link: "my-dashboard"
+            }
+          };
+        default:
+          return {
+            title: "Unable to Process Invitation",
+            description: "We're having trouble processing this team invitation. Please try again later.",
+            primary: {
+              label: "Back to Dashboard",
+              link: "my-dashboard"
+            }
+          };
+      }
+    };
+
+    const errorConfig = getErrorConfig(errorType);
+
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md">
-          <Alert variant="default">
-            <Icons.alert />
-            <AlertTitle>
-              Uh oh! there was an unexpected error getting this invite.
-            </AlertTitle>
-            <AlertDescription>Try again with a new team link.</AlertDescription>
-          </Alert>
-        </div>
+        <ErrorState {...errorConfig} />
       </main>
     );
   }
