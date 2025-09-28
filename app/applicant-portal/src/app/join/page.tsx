@@ -15,7 +15,7 @@ import {
 } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorState from "../(main)/components/ErrorState.tsx"
+import ErrorState from "../(main)/components/ErrorState"
 
 export default function JoinPage() {
   const isUserOnTeam = true;
