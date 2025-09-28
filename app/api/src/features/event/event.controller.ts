@@ -1,10 +1,5 @@
-import type { Request, Response } from 'express';
-
-import { z } from 'zod';
 import prisma from '../../config/prismaClient';
-import { EventArgsObjectSchema, EventWhereUniqueInputObjectSchema } from '../../zod/schemas';
 import { type GetEventsQuerySchema } from './event.schemas';
-import { idParamsSchema } from '../../common/common.schema';
 import { TRPCError } from '@trpc/server';
 
 export async function getEventById(id: string) {

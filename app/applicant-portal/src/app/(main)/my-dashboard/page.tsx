@@ -10,7 +10,7 @@ import ErrorState from "../components/ErrorState";
 
 export default function MyDashboardView() {
   const { data, isLoading, error } = trpc.events.getById.useQuery({
-    id: process.env.EVENT_ID || "",
+    id: process.env.NEXT_PUBLIC_EVENT_ID || "",
   });
 
   if (error) {
