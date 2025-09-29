@@ -15,7 +15,7 @@ import {
 } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorState from "../(main)/components/ErrorState"
+import ErrorStateAlert from "../(main)/components/ErrorStateAlert"
 
 export default function JoinPage() {
   const isUserOnTeam = true;
@@ -45,10 +45,9 @@ export default function JoinPage() {
     
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
-        <ErrorState
+        <ErrorStateAlert
           title={{
             text: isInvalidLink ? "Invalid Team Invitation" : "Unable to Process Invitation",
-            styling: "text-red-500 text-lg"
           }}
           description={{
             text: 
@@ -58,7 +57,7 @@ export default function JoinPage() {
                 ? "We're experiencing technical difficulties. Please try again later."
                 : "Something went wrong while processing this team invitation. Please try again later."
           }}
-          primary={{
+          callToAction={{
             text: "Back to Dashboard",
             link: "/my-dashboard"
           }}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/lib/icons";
 import Link from 'next/link'
 
-interface ErrorStateProps {
+interface ErrorStateAlertProps {
   title: {
     text: string,
     styling?: string,
@@ -13,13 +13,14 @@ interface ErrorStateProps {
     styling?: string,
   };
   variant?: "default" | "destructive";
-  primary?: {
+  callToAction?: {
     text: string;
     link: string;
   }
 }
 
-export default function ErrorState({ title, description, variant = "destructive", primary }: ErrorStateProps) {
+// Note: this component will not handle ensuring links requiring authentication are checked
+export default function ErrorStateAlert({ title, description, variant = "destructive", callToAction }: ErrorStateAlertProps) {
   return (
     <div className="max-w-md w-full space-y-4">
       <Alert variant={variant}>
@@ -28,11 +29,11 @@ export default function ErrorState({ title, description, variant = "destructive"
         <AlertDescription className={description.styling}>{description.text}</AlertDescription>
       </Alert>
       
-      { primary &&
+      { callToAction &&
         <div className="flex flex-col gap-2">
             <Button className="w-full">
-              <Link href={primary.link}>
-                {primary?.text}
+              <Link href={callToAction.link}>
+                {callToAction?.text}
               </Link>
             </Button>
         </div>
