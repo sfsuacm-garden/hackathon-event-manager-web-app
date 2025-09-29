@@ -24,7 +24,7 @@ export default function ErrorStateAlert({ title, description, variant = "destruc
   return (
     <div className="max-w-md w-full space-y-4">
       <Alert variant={variant}>
-        <Icons.alert className="h-4 w-4" />
+        <Icons.alert />
         <AlertTitle className={title.styling}>{title.text}</AlertTitle>
         <AlertDescription className={description.styling}>{description.text}</AlertDescription>
       </Alert>
