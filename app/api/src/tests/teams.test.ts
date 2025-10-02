@@ -2,7 +2,7 @@ import { joinTeam, kickTeamMember, getTeamById, leaveTeam, createTeam  } from '.
 import prisma from '../config/prismaClient';
 import type { Event, Team, TeamMember, UserProfile } from '@prisma/client';
 import { PrismaClient } from '@prisma/client/extension';
-import { describe, beforeEach, afterEach, expect, test } from "vitest";
+import { describe, beforeEach, afterEach, expect, test } from 'vitest';
 
 interface TeamInfo {
   team: Team;
@@ -71,22 +71,22 @@ async function setTeamsTestUp(tx: PrismaClient, teamMemberCounts: number[]) {
 }
 
 
-describe('Team tests', ()=>{
+describe('Team tests for 2 teams. initial team state: one member per team', ()=>{
   let teamSetupInfo: TeamTestSetupInfo;
   beforeEach(async () => {
-    teamSetupInfo = await setTeamsTestUp();
+    teamSetupInfo = await setTeamsTestUp([1, 1]);
   });
 
   afterEach(async () => {
     await cleanTeamsTestUp(teamSetupInfo);
   });
 
-  test('join team test', ()=>{
-
+  test('join team test', async ()=>{
+    await testJoinTeam(teamSetupInfo);
   });
 });
 
-async function cleanTeamsTestUp(tx: PrismaClient, setUpInfo: TeamTestSetupInfo) {
+async function cleanTeamsTestUp(tx: PrismaClient, setUpInfo: TeamTestSetupInfo) {//better setups might enable us to just rollback transaction to get a clean DB state insetad of running this
   //IN THEORY DELETING THE EVENT SHOULD DELETE THE RELATED TEST TEAMS AND TEAM MEMEBERS VIA DATABASE CASCADES BUT PROFILES WILL REMAIN, WE CLEAN THOSE MANUALLY
   try{
     await tx.event.delete({
@@ -94,7 +94,7 @@ async function cleanTeamsTestUp(tx: PrismaClient, setUpInfo: TeamTestSetupInfo) 
         id: setUpInfo.event.id
       }
     });
-    
+
     const profileIds = [];
     for(const team of setUpInfo.teams) {
       for(const member of team.teamMembers) {
@@ -116,15 +116,51 @@ async function cleanTeamsTestUp(tx: PrismaClient, setUpInfo: TeamTestSetupInfo) 
 }
 
 async function testJoinTeam(testInfo: TeamTestSetupInfo) {
-  // this scenario occurs when player 1 is on team 1, player 2 is on team 2
-  // player 2 joins player 1's team.
-  // expected behavior:
-    // Player 1 is admin player 2 no longer admin
-    // Player 2 is part of player 1's team
-    // Player 2's team no longer exists.
-
-  await joinTeam(testInfo.team1.id, testInfo.profile2.id, testInfo.event.id);
   
+  const teamToJoin = testInfo.teams?.[0];
+  expect(teamToJoin).toBeDefined();
+    
+  const teamBeingLeft = testInfo.teams?.[1];
+  expect(teamBeingLeft).toBeDefined();
+
+  const memberLeaving = teamBeingLeft?.teamMembers?.[0];
+  expect(memberLeaving).toBeDefined();
+
+  await joinTeam(teamToJoin!.team.id, teamBeingLeft!.teamMembers[0]!.userId, testInfo.event.id);
+
+  const teamJoinedDb = await prisma.team.findUnique({
+    where: {
+      id: teamToJoin!.team.id
+    },
+    include: {
+      members: true
+    }
+  });
+
+  expect(teamJoinedDb).not.toBeNull();
+  expect(teamJoinedDb?.members).not.toBeNull();
+
+  let newMemberDb: TeamMember | undefined = undefined;
+  for(const member of teamJoinedDb!.members) {
+    if (member.userId === memberLeaving?.userId) {
+      newMemberDb = member;
+    }
+  }
+
+  expect(newMemberDb, 'there was no new member of team').toBeDefined();
+  expect(newMemberDb?.isAdmin, 'joining member cannot be admin').toBe(false);
+
+  const oldTeamDb = await prisma.team.findUnique({
+    where: {
+      id: teamBeingLeft!.team.id
+    },
+    include: {
+      members: true
+    }
+  });
+  
+  expect(oldTeamDb, 'old team should be deleted because there was only one member who joined a new team.').toBeNull();
+
 }
 
 function teamsTestMain() {

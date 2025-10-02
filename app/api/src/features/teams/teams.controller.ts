@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client/extension';
 
 export async function getTeamById(id: string) {
   try {
-    const team = await prisma.event.findUnique({ where: { id } });
+    const team = await prisma.team.findUnique({ where: { id } });
     if (!team) {
       throw new TRPCError({
         code: 'NOT_FOUND',
