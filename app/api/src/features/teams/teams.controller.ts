@@ -81,7 +81,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
           }
         },
         data: {
-          teamId: teamId
+          teamId: teamId,
+          isAdmin: false
         }
       });
 
@@ -192,7 +193,7 @@ export async function leaveTeam(teamId: string, userId: string) {
   }
 }
 
-export async function kickTeamMember(memberKickingId: string, kickedMemberId: string, teamId: string, eventId: string) {
+export async function kickTeamMember(memberKickingId: string, kickedMemberId: string, teamId: string) {
   try {
     await prisma.$transaction(async (tx) => {
       const memberKickingInfo = await fetchTeamMemberByTeam(tx, memberKickingId, teamId);
@@ -212,7 +213,7 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
         });
       }
 
-      const newTeam = await createTeam(tx, eventId);
+      const newTeam = await createTeam(tx, memberKickingInfo.eventId);
       await tx.teamMember.update({
         where: {
           teamId_userId: {
@@ -221,7 +222,8 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
           }
         },
         data: {
-          teamId: newTeam.id
+          teamId: newTeam.id,
+          isAdmin: true
         }
       });
     });
@@ -246,6 +248,9 @@ async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId:
         userId: memberId,
         teamId: teamId
       }
+    },
+    include: {
+      team: true
     }
   });
   if (!teamMember) {
@@ -258,11 +263,11 @@ async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId:
   return teamMember;
 }
 
-async function createTeam(prismaClient: PrismaClient, eventId: string) {
+export async function createTeam(prismaClient: PrismaClient, eventId: string) {
   const numTeamsInEvent = await prismaClient.teams.count({
     where: {
       eventId: eventId
-    },
+    }
   });
 
   const newTeam = await prismaClient.teams.create({
