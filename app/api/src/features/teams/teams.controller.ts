@@ -143,7 +143,7 @@ export async function leaveTeam(teamId: string, userId: string) {
         });
       }
 
-      const newTeamInfo = await createTeam(tx, prevTeamMemberAndTeamInfo.eventId);
+      const newTeamInfo = await createTeam(tx, prevTeamMemberAndTeamInfo.event_id);
       await tx.teamMember.update({
         where: {
           teamId_userId: {

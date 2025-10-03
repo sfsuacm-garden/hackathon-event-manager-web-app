@@ -37,7 +37,7 @@ export async function setTeamsTestUp(teamMemberCounts: number[]) {
           const tempTeamMember = await tx.teamMember.create({
             data: {
               teamId: tempTeam.id,
-              eventId: testEvent.id,
+              event_id: testEvent.id,
               userId: tempProfile.id,
               isAdmin: j === 0 //if first member of team admin true otherwise false
             }
