@@ -1,4 +1,3 @@
-import { Router } from 'express';
 import { initTRPC } from '@trpc/server';
 import { idParamsSchema } from '../../common/common.schema';
 import { getTeamById, joinTeam, kickTeamMember, leaveTeam } from './teams.controller';

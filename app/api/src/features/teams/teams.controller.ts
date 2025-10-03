@@ -264,13 +264,13 @@ async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId:
 }
 
 export async function createTeam(prismaClient: PrismaClient, eventId: string) {
-  const numTeamsInEvent = await prismaClient.teams.count({
+  const numTeamsInEvent = await prismaClient.team.count({
     where: {
       eventId: eventId
     }
   });
 
-  const newTeam = await prismaClient.teams.create({
+  const newTeam = await prismaClient.team.create({
     data: {
       eventId: eventId,
       name: `New Team #${numTeamsInEvent}`
