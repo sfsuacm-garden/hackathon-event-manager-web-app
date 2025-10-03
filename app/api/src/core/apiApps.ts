@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import healthRouter from './health/health.routes';
+import healthRouter from '../features/health/health.routes';
 
 const apiRouter = Router();
 

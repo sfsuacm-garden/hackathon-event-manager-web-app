@@ -1,1 +1,0 @@
-export const DEFAULT_QUERY_LIMIT_SMALL = 10;
