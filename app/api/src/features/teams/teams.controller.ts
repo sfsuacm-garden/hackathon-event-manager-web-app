@@ -56,7 +56,7 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
       const prevTeamUserInfo = await tx.teamMember.findFirst({ 
         where: {
           userId: profileId,
-          eventId: eventId
+          event_id: eventId
         }
       });
       if (!prevTeamUserInfo) {
