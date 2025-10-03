@@ -38,6 +38,10 @@ describe('Teams Tests', ()=>{
     test('leave team normal case', async () => {
       await leaveTeamNormalCase(teamSetupInfo);
     });
+
+    test('leave team admin leaves case', async ()=> {
+      await leaveTeamAdminLeaves(teamSetupInfo);
+    });
   });
 
   describe('Team tests where there are multiple teams with at least one team having >1 member', ()=> {
@@ -141,8 +145,7 @@ async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
 
   const oldTeamMembersDb = await prisma.teamMember.findMany({
     where: {
-      teamId: teamBeingLeft?.team.id!,
-      isAdmin: true
+      teamId: teamBeingLeft?.team.id!
     },
     orderBy: {
       joinedAt: 'asc'
@@ -150,9 +153,17 @@ async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
     take: 1
   });
 
+  const teamAdmin = await prisma.teamMember.findMany({
+    where: {
+      teamId: teamBeingLeft?.team.id!,
+      isAdmin: true
+    },
+    take: 1
+  });
+
+
   expect(oldTeamMembersDb, 'old team should still have members').not.toBeNull();
-  expect(oldTeamMembersDb[0]?.isAdmin, 'most recent member should have admin after admin leaves').toBe(true);
-  
+  expect(teamAdmin[0]?.userId).toBe(teamBeingLeft?.teamMembers[1]?.userId);
 }
 
 async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
@@ -213,4 +224,49 @@ async function leaveTeamNormalCase(testInfo: TeamTestSetupInfo) {
     }
   });
   expect(kickedTeamMemberDb?.isAdmin, 'kicked team member should now be admin').toBe(true);
+}
+
+async function leaveTeamAdminLeaves(testInfo: TeamTestSetupInfo) {
+  expect(testInfo.teams, 'teams list cannot be empty').not.toBeNull();
+
+  const origTeam = testInfo.teams[0];
+  expect(origTeam?.teamMembers).not.toBeNull();
+  expect(origTeam?.teamMembers.length).greaterThan(1);
+  expect(origTeam?.teamMembers[0]?.isAdmin).toBe(true);
+
+  await leaveTeam(origTeam?.team.id!, origTeam?.teamMembers[0]?.userId!);
+
+  const origTeamMembersDb = await prisma.teamMember.findMany({
+    where: {
+      teamId: origTeam!.team.id
+    },
+    orderBy: {
+      joinedAt: 'asc'
+    },
+    take: 1
+  });
+
+  const teamAdmin = await prisma.teamMember.findFirst({
+    where: {
+      teamId: origTeam?.team.id!,
+      isAdmin: true
+    }
+  });
+
+  expect(origTeamMembersDb, 'Member leaving team should not result in team having no members').not.toBeNull();
+  expect(origTeamMembersDb[0]?.isAdmin, 'oldest team member remaining on original team should be admin').toBe(true);
+
+  console.log(`Who should be admin after leaving ${origTeam?.teamMembers[1]?.userId}`);
+  console.log(`who is the new admin ${teamAdmin?.userId}`);
+  console.log(`Who we are comparing against ${origTeamMembersDb[0]?.userId}`);
+  console.log(origTeamMembersDb[0]?.isAdmin);
+
+
+  const leavingMemberDb = await prisma.teamMember.findFirst({
+    where: {
+      userId: origTeam?.teamMembers[0]?.userId! 
+    }
+  });
+
+  expect(leavingMemberDb?.isAdmin, 'member who left should now be admin').toBe(true);
 }

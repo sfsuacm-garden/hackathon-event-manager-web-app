@@ -66,6 +66,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
       }
 
+      console.log(`is prev team user admin: ${prevTeamUserInfo.isAdmin}`);
+
       if (prevTeamUserInfo.teamId === teamId) {
         throw new TRPCError({
           code: 'CONFLICT',
