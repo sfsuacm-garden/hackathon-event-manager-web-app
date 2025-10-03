@@ -1,7 +1,6 @@
-import type { TeamMember } from '@prisma/client';
-import prisma, { prisma } from '../config/prismaClient';
+import type { Event, Team, TeamMember } from '@prisma/client';
+import { prisma } from '../config/prismaClient';
 import { createTeam } from '../features/teams/teams.controller';
-import type { TeamInfo, TeamTestSetupInfo } from './teams.test';
 
 export async function setTeamsTestUp(teamMemberCounts: number[]) {
   try {
@@ -95,5 +94,15 @@ export async function cleanTeamsTestUp(setUpInfo: TeamTestSetupInfo) {
     console.error('fatal error cleaning up teams tests', error);
     throw error;
   }
+}
+
+export interface TeamInfo {
+  team: Team;
+  teamMembers: TeamMember[];
+}
+
+export interface TeamTestSetupInfo {
+  event: Event;
+  teams: TeamInfo[];
 }
 

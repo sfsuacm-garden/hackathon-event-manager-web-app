@@ -101,7 +101,7 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
         console.log(`[SUCCESS] Deleted team with ID ${deletedTeam.id}`);
       } else if (prevTeamUserInfo.isAdmin) {
-        reassignAdminToEarliestJoiningMember(tx, prevTeamUserInfo.teamId);
+        await reassignAdminToEarliestJoiningMember(tx, prevTeamUserInfo.teamId);
       }
 
       console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
@@ -178,7 +178,7 @@ export async function leaveTeam(teamId: string, userId: string) {
           }
         });
       } else if (prevTeamMemberAndTeamInfo.isAdmin) {
-        reassignAdminToEarliestJoiningMember(tx, teamId);
+        await reassignAdminToEarliestJoiningMember(tx, teamId);
       }
 
     });
@@ -286,12 +286,12 @@ async function reassignAdminToEarliestJoiningMember(tx: PrismaClient, teamId: st
       teamId: teamId
     },
     orderBy: {
-      joinedAt: 'desc'
+      joinedAt: 'asc'
     },
     take: 1 // we want the most earliest team member
   });
   if (nextEarliestTeamMember && nextEarliestTeamMember[0]) {
-    tx.teamMember.update({
+    await tx.teamMember.update({
       where: {
         teamId_userId: {
           userId: nextEarliestTeamMember[0].userId,
