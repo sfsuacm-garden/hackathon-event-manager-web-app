@@ -14,7 +14,7 @@ export const MAJOR_OPTIONS = [
   'Undecided / Undeclared Major',
   'My school does not offer majors / primary areas of study',
   'Prefer not to answer',
-] as const;
+] as readonly string[];
 
 export const OTHER_MAJOR = 'Other (please specify)';
 
@@ -30,7 +30,7 @@ export const LEVEL_OF_STUDY_OPTIONS = [
   'Other',
   'I’m not currently a student',
   'Prefer not to answer',
-] as const;
+] as readonly string[];
 
 export const GENDER_OPTIONS = ['Male', 'Female', 'Gender Spectrum'] as const;
 
@@ -40,7 +40,7 @@ export const PRONOUN_OPTIONS = ['She/Her',
 'She/They',
 'He/They',
 'Prefer Not to Answer',
-'Other'] as const;
+'Other'] as readonly string[];
 export const OTHER_PRONOUN = 'Other (Please Specify)';
 
 export const RACE_OPTIONS = [
@@ -56,7 +56,7 @@ export const RACE_OPTIONS = [
   'Southeast Asian (e.g., Filipino, Vietnamese, Indonesian)',
   'Other (Please Specify)',
   'Prefer Not to Answer',
-] as const;
+] as readonly string[];
 
 export const OTHER_RACE = 'Other (Please Specify)';
 

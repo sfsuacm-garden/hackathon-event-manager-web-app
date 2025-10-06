@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import * as React from "react";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import * as RPNInput from "react-phone-number-input";
@@ -86,6 +87,7 @@ const CountrySelect = ({
       modal
       onOpenChange={(open) => {
         setIsOpen(open);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         open && setSearchValue("");
       }}
     >

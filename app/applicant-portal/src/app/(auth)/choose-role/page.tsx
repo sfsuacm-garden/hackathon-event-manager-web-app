@@ -8,17 +8,51 @@ import { Button } from '@/components/shadcn/ui/button';
 import { Separator } from '@/components/shadcn/ui/separator';
 import { Progress } from '@/components/shadcn/ui/progress';
 
-const ROLES = ['hacker', 'judge', 'mentor'] as const;
-type Role = typeof ROLES[number];
+export type Role = 'hacker' | 'judge' | 'mentor';
+
+/** Moved above usage to satisfy no-use-before-define */
+function RoleBlock({
+  title,
+  body,
+  onPrimary,
+  primary,
+  onSecondary,
+  secondary,
+}: {
+  title: string;
+  body: string;
+  onPrimary: () => void;
+  primary: string;
+  onSecondary?: () => void;
+  secondary?: string;
+}) {
+  return (
+    <Card>
+      <CardContent className="space-y-4 p-6">
+        <div className="space-y-2">
+          <h2 className="text-base font-semibold">{title}</h2>
+          <p className="text-sm text-muted-foreground">{body}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button onClick={onPrimary}>{primary}</Button>
+          {onSecondary && secondary ? (
+            <Button variant="secondary" onClick={onSecondary}>
+              {secondary}
+            </Button>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ChooseRolePage() {
   const router = useRouter();
 
   function gotoAuth(role: Role) {
     try {
-      localStorage.setItem('pendingRole', role); // I keep it as a fallback
+      localStorage.setItem('pendingRole', role); // fallback
     } catch {}
-    // Route groups like (auth) are not part of the URL; the path is just /login
     router.push(`/login?role=${encodeURIComponent(role)}`);
   }
 
@@ -62,40 +96,5 @@ export default function ChooseRolePage() {
         />
       </div>
     </main>
-  );
-}
-
-function RoleBlock({
-  title,
-  body,
-  onPrimary,
-  primary,
-  onSecondary,
-  secondary,
-}: {
-  title: string;
-  body: string;
-  onPrimary: () => void;
-  primary: string;
-  onSecondary?: () => void;
-  secondary?: string;
-}) {
-  return (
-    <Card>
-      <CardContent className="space-y-4 p-6">
-        <div className="space-y-2">
-          <h2 className="text-base font-semibold">{title}</h2>
-          <p className="text-sm text-muted-foreground">{body}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={onPrimary}>{primary}</Button>
-          {onSecondary && secondary ? (
-            <Button variant="secondary" onClick={onSecondary}>
-              {secondary}
-            </Button>
-          ) : null}
-        </div>
-      </CardContent>
-    </Card>
   );
 }

@@ -1,7 +1,6 @@
-
 import { z } from 'zod';
 
-// This is for optional fields
+
 const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema);
 
@@ -28,58 +27,46 @@ export const TShirtSizeEnum = z.enum([
   'UK_16',
 ]);
 
-// Primitives for common fields
+// Primitive helpers
 const UUID = emptyToUndefined(z.uuid());
 const Email = emptyToUndefined(z.email());
-const IsoDateString = emptyToUndefined(z.iso.datetime()); 
+const IsoDateString = emptyToUndefined(z.iso.datetime());
 const Url = emptyToUndefined(z.url());
-
-export const PhoneRequiredLoose = z.string();
-
-const Age = z.coerce
-  .number()
-  .int()
-  .min(18, { message: "You must be at least 18 to submit an application" })
-  .max(120, { message: "Enter a valid age" });
-
-
 
 export const ApplicationPayload = z
   .object({
-    id: UUID.optional(),               
+    id: UUID.optional(),
     eventId: UUID.optional(),
-    userId: UUID.optional(),           
-     schoolEmail: Email.optional(),
+    userId: UUID.optional(),
+
+    schoolEmail: Email.optional(),
     school: emptyToUndefined(z.string()).optional(),
     schoolId: UUID.optional(),
     status: emptyToUndefined(ApplicationStatusEnum).optional(),
 
-   
     graduationYear: emptyToUndefined(
-  z
-    .union([z.number().int(), z.string().regex(/^\d+$/)])
-    .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v))
-).optional(),
+      z
+        .union([z.number().int(), z.string().regex(/^\d+$/)])
+        .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v))
+    ).optional(),
 
     experienceLevel: emptyToUndefined(z.string()).optional(),
     submissionDate: IsoDateString.optional(),
-    createdAt: IsoDateString.optional(), 
+    createdAt: IsoDateString.optional(),
 
     publicStatus: emptyToUndefined(ApplicationStatusEnum).optional(),
     internalStatus: emptyToUndefined(ApplicationStatusEnum).optional(),
 
-   
-    dob: emptyToUndefined(z.string()).optional(), // might honeslty get rid of this on the db and replace with Age
-    phoneNumber: PhoneRequiredLoose.optional(),
+    // Removed: dob, phoneNumber, age (now collected on profile during sign-in)
+
     levelOfStudy: emptyToUndefined(z.string()).optional(),
     countryOfResidence: emptyToUndefined(z.string()).optional(),
     linkedinUrl: Url.optional(),
 
     mlhAuthorizedPromoEmail: z.boolean().optional(),
     mlhAuthorizedDataShare: z.boolean().optional(),
-    
     mlhCodeOfConductAgreement: z.boolean().optional(),
-    age: Age,
+
     dietaryVegetarian: z.boolean().optional(),
     dietaryVegan: z.boolean().optional(),
     dietaryCeliacDisease: z.boolean().optional(),

@@ -24,7 +24,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.54.0",
     "@tanstack/react-query": "^5.89.0",
@@ -36,15 +35,17 @@
     "cmdk": "^1.1.1",
     "country-data-list": "^1.5.5",
     "input-otp": "^1.4.2",
+    "libphonenumber-js": "^1.12.23",
     "lucide-react": "^0.539.0",
     "next": "15.4.6",
     "react": "19.1.0",
     "react-circle-flags": "^0.0.23",
+    "react-day-picker": "^9.11.0",
     "react-dom": "19.1.0",
-    "react-hook-form": "^7.62.0",
+    "react-hook-form": "^7.63.0",
     "react-phone-number-input": "^3.4.12",
     "tailwind-merge": "^3.3.1",
-    "zod": "^4.1.8"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
