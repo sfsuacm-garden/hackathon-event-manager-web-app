@@ -1,25 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 
-async function main(){
-
-
+async function main() {
   const prisma = new PrismaClient();
-  try{
+  try {
     const result = await prisma.$queryRaw`SELECT now()`;
     console.log(`Connected: Current time: ${result}`);
-  
-  }catch(error){
+  } catch (error) {
     console.error('Connection Failed', error);
-  }finally {
+  } finally {
     await prisma.$disconnect();
   }
-
-
-
-
-
-
-
 }
 
 main();

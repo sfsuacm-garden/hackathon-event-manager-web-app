@@ -21,7 +21,7 @@ model Application {
   school                    String?
   graduationYear            Int?                @map("graduation_year")
   experienceLevel           String?             @map("experience_level")
-  submission_data           Json?
+  submissionData            Json?               @map("submission_data")
   createdAt                 DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
   publicStatus              application_status? @map("public_status")
   internalStatus            application_status? @map("internal_status")
@@ -46,24 +46,24 @@ model Application {
   educationLevel            String?             @map("education_level")
   tshirtSize                t_shirt_size?       @map("tshirt_size")
   majorFieldOfStudy         String?             @map("major_field_of_study")
-  events                    Event               @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  profiles                  user_profiles       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event                     Event               @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile                   UserProfile         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([eventId, userId])
   @@map("applications")
 }
 
 model Event {
-  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                 String
   description          String?
-  startDate            DateTime?        @map("start_date") @db.Timestamp(6)
-  endDate              DateTime?        @map("end_date") @db.Timestamp(6)
-  createdAt            DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
-  isEventLive          Boolean?         @map("is_event_live")
-  isTeamManagementOpen Boolean?         @map("is_team_managment_open")
+  startDate            DateTime?      @map("start_date") @db.Timestamp(6)
+  endDate              DateTime?      @map("end_date") @db.Timestamp(6)
+  createdAt            DateTime?      @default(now()) @map("created_at") @db.Timestamp(6)
+  isEventLive          Boolean?       @map("is_event_live")
+  isTeamManagementOpen Boolean?       @map("is_team_managment_open")
   applications         Application[]
-  event_profiles       event_profiles[]
+  eventProfiles        EventProfile[]
   mailingLists         MailingList[]
   team_members         TeamMember[]
   teams                Team[]
@@ -72,95 +72,95 @@ model Event {
 }
 
 model MailingListMember {
-  mailingListId String        @map("mailing_list_id") @db.Uuid
-  userId        String        @map("user_id") @db.Uuid
-  mailingList   MailingList   @relation(fields: [mailingListId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  profiles      user_profiles @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  mailingListId String      @map("mailing_list_id") @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  mailingList   MailingList @relation(fields: [mailingListId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([mailingListId, userId])
   @@map("mailing_list_members")
 }
 
 model MailingList {
-  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId            String?             @map("event_id") @db.Uuid
-  name               String
-  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
-  mailingListMembers MailingListMember[]
-  events             Event?              @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String?             @map("event_id") @db.Uuid
+  name      String
+  createdAt DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
+  members   MailingListMember[]
+  event     Event?              @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("mailing_lists")
 }
 
 model School {
-  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                 String
-  countryCode          String                 @map("country_code")
-  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
-  state_province       String?
-  school_email_domains school_email_domains[]
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  countryCode   String              @map("country_code")
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  stateProvince String?             @map("state_province")
+  emailDomains  SchoolEmailDomain[]
 
   @@map("schools")
 }
 
 model TeamMember {
-  teamId   String        @map("team_id") @db.Uuid
-  userId   String        @map("user_id") @db.Uuid
-  isAdmin  Boolean?      @map("is_admin")
-  joinedAt DateTime?     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("joined_at") @db.Timestamp(6)
-  event_id String        @db.Uuid
-  events   Event         @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  teams    Team          @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  profiles user_profiles @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  teamId   String      @map("team_id") @db.Uuid
+  userId   String      @map("user_id") @db.Uuid
+  isAdmin  Boolean?    @map("is_admin")
+  joinedAt DateTime?   @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("joined_at") @db.Timestamp(6)
+  event_id String      @db.Uuid
+  events   Event       @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  team     Team        @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  profile  UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([teamId, userId])
   @@map("team_members")
 }
 
 model Team {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventId     String?      @map("event_id") @db.Uuid
-  name        String?
-  createdAt   DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
-  teamMembers TeamMember[]
-  events      Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String?      @map("event_id") @db.Uuid
+  name      String?
+  createdAt DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
+  members   TeamMember[]
+  event     Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("teams")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model event_profiles {
-  created_at    DateTime             @default(now()) @db.Timestamptz(6)
-  profile_id    String               @db.Uuid
-  event_id      String               @db.Uuid
-  role          participation_level? @default(hacker)
-  events        Event                @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user_profiles user_profiles        @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model EventProfile {
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  profileId String               @map("profile_id") @db.Uuid
+  eventId   String               @map("event_id") @db.Uuid
+  role      participation_level? @default(hacker)
+  event     Event                @relation(fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  profile   UserProfile          @relation(fields: [profileId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([profile_id, event_id])
+  @@id([profileId, eventId])
+  @@map("event_profiles")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model school_email_domains {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  school_id  String   @db.Uuid
-  domain     String
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  schools    School   @relation(fields: [school_id], references: [id], onDelete: Cascade)
+model SchoolEmailDomain {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  domain    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@map("school_email_domains")
 }
 
-model user_profiles {
-  id                 String              @id(map: "profiles_pkey") @default(dbgenerated("auth.uid()")) @db.Uuid
-  created_at         DateTime            @default(now()) @db.Timestamp(6)
-  first_name         String?
-  last_name          String?
-  dob                String?
-  phone_number       String?
-  applications       Application[]
-  event_profiles     event_profiles[]
-  mailingListMembers MailingListMember[]
-  teamMembers        TeamMember[]
+model UserProfile {
+  id            String   @id(map: "user_profiles_pkey") @default(dbgenerated("auth.uid()")) @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  firstName     String?  @map("first_name")
+  lastName      String?  @map("last_name")
+  applications  Application[]
+  eventProfiles EventProfile[]
+  mailingLists  MailingListMember[]
+  teamMembers   TeamMember[]
+
+  @@map("user_profiles")
 }
 
 enum application_status {
