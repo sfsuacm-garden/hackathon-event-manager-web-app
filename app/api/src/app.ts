@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import express, { type Application, type Request, type Response } from 'express';
+import express, { type Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 import helmet from 'helmet';
@@ -7,6 +7,7 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { trpcRouter } from './core/_app';
 import { createContext } from './core/context';
 import apiRouter from './core/apiApps';
+import emailRoutes from './email/email.routes';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app: Application = express();
 
 app.use(express.json());
 app.use(helmet());
+app.use('/email', emailRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
