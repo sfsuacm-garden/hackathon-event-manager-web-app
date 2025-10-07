@@ -1,33 +1,39 @@
-import { initTRPC } from '@trpc/server';
+import z from 'zod';
+import {t} from '../../core/trpc';
+import { teamProcedure, protectedProcedure } from '../../common/common.middleware';
 import { idParamsSchema } from '../../common/common.schema';
 import { getTeamById, joinTeam, kickTeamMember, leaveTeam } from './teams.controller';
 import { kickTeamMemberParamsSchema, teamIdUserIdParamsSchema } from './teams.schemas';
 
-const teamsTRPC = initTRPC.create();
+// const teamsTRPC = initTRPC.create();
 
-export const teamsRouter = teamsTRPC.router({
-  getTeamById: teamsTRPC.procedure
+export const teamsRouter = t.router({
+  getTeamById: protectedProcedure
     .input(idParamsSchema)
     .query(async ({ input }) => {
       return await getTeamById(input.id);
     }),
 
-  joinTeamById: teamsTRPC.procedure
-    .input(teamIdUserIdParamsSchema)
-    .mutation(async ({ input }) => {
-      return await joinTeam(input.teamId, input.userId, input.eventId);
+  getOwnTeam: teamProcedure
+    .query(async ({ctx}) => {
+      return await getTeamById(ctx.teamId);
     }),
 
-  leaveTeamById: teamsTRPC.procedure
-    .input(teamIdUserIdParamsSchema)
-    .mutation(async ({ input }) => {
-      return await leaveTeam(input.teamId, input.userId);
+  joinTeamById: teamProcedure
+    .input(idParamsSchema)
+    .mutation(async ({ ctx, input }) => {
+      return await joinTeam(input.id, ctx.user.id, ctx.event?.id!);
+    }),
+
+  leaveTeamById: teamProcedure
+    .mutation(async ({ ctx }) => {
+      return await leaveTeam(ctx.teamId, ctx.user.id);
     }),
   
-  kickTeamMemberById: teamsTRPC.procedure
-    .input(kickTeamMemberParamsSchema)
-    .mutation(async ({ input }) => {
-      return await kickTeamMember(input.memberKickingId, input.memberBeingKickedId, input.teamId);
+  kickTeamMemberById: teamProcedure
+    .input(z.object({memberBeingKickedId: z.uuid()}))
+    .mutation(async ({ ctx, input }) => {
+      return await kickTeamMember(ctx.user.id, input.memberBeingKickedId, ctx.teamId);
     })
 });
 
