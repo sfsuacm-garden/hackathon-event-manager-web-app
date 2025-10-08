@@ -19,13 +19,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/ui/tooltip";
+import { trpc } from "@/utils/trpc";
+import ErrorStateAlert from "../../components/ErrorStateAlert";
+import { useQueryClient } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
 
 export default function TeamView() {
-  const error = false;
-  const loading = false;
-  const isTeamAdmin = true;
-  const isTeamManagementUnlocked = false;
-  const teamCount = 4;
+  const utils = trpc.useUtils();
+  const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao 
+
+  const {data: team, isLoading: loading, error} = trpc.teams.getOwnTeam.useQuery();
+  const isTeamAdmin = team?.isTeamAdmin ?? false;
+  const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
 
@@ -41,6 +46,23 @@ export default function TeamView() {
         </AlertDescription>
       </Alert>
     );
+  }
+
+  const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
+    onSuccess: ()=> {
+      utils.teams.getOwnTeam.invalidate();
+    },
+    onError: () => {
+      <ErrorStateAlert 
+        title={{text: 'Error leaving team'}}
+        description={{text: 'There was an error leaving the team. Please try again or contact the team.'}}
+      />   
+    }
+  });
+
+  const handleLeaveTeam = ()=> {
+    //need to add a component for ARE YOU SURE dialogues
+    leaveTeamMutation.mutate();
   }
 
   return (
@@ -79,9 +101,15 @@ export default function TeamView() {
       </div>
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
-          {[...Array(teamCount)].map((_, idx) => (
-            <TeamMemberCard key={idx} userId={""} isTeamAdmin={isTeamAdmin} />
+          
+          {team?.team.members.map((member, idx) => (
+            <TeamMemberCard 
+              key={idx}
+              userId={member.userId}
+              isTeamAdmin={member.isAdmin ?? false}
+            />
           ))}
+
         </div>
       ) : (
         <div className="h-56 flex items-center justify-center w-full mx-auto">
@@ -90,7 +118,7 @@ export default function TeamView() {
       )}
 
       {isTeam && !loading && !isTeamManagementUnlocked && (
-        <Button variant="outline" size="lg">
+        <Button variant="outline" size="lg" onClick={handleLeaveTeam}>
           <Icons.logOut /> Leave Team
         </Button>
       )}

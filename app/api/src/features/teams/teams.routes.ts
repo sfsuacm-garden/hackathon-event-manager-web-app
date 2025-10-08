@@ -3,9 +3,6 @@ import {t} from '../../core/trpc';
 import { teamProcedure, protectedProcedure } from '../../common/common.middleware';
 import { idParamsSchema } from '../../common/common.schema';
 import { getTeamById, joinTeam, kickTeamMember, leaveTeam } from './teams.controller';
-import { kickTeamMemberParamsSchema, teamIdUserIdParamsSchema } from './teams.schemas';
-
-// const teamsTRPC = initTRPC.create();
 
 export const teamsRouter = t.router({
   getTeamById: protectedProcedure
@@ -16,7 +13,10 @@ export const teamsRouter = t.router({
 
   getOwnTeam: teamProcedure
     .query(async ({ctx}) => {
-      return await getTeamById(ctx.teamId);
+      return {
+        team: await getTeamById(ctx.teamId),
+        isTeamAdmin: ctx.isTeamAdmin
+      }
     }),
 
   joinTeamById: teamProcedure
@@ -25,7 +25,7 @@ export const teamsRouter = t.router({
       return await joinTeam(input.id, ctx.user.id, ctx.event?.id!);
     }),
 
-  leaveTeamById: teamProcedure
+  leaveTeam: teamProcedure
     .mutation(async ({ ctx }) => {
       return await leaveTeam(ctx.teamId, ctx.user.id);
     }),
