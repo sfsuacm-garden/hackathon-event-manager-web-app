@@ -53,7 +53,7 @@ export const requireEventUnlocked = t.middleware(({ ctx, next }) => {
   });
 });
 
-export const requireTeam = requireAuth.unstable_pipe(async({ ctx, next }) => {
+export const requireTeam = requireAuth.unstable_pipe(async ({ ctx, next }) => {
   const teamAndMember = await prisma.teamMember.findFirst({
     where: {
       userId: ctx.user?.id!,
@@ -64,12 +64,12 @@ export const requireTeam = requireAuth.unstable_pipe(async({ ctx, next }) => {
     }
   });
 
-  if(!teamAndMember) {
+  if (!teamAndMember) {
     throw new TRPCError({ code: 'NOT_FOUND', message: 'User is not part of any team for this event' });
   }
 
   return next({
-    ctx:{
+    ctx: {
       ...ctx,
       teamId: teamAndMember.teamId,
       isTeamAdmin: teamAndMember.isAdmin
