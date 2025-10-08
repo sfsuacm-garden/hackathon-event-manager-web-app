@@ -16,13 +16,38 @@ import {
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import ErrorStateAlert from "../(main)/components/ErrorStateAlert"
+import { useRouter } from "next/router";
+import { trpc } from "@/utils/trpc";
+import { TRPCError } from "@trpc/server";
+import { useState } from "react";
+import { isTRPCClientError, TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "../../../../shared/trpc";
 
 export default function JoinPage() {
   const isUserOnTeam = true;
-  const isTeamFull = true;
+  //const isTeamFull = true;
   const teamName = "TeamName01";
-  const isLoading = false;
-  const error = true;
+  // const isLoading = false;
+  // const error = true; 
+
+  const [isTeamFull, setIsTeamFull] = useState(false);
+  const [error, setErrorStatus] = useState(false);
+
+  const router = useRouter();
+  const teamIdToJoin = router.query.teamId;
+
+  const { mutate } = trpc.teams.joinTeamById.useMutation({
+    onError: (error: unknown) => {
+      if(error instanceof TRPCClientError) {
+        if(error.data.code === 'CONFLICT' && error.data.cause === 'TEAM_FULL') {
+          
+        }
+      }
+    },
+    onSuccess: () => {
+
+    }
+  });
 
   //TODO enhance loading experience
   if (isLoading) {
@@ -79,7 +104,7 @@ export default function JoinPage() {
             </CardTitle>
             <CardDescription>
               This means that your application to participate in SF Hacks 2026
-              will be evualated together.
+              will be evaluated together.
             </CardDescription>
           </CardHeader>
         ) : (

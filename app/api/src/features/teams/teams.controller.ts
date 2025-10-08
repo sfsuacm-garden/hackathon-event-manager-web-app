@@ -31,6 +31,14 @@ export async function getTeamById(id: string) {
   }
 }
 
+// export async function generateInviteLink(teamId: string, isRequestorTeamAdmin: boolean) {
+//   if(!isRequestorTeamAdmin) {
+//     throw new TRPCError({code: 'FORBIDDEN', message:'in order to generate invite link, user must be a team admin'});
+//   }
+
+
+// }
+
 export async function joinTeam(teamId: string, profileId: string, eventId: string) {
   try {
     const teamMember = await prisma.$transaction(async (tx) => {
@@ -54,7 +62,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
       if (requestedTeam.members.length >= 4) { //make an enum or some shit somewhere config or some shit
         throw new TRPCError({
           code: 'CONFLICT',
-          message: `Team with ID ${teamId} is full`
+          message: `Team with ID ${teamId} is full`,
+          cause: 'TEAM_FULL'
         });
       }
 
@@ -78,7 +87,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
       if (prevTeamUserInfo.teamId === teamId) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: `User with ID ${profileId} is already part of team with ID ${teamId}`
+          message: `User with ID ${profileId} is already part of team with ID ${teamId}`,
+          cause: 'USER_ALREADY_MEMBER'
         });
       }
 
@@ -125,7 +135,7 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
 
     throw new TRPCError({
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'Failed to fetch event',
+      message: 'Failed to fetch team',
       cause: error
     });
   }

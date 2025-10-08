@@ -19,10 +19,15 @@ export const teamsRouter = t.router({
       }
     }),
 
+  // generateInviteLink: teamProcedure
+  //   .mutation(async({ ctx }) => {
+  //     return 
+  //   }),
+
   joinTeamById: teamProcedure
-    .input(idParamsSchema)
+    .input(z.object({teamId: z.uuid()}))
     .mutation(async ({ ctx, input }) => {
-      return await joinTeam(input.id, ctx.user.id, ctx.event?.id!);
+      return await joinTeam(input.teamId, ctx.user.id, ctx.event?.id!);
     }),
 
   leaveTeam: teamProcedure

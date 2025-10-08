@@ -4,6 +4,7 @@
  * Displays the user's team information, including team lock-in time,
  * invite link, team members, and an option to leave the team.
  */
+import React, { useState } from 'react'
 import { Button } from "@/components/shadcn/ui/button";
 import TeamMemberCard from "./MemberCard";
 import { Icons } from "@/lib/icons";
@@ -21,8 +22,6 @@ import {
 } from "@/components/shadcn/ui/tooltip";
 import { trpc } from "@/utils/trpc";
 import ErrorStateAlert from "../../components/ErrorStateAlert";
-import { useQueryClient } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
 
 export default function TeamView() {
   const utils = trpc.useUtils();
@@ -33,6 +32,10 @@ export default function TeamView() {
   const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
+
+  const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`
+
+  const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
 
   if (error) {
     return (
@@ -53,16 +56,18 @@ export default function TeamView() {
       utils.teams.getOwnTeam.invalidate();
     },
     onError: () => {
-      <ErrorStateAlert 
-        title={{text: 'Error leaving team'}}
-        description={{text: 'There was an error leaving the team. Please try again or contact the team.'}}
-      />   
+      setLeaveTeamMutationFailError(true);
     }
   });
 
   const handleLeaveTeam = ()=> {
-    //need to add a component for ARE YOU SURE dialogues
+    //TODO: need to add a component for ARE YOU SURE dialogues
     leaveTeamMutation.mutate();
+  }
+
+  const handleCopyInviteLink = () => {
+    //TODO: implement some sort of brief popup or something to indicate that the link was copied
+    navigator.clipboard.writeText(teamInviteLink);
   }
 
   return (
@@ -85,6 +90,7 @@ export default function TeamView() {
                 variant="secondary"
                 size="lg"
                 className="w-full md:w-auto"
+                onClick={handleCopyInviteLink}
                 disabled={isTeamFull}
               >
                 <Icons.copy /> Copy Invite Link
@@ -121,6 +127,13 @@ export default function TeamView() {
         <Button variant="outline" size="lg" onClick={handleLeaveTeam}>
           <Icons.logOut /> Leave Team
         </Button>
+      )}
+
+      {showLeaveTeamMutationFailError && (
+        <ErrorStateAlert 
+          title={{text: 'Error leaving team'}}
+          description={{text: 'There was an error leaving the team. Please try again or contact the team.'}}
+        />
       )}
     </div>
   );
