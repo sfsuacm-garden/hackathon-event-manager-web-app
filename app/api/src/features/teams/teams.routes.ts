@@ -15,7 +15,8 @@ export const teamsRouter = t.router({
     .query(async ({ctx}) => {
       return {
         team: await getTeamById(ctx.teamId),
-        isTeamAdmin: ctx.isTeamAdmin
+        isTeamAdmin: ctx.isTeamAdmin,
+        requestorUserId: ctx.user.id
       }
     }),
 
@@ -38,6 +39,7 @@ export const teamsRouter = t.router({
   kickTeamMemberById: teamProcedure
     .input(z.object({memberBeingKickedId: z.uuid()}))
     .mutation(async ({ ctx, input }) => {
+      // memberBeingKickedId should also be a userId
       return await kickTeamMember(ctx.user.id, input.memberBeingKickedId, ctx.teamId);
     })
 });

@@ -1,7 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
 import { PrismaClient } from '@prisma/client/extension';
-import { profile } from 'console';
 
 export async function getTeamById(id: string) {
   try {

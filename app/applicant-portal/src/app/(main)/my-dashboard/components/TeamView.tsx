@@ -28,12 +28,10 @@ export default function TeamView() {
   const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao 
 
   const {data: team, isLoading: loading, error} = trpc.teams.getOwnTeam.useQuery();
-  //const isTeamAdmin = team?.isTeamAdmin ?? false; // use this for kicking members from team
   const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
-
-  const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`
+  const isLoggedInAdmin = team?.isTeamAdmin ?? false;
 
   const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
 
@@ -67,6 +65,8 @@ export default function TeamView() {
 
   const handleCopyInviteLink = () => {
     //TODO: implement some sort of brief popup or something to indicate that the link was copied
+    const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`;
+    console.log(`Team Invite Link: ${teamInviteLink}`);
     navigator.clipboard.writeText(teamInviteLink);
   }
 
@@ -108,10 +108,12 @@ export default function TeamView() {
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
           
-          {team?.team.members.map((member, idx) => (
+          {team?.team.members.map((member, idx) => ( 
             <TeamMemberCard 
               key={idx}
-              userId={member.userId}
+              teamMemberInfo={member}
+              isMemberLoggedInUser={member.userId === team.requestorUserId}
+              isAdminLoggedInUser={isLoggedInAdmin}
               isTeamAdmin={member.isAdmin ?? false}
             />
           ))}
