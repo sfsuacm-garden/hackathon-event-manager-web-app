@@ -28,7 +28,7 @@ export default function TeamView() {
   const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao 
 
   const {data: team, isLoading: loading, error} = trpc.teams.getOwnTeam.useQuery();
-  const isTeamAdmin = team?.isTeamAdmin ?? false;
+  //const isTeamAdmin = team?.isTeamAdmin ?? false; // use this for kicking members from team
   const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
