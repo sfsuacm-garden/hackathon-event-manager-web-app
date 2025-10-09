@@ -1,25 +1,59 @@
 import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
 import { PrismaClient } from '@prisma/client/extension';
+import { profile } from 'console';
 
 export async function getTeamById(id: string) {
   try {
-    const team = await prisma.team.findUnique({
-      where: { 
+    const { eventId } = await prisma.team.findUniqueOrThrow({
+      where: {
         id: id
       },
+      select: {eventId: true}
+    });
+
+    let iHateFknPrismaQueries = await prisma.team.findUnique({
+      where: {id: id},
       include: {
-        members: true
+        members: {
+          include: {
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                applications: {
+                  // turned off TS error for this because findUniqueOrThrow should type prevent this from being null/undefined
+                  where: {eventId: eventId!}, 
+                  select: { 
+                    schoolEmail: true, 
+                    status: true,
+                    createdAt: true
+                  },
+                  orderBy: {createdAt: 'desc'},
+                  take: 1
+                }
+              }
+            }
+          }
+        }
       }
     });
-    if (!team) {
+    // const team = await prisma.team.findUnique({
+    //   where: { 
+    //     id: id
+    //   },
+    //   include: {
+    //     members: true
+    //   }
+    // });
+    if (!iHateFknPrismaQueries) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: `Event with ID ${id} not found`
       });
     }
 
-    return team;
+    return iHateFknPrismaQueries;
 
   } catch (error) {
     if (error instanceof TRPCError) throw error;
@@ -41,7 +75,7 @@ export async function getTeamById(id: string) {
 
 export async function joinTeam(teamId: string, profileId: string, eventId: string) {
   try {
-    const teamMember = await prisma.$transaction(async (tx) => {
+    const newTeamInfo = await prisma.$transaction(async (tx) => {
       const requestedTeam = await tx.team.findUnique({
         where: {
           id: teamId,
@@ -124,11 +158,21 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
       }
 
       console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
-      return newTeamUserInfo;
+
+      //return updated team information with members etc.
+      const newTeamAndMembersInfo = tx.team.findUnique({
+        where: {
+          id: newTeamUserInfo.teamId
+        },
+        include: {
+          members: true
+        }
+      })
+      return newTeamAndMembersInfo;
     });
 
     console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
-    return teamMember;
+    return newTeamInfo;
 
   } catch (error) {
     if (error instanceof TRPCError) throw error;
