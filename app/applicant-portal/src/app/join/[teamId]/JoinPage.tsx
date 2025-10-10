@@ -15,30 +15,16 @@ import {
 } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorStateAlert from "../(main)/components/ErrorStateAlert"
+import ErrorStateAlert from "../../(main)/components/ErrorStateAlert"
 import { trpc } from "@/utils/trpc";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 //import { useRouter } from "next/router";
 
-export default function JoinPage() {
+export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {
   const isUserOnTeam = true; // user is always on a team
 
   const utils = trpc.useUtils();
   const router = useRouter();
-
-  const searchParams = useSearchParams();
-  const teamIdToJoin = searchParams.get('teamId') ?? null;
-  if(!teamIdToJoin) {
-    return (
-      <main className="min-h-full flex items-center justify-center p-4">
-        <ErrorStateAlert
-          title={{text: 'Invalid team invitation'}}
-          description={{text: 'Missing team information'}}
-          callToAction={{text: 'Back to dashboard', link: '/my-dashboard'}}
-        />
-      </main>
-    );
-  }
 
   const {data: team, isPending: loading } = trpc.teams.getTeamById.useQuery(
     {id: teamIdToJoin as string},
