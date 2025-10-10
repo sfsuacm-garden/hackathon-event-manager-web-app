@@ -17,49 +17,46 @@ import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import ErrorStateAlert from "../(main)/components/ErrorStateAlert"
 import { trpc } from "@/utils/trpc";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useSearchParams, useRouter } from "next/navigation";
+//import { useRouter } from "next/router";
 
 export default function JoinPage() {
   const isUserOnTeam = true; // user is always on a team
-  let joinTeamSuccess = false;
-
-  const [error, setErrorStatus] = useState(false);
-
-  const searchParams = useSearchParams();
-  const teamIdToJoin = searchParams.get('teamId');
 
   const utils = trpc.useUtils();
   const router = useRouter();
 
-  const {data: team, isPending: loading, error: newTeamFetchError } = trpc.teams.getTeamById.useQuery(
+  const searchParams = useSearchParams();
+  const teamIdToJoin = searchParams.get('teamId') ?? null;
+  if(!teamIdToJoin) {
+    return (
+      <main className="min-h-full flex items-center justify-center p-4">
+        <ErrorStateAlert
+          title={{text: 'Invalid team invitation'}}
+          description={{text: 'Missing team information'}}
+          callToAction={{text: 'Back to dashboard', link: '/my-dashboard'}}
+        />
+      </main>
+    );
+  }
+
+  const {data: team, isPending: loading } = trpc.teams.getTeamById.useQuery(
     {id: teamIdToJoin as string},
     {enabled: Boolean(teamIdToJoin)}
   );
-
-  if(newTeamFetchError) {
-    setErrorStatus(true);
-  }
 
   const teamMemberCount = team?.members.length ?? 4;
   const isTeamFull = teamMemberCount >= 4;
 
   const  joinTeamMutation = trpc.teams.joinTeamById.useMutation({
-    onError: () => {
-      setErrorStatus(true);  
-    },
-    onSuccess: () => {
-      utils.teams.getOwnTeam.invalidate();
-      joinTeamSuccess = true;
+    onSuccess: async () => {
+      await utils.teams.getOwnTeam.invalidate();
       router.push('/my-dashboard'); // idk what to do here redirect user to team page or what?
     }
   });
 
   const handleJoinTeam = () => {
-    if(teamIdToJoin && !joinTeamMutation.isPending && !error && !joinTeamSuccess) {
-      joinTeamMutation.mutate({teamId: teamIdToJoin});
-    }
+    joinTeamMutation.mutate({teamId: teamIdToJoin});
   }
 
   //TODO enhance loading experience
@@ -76,12 +73,12 @@ export default function JoinPage() {
   }
 
   //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
-  if (error) {
+  if (joinTeamMutation.error || !team) {
     // Determine error type for better messaging
     let isInvalidLink = false;
     let isServerError = false;
     
-    if(newTeamFetchError) {
+    if(!team) {
       isInvalidLink = true;
     }
     else {
@@ -169,9 +166,15 @@ export default function JoinPage() {
                     {teamMemberCount}/{4}
                   </code>
                 </div>
-                {[...Array(2)].map((_, idx) => (
+                {team.members.map((member, idx) => (
                   <>
-                    <MemberPreview key={idx} />
+                    <MemberPreview 
+                      key={idx}
+                      firstName={member.profile.firstName}
+                      lastName={member.profile.lastName}
+                      email={member.profile.applications[0].schoolEmail}
+                      status={member.profile.applications[0].status} 
+                    />
                     <Separator />
                   </>
                 ))}
@@ -180,7 +183,7 @@ export default function JoinPage() {
           )}
           {!isTeamFull ? (
             <div className="space-x-2">
-              <Button onClick={handleJoinTeam}>
+              <Button onClick={handleJoinTeam} disabled={joinTeamMutation.isPending}>
                 Join New Team
               </Button>
               <Button
