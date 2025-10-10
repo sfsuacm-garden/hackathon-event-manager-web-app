@@ -1,5 +1,5 @@
 'use client';
-// this logic will move to application.controller.ts
+
 import { createClient } from '@/utils/supabase/client';
 import { z } from 'zod';
 import { ApplicationPayload as ApplicationPayloadSchema } from '@/schemas/applicationPayload';
@@ -41,11 +41,9 @@ function toDbRow(v: FormValues, userId: string) {
     mlh_code_of_conduct_aggreemeant: v.mlhCodeOfConductAgreement ?? null,
   };
 
-  // strip undefined keys
-  Object.keys(row).forEach((k) => {
+  for (const k of Object.keys(row)) {
     if (row[k] === undefined) delete row[k];
-  });
-
+  }
   return row;
 }
 
@@ -61,32 +59,23 @@ export async function submitApplicationDemo(form: FormValues) {
 
   const appRow = toDbRow(form, user.id);
 
-  const { data: app, error: insertErr } = await supabase
+  const { data: app, error: upsertErr } = await supabase
     .from('applications')
-    .insert(appRow)
+    .upsert(appRow, { onConflict: 'event_id,user_id' })
     .select()
     .single();
 
-  if (insertErr) throw new Error(insertErr.message);
+  if (upsertErr) throw new Error(upsertErr.message);
 
-  // also ensure an event_profile exists for this user/event
   const role = (user.user_metadata?.role as string) || 'hacker';
- const { data: prof, error: profErr } = await supabase
-  .from('user_profiles')
-  .select('id')
-  .eq('id', user.id) 
-  .maybeSingle();
+  const { error: epErr } = await supabase
+    .from('event_profiles')
+    .upsert(
+      { event_id: EVENT_ID, profile_id: user.id, role },
+      { onConflict: 'event_id,profile_id' }
+    );
 
-if (profErr) throw new Error(profErr.message);
-if (!prof) throw new Error('Profile not found');
-
-const { error: epErr } = await supabase
-  .from('event_profiles')
-  .upsert(
-    { event_id: EVENT_ID, profile_id: prof.id, role },
-    { onConflict: 'event_id,profile_id' }
-  );
-if (epErr) throw new Error(epErr.message);
+  if (epErr) throw new Error(epErr.message);
 
   return app;
 }

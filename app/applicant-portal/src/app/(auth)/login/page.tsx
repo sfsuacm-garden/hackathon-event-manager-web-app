@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
@@ -44,7 +44,10 @@ function getErrorMessage(error: unknown): string {
   }
 }
 
-export default function LoginPage() {
+
+
+
+function LoginPageInner() {
   const router = useRouter();
   const search = useSearchParams();
   const supabase = createClient();
@@ -460,4 +463,15 @@ export default function LoginPage() {
       </Card>
     </main>
   );
+}
+
+export default function LoginPage(){
+  return (
+    <Suspense fallback = {<main className="mx-auto w-full max-w-md p-6 text-sm text-muted-foreground">Loading…</main>}>
+      <LoginPageInner />
+    </Suspense>
+
+
+
+  )
 }
