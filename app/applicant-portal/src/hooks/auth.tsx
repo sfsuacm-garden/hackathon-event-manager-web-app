@@ -1,5 +1,3 @@
-"use client";
-
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

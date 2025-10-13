@@ -1,8 +1,10 @@
+"use client";
+
 import { useUser } from "@/hooks/auth";
 import { trpc } from "@/utils/trpc";
 import { QueryClient } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { useState } from "react";
+import { useMemo } from "react";
 
 export const TRPCProvider = ({
   children,
@@ -11,22 +13,24 @@ export const TRPCProvider = ({
   children: React.ReactNode;
   queryClient: QueryClient;
 }) => {
-  const eventId = process.env.EVENT_ID;
+  const eventId = process.env.NEXT_PUBLIC_EVENT_ID;
   const { data: user } = useUser();
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: process.env.NEXT_PUBLIC_API_URL + "/trpc",
-          headers() {
-            return {
-              ...(eventId ? { "x-event-id": eventId } : {}),
-              ...(user?.id ? { "x-user-id": user.id } : {}),
-            };
-          },
-        }),
-      ],
-    })
+  const trpcClient = useMemo(
+    () =>
+      trpc.createClient({
+        links: [
+          httpBatchLink({
+            url: process.env.NEXT_PUBLIC_API_URL + "/trpc",
+            headers() {
+              return {
+                ...(eventId ? { "x-event-id": eventId } : {}),
+                ...(user?.id ? { "x-user-id": user.id } : {}),
+              };
+            },
+          }),
+        ],
+      }),
+    [user?.id, eventId] // Only recreate client if these change
   );
 
   return (
