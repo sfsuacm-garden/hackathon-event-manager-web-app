@@ -1,3 +1,5 @@
+"use client";
+
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import { useUser } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
