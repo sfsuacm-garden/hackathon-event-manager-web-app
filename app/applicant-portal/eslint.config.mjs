@@ -16,7 +16,7 @@ const compat = new FlatCompat({
 export default [
   ...compat.extends(
     "next/core-web-vitals", // Next.js core web vitals rules
-    "next/typescript" // Next.js + TypeScript recommended rules
+    "next/typescript", // Next.js + TypeScript recommended rules
   ),
   {
     languageOptions: {

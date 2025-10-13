@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { createClient } from '@/utils/supabase/client';
-import { z } from 'zod';
-import { ApplicationPayload as ApplicationPayloadSchema } from '@/schemas/applicationPayload';
+import { createSupabaseClient } from "@/utils/supabase/client";
+import { z } from "zod";
+import { ApplicationPayload as ApplicationPayloadSchema } from "@/schemas/applicationPayload";
 
 type FormValues = z.input<typeof ApplicationPayloadSchema>;
 
-const EVENT_ID = '8924dd52-1358-4853-9871-c9e0fe46cb30';
+const EVENT_ID = "8924dd52-1358-4853-9871-c9e0fe46cb30";
 
 function toDbRow(v: FormValues, userId: string) {
   const row: Record<string, unknown> = {
@@ -16,9 +16,11 @@ function toDbRow(v: FormValues, userId: string) {
     school_email: v.schoolEmail ?? null,
     school: v.school ?? null,
     graduation_year:
-      typeof v.graduationYear === 'string'
-        ? (v.graduationYear ? Number(v.graduationYear) : null)
-        : v.graduationYear ?? null,
+      typeof v.graduationYear === "string"
+        ? v.graduationYear
+          ? Number(v.graduationYear)
+          : null
+        : (v.graduationYear ?? null),
     major_field_of_study: v.majorFieldOfStudy ?? null,
     level_of_study: v.levelOfStudy ?? null,
 
@@ -48,31 +50,31 @@ function toDbRow(v: FormValues, userId: string) {
 }
 
 export async function submitApplicationDemo(form: FormValues) {
-  const supabase = createClient();
+  const supabase = createSupabaseClient();
 
   const {
     data: { user },
     error: userErr,
   } = await supabase.auth.getUser();
   if (userErr) throw new Error(userErr.message);
-  if (!user) throw new Error('Not signed in');
+  if (!user) throw new Error("Not signed in");
 
   const appRow = toDbRow(form, user.id);
 
   const { data: app, error: upsertErr } = await supabase
-    .from('applications')
-    .upsert(appRow, { onConflict: 'event_id,user_id' })
+    .from("applications")
+    .upsert(appRow, { onConflict: "event_id,user_id" })
     .select()
     .single();
 
   if (upsertErr) throw new Error(upsertErr.message);
 
-  const role = (user.user_metadata?.role as string) || 'hacker';
+  const role = (user.user_metadata?.role as string) || "hacker";
   const { error: epErr } = await supabase
-    .from('event_profiles')
+    .from("event_profiles")
     .upsert(
       { event_id: EVENT_ID, profile_id: user.id, role },
-      { onConflict: 'event_id,profile_id' }
+      { onConflict: "event_id,profile_id" },
     );
 
   if (epErr) throw new Error(epErr.message);

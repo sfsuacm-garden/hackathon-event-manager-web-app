@@ -4,9 +4,9 @@
  */
 
 import { Skeleton } from "@/components/shadcn/ui/skeleton";
-import TeamView from "./components/TeamView";
 import { trpc } from "@/utils/trpc";
 import ErrorStateAlert from "../components/ErrorStateAlert";
+import TeamView from "./components/TeamView";
 
 export default function MyDashboardView() {
   const { data, isLoading, error } = trpc.events.getById.useQuery({
@@ -17,7 +17,7 @@ export default function MyDashboardView() {
     // Determine error type for better messaging
     const isNotFound = false;
     const isServerError = true;
-    
+
     return (
       <main className="min-h-full flex items-center justify-center p-4">
         <ErrorStateAlert
@@ -25,16 +25,15 @@ export default function MyDashboardView() {
             text: isNotFound ? "Event Not Found" : "Unable to Load Dashboard",
           }}
           description={{
-            text:
-              isNotFound 
-                ? "The event you're looking for doesn't exist or has been removed."
-                : isServerError
+            text: isNotFound
+              ? "The event you're looking for doesn't exist or has been removed."
+              : isServerError
                 ? "We're experiencing technical difficulties. Please try again later."
-                : "Something went wrong while loading your dashboard."
+                : "Something went wrong while loading your dashboard.",
           }}
           callToAction={{
             text: "Back to Home",
-            link: "/"
+            link: "/",
           }}
           variant="default"
         />

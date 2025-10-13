@@ -31,5 +31,4 @@ export const Icons = {
   badgeCheck: BadgeCheckIcon,
   badgeX: BadgeX,
   x: X,
-
 };

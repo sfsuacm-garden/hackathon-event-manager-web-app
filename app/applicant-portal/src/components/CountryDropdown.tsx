@@ -51,14 +51,13 @@ interface CountryDropdownProps {
   className?: string;
 }
 
-
 const RAW_OPTIONS: Country[] = countries.all.filter(
   (c: Country) =>
     Boolean(c.emoji) &&
     c.status !== "deleted" &&
     Boolean(c.alpha2) &&
     c.alpha2.length === 2 &&
-    Boolean(c.name)
+    Boolean(c.name),
 );
 
 function dedupeByAlpha2(list: Country[]) {
@@ -83,16 +82,19 @@ const CountryDropdownComponent = (
     slim = false,
     className,
   }: CountryDropdownProps,
-  ref: React.ForwardedRef<HTMLButtonElement>
+  ref: React.ForwardedRef<HTMLButtonElement>,
 ) => {
   const [open, setOpen] = useState(false);
 
-  
   const safeOptions = useMemo(() => {
     const cleaned = dedupeByAlpha2(
       (options || []).filter(
-        (c) => Boolean(c) && Boolean(c.alpha2) && c.alpha2.length === 2 && Boolean(c.name)
-      )
+        (c) =>
+          Boolean(c) &&
+          Boolean(c.alpha2) &&
+          c.alpha2.length === 2 &&
+          Boolean(c.name),
+      ),
     );
     return cleaned.sort((a, b) => a.name.localeCompare(b.name));
   }, [options]);
@@ -101,7 +103,7 @@ const CountryDropdownComponent = (
     if (!value) return undefined;
     const target = String(value).toLowerCase();
     return safeOptions.find(
-      (c) => String(c[valueKey] as string).toLowerCase() === target
+      (c) => String(c[valueKey] as string).toLowerCase() === target,
     );
   }, [value, valueKey, safeOptions]);
 
@@ -111,13 +113,13 @@ const CountryDropdownComponent = (
       onValueChange?.(nextValue, country);
       setOpen(false);
     },
-    [onValueChange, valueKey]
+    [onValueChange, valueKey],
   );
 
   const triggerClasses = cn(
     "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
     slim === true && "w-20",
-    className
+    className,
   );
 
   return (
@@ -194,7 +196,7 @@ const CountryDropdownComponent = (
                     <CheckIcon
                       className={cn(
                         "ml-auto h-4 w-4 shrink-0",
-                        isSelected ? "opacity-100" : "opacity-0"
+                        isSelected ? "opacity-100" : "opacity-0",
                       )}
                     />
                   </CommandItem>

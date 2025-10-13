@@ -1,5 +1,6 @@
 "use client";
 
+import { SupabaseProvider } from "@/context/SupabaseContext";
 import { trpc } from "@/utils/trpc";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
@@ -25,11 +26,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <SupabaseProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </SupabaseProvider>
     </trpc.Provider>
   );
-
-
-
 }
-

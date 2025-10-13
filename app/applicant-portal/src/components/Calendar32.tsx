@@ -1,21 +1,20 @@
+"use client";
 
-"use client"
+import * as React from "react";
+import { ChevronDownIcon } from "lucide-react";
 
-import * as React from "react"
-import { ChevronDownIcon } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/shadcn/ui/calendar"
-import { Label } from "@/components/shadcn/ui/label"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/shadcn/ui/calendar";
+import { Label } from "@/components/shadcn/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/shadcn/ui/popover"
+} from "@/components/shadcn/ui/popover";
 
 export function Calendar22() {
-  const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState<Date | undefined>(undefined)
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   return (
     <div className="flex flex-col gap-3">
@@ -39,12 +38,12 @@ export function Calendar22() {
             selected={date}
             captionLayout="dropdown"
             onSelect={(date) => {
-              setDate(date)
-              setOpen(false)
+              setDate(date);
+              setOpen(false);
             }}
           />
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

@@ -1,30 +1,32 @@
-import { z } from 'zod';
-
+import { z } from "zod";
 
 const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema);
+  z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    schema,
+  );
 
 // Enums copied from Prisma schema so they match exactly.
 export const ApplicationStatusEnum = z.enum([
-  'pending',
-  'rejected',
-  'accepted',
-  'waitlisted',
+  "pending",
+  "rejected",
+  "accepted",
+  "waitlisted",
 ]);
 
 export const TShirtSizeEnum = z.enum([
-  'US_XS',
-  'US_S',
-  'US_M',
-  'US_L',
-  'US_XL',
-  'US_XXL',
-  'UK_6',
-  'UK_8',
-  'UK_10',
-  'UK_12',
-  'UK_14',
-  'UK_16',
+  "US_XS",
+  "US_S",
+  "US_M",
+  "US_L",
+  "US_XL",
+  "US_XXL",
+  "UK_6",
+  "UK_8",
+  "UK_10",
+  "UK_12",
+  "UK_14",
+  "UK_16",
 ]);
 
 // Primitive helpers
@@ -47,7 +49,7 @@ export const ApplicationPayload = z
     graduationYear: emptyToUndefined(
       z
         .union([z.number().int(), z.string().regex(/^\d+$/)])
-        .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v))
+        .transform((v) => (typeof v === "string" ? parseInt(v, 10) : v)),
     ).optional(),
 
     experienceLevel: emptyToUndefined(z.string()).optional(),

@@ -9,13 +9,10 @@ import {
 } from "@/components/ui/card";
 import MemberPreview from "./components/MemberPreviewCard";
 import { Separator } from "@radix-ui/react-separator";
-import {
-  Alert,
-  AlertDescription,
-} from "@/components/shadcn/ui/alert";
+import { Alert, AlertDescription } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorStateAlert from "../(main)/components/ErrorStateAlert"
+import ErrorStateAlert from "../(main)/components/ErrorStateAlert";
 
 export default function JoinPage() {
   const isUserOnTeam = true;
@@ -42,24 +39,25 @@ export default function JoinPage() {
     // Determine error type for better messaging
     const isInvalidLink = true;
     const isServerError = true;
-    
+
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
         <ErrorStateAlert
           title={{
-            text: isInvalidLink ? "Invalid Team Invitation" : "Unable to Process Invitation",
+            text: isInvalidLink
+              ? "Invalid Team Invitation"
+              : "Unable to Process Invitation",
           }}
           description={{
-            text: 
-              isInvalidLink 
-                ? "This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation."
-                : isServerError
+            text: isInvalidLink
+              ? "This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation."
+              : isServerError
                 ? "We're experiencing technical difficulties. Please try again later."
-                : "Something went wrong while processing this team invitation. Please try again later."
+                : "Something went wrong while processing this team invitation. Please try again later.",
           }}
           callToAction={{
             text: "Back to Dashboard",
-            link: "/my-dashboard"
+            link: "/my-dashboard",
           }}
           variant="default"
         />

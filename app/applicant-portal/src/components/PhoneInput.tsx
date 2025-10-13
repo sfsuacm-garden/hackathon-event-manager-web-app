@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/ui/popover";
 import { ScrollArea } from "@/components/shadcn/ui/scroll-area";
-import {cn} from '@/lib/shadcn/utils'
+import { cn } from "@/lib/shadcn/utils";
 
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,

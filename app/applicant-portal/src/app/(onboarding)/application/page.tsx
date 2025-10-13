@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { z } from 'zod';
+import * as React from "react";
+import { z } from "zod";
 import {
   useForm,
   useFormContext,
   type Resolver,
   type Control,
   type FieldPath,
-} from 'react-hook-form';
+} from "react-hook-form";
 
 import {
   ApplicationPayload,
   TShirtSizeEnum,
-} from '@/schemas/applicationPayload';
+} from "@/schemas/applicationPayload";
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/shadcn/ui/button';
-import { Input } from '@/components/shadcn/ui/input';
-import { Separator } from '@/components/shadcn/ui/separator';
-import { Progress } from '@/components/shadcn/ui/progress';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Separator } from "@/components/shadcn/ui/separator";
+import { Progress } from "@/components/shadcn/ui/progress";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/components/shadcn/ui/select';
-import { Checkbox } from '@/components/shadcn/ui/checkbox';
+} from "@/components/shadcn/ui/select";
+import { Checkbox } from "@/components/shadcn/ui/checkbox";
 import {
   Form,
   FormField,
@@ -35,10 +35,10 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/shadcn/ui/form';
-import { createClient } from '@/utils/supabase/client';
-import { CountryDropdown } from '@/components/CountryDropdown';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from "@/components/shadcn/ui/form";
+import { createSupabaseClient } from "@/utils/supabase/client";
+import { CountryDropdown } from "@/components/CountryDropdown";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   MAJOR_OPTIONS,
   OTHER_MAJOR,
@@ -49,9 +49,9 @@ import {
   RACE_OPTIONS,
   OTHER_RACE,
   SEX_OPTIONS,
-} from '../dropdownOptions';
+} from "../dropdownOptions";
 
-import { submitApplicationDemo } from './submit-demo'
+import { submitApplicationDemo } from "./submit-demo";
 
 /* ----------------------------- links helper ---------------------------- */
 
@@ -71,7 +71,6 @@ function LinkWord(props: { href: string; children: string }) {
 /* --------------------------------- schemas --------------------------------- */
 // Removed the personal info step schema; DOB/phone collected on sign-in
 
-
 const StepEducation = ApplicationPayload.pick({
   schoolEmail: true,
   school: true,
@@ -79,8 +78,6 @@ const StepEducation = ApplicationPayload.pick({
   majorFieldOfStudy: true,
   levelOfStudy: true,
 }).loose();
-
-
 
 const StepDemographics = ApplicationPayload.pick({
   countryOfResidence: true,
@@ -109,30 +106,40 @@ const StepMLH = ApplicationPayload.pick({
 const StepReview = z.object({}).loose();
 
 const steps = [
-  { key: 'education', label: 'Education', schema: StepEducation },
-  { key: 'demographics', label: 'Demographics', schema: StepDemographics },
-  { key: 'dietary', label: 'Dietary Preferences', schema: StepDietary },
-  { key: 'mlh', label: 'MLH Agreements', schema: StepMLH },
-  { key: 'review', label: 'Review & Submit', schema: StepReview },
+  { key: "education", label: "Education", schema: StepEducation },
+  { key: "demographics", label: "Demographics", schema: StepDemographics },
+  { key: "dietary", label: "Dietary Preferences", schema: StepDietary },
+  { key: "mlh", label: "MLH Agreements", schema: StepMLH },
+  { key: "review", label: "Review & Submit", schema: StepReview },
 ] as const;
 
-type StepKey = (typeof steps)[number]['key'];
+type StepKey = (typeof steps)[number]["key"];
 type FormValues = z.input<typeof ApplicationPayload>;
 
 /** Per-step field lists typed to RHF FieldPath<FormValues> so trigger(...) is happy */
 const stepFields: Record<StepKey, FieldPath<FormValues>[]> = {
-  education: ['school', 'graduationYear', 'majorFieldOfStudy', 'levelOfStudy'],
+  education: ["school", "graduationYear", "majorFieldOfStudy", "levelOfStudy"],
   demographics: [
-    'countryOfResidence',
-    'gender',
-    'pronouns',
-    'raceEthnicity',
-    'sexualOrientation',
-    'educationLevel',
-    'tshirtSize',
+    "countryOfResidence",
+    "gender",
+    "pronouns",
+    "raceEthnicity",
+    "sexualOrientation",
+    "educationLevel",
+    "tshirtSize",
   ],
-  dietary: ['dietaryVegetarian', 'dietaryVegan', 'dietaryCeliacDisease', 'dietaryKosher', 'dietaryHalal'],
-  mlh: ['mlhAuthorizedPromoEmail', 'mlhAuthorizedDataShare', 'mlhCodeOfConductAgreement'],
+  dietary: [
+    "dietaryVegetarian",
+    "dietaryVegan",
+    "dietaryCeliacDisease",
+    "dietaryKosher",
+    "dietaryHalal",
+  ],
+  mlh: [
+    "mlhAuthorizedPromoEmail",
+    "mlhAuthorizedDataShare",
+    "mlhCodeOfConductAgreement",
+  ],
   review: [],
 };
 
@@ -140,14 +147,14 @@ const stepFields: Record<StepKey, FieldPath<FormValues>[]> = {
 
 function CheckField<
   TName extends
-    | 'dietaryVegetarian'
-    | 'dietaryVegan'
-    | 'dietaryCeliacDisease'
-    | 'dietaryKosher'
-    | 'dietaryHalal'
-    | 'mlhAuthorizedPromoEmail'
-    | 'mlhAuthorizedDataShare'
-    | 'mlhCodeOfConductAgreement'
+    | "dietaryVegetarian"
+    | "dietaryVegan"
+    | "dietaryCeliacDisease"
+    | "dietaryKosher"
+    | "dietaryHalal"
+    | "mlhAuthorizedPromoEmail"
+    | "mlhAuthorizedDataShare"
+    | "mlhCodeOfConductAgreement",
 >({
   control,
   name,
@@ -194,7 +201,7 @@ function StepEducationFields() {
             <FormControl>
               <Input
                 placeholder="me@university.edu"
-                value={typeof field.value === 'string' ? field.value : ''}
+                value={typeof field.value === "string" ? field.value : ""}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 name={field.name}
@@ -215,7 +222,7 @@ function StepEducationFields() {
             <FormControl>
               <Input
                 placeholder="University name"
-                value={typeof field.value === 'string' ? field.value : ''}
+                value={typeof field.value === "string" ? field.value : ""}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 name={field.name}
@@ -237,7 +244,7 @@ function StepEducationFields() {
               <Input
                 placeholder="2026"
                 inputMode="numeric"
-                value={typeof field.value === 'string' ? field.value : ''}
+                value={typeof field.value === "string" ? field.value : ""}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 name={field.name}
@@ -253,11 +260,15 @@ function StepEducationFields() {
         control={control}
         name="majorFieldOfStudy"
         render={({ field }) => {
-          const valStr = typeof field.value === 'string' ? field.value.trim() : '';
+          const valStr =
+            typeof field.value === "string" ? field.value.trim() : "";
           const currentIsOther =
-            valStr === '' || (MAJOR_OPTIONS as readonly string[]).includes(valStr) === false;
+            valStr === "" ||
+            (MAJOR_OPTIONS as readonly string[]).includes(valStr) === false;
 
-          const selectValue: string | undefined = currentIsOther ? OTHER_MAJOR : valStr;
+          const selectValue: string | undefined = currentIsOther
+            ? OTHER_MAJOR
+            : valStr;
 
           return (
             <FormItem>
@@ -266,14 +277,14 @@ function StepEducationFields() {
                 <Select
                   value={selectValue}
                   onValueChange={(val: string) => {
-                    if (val === OTHER_MAJOR) field.onChange('');
+                    if (val === OTHER_MAJOR) field.onChange("");
                     else field.onChange(val);
                   }}
                 >
                   <FormControl>
                     <SelectTrigger
                       className="w-full max-w-full overflow-hidden"
-                      title={selectValue ?? ''}
+                      title={selectValue ?? ""}
                     >
                       <SelectValue
                         placeholder="Select major or field of study"
@@ -320,9 +331,11 @@ function StepEducationFields() {
         name="levelOfStudy"
         render={({ field }) => {
           const isValid =
-            typeof field.value === 'string' &&
+            typeof field.value === "string" &&
             (LEVEL_OF_STUDY_OPTIONS as readonly string[]).includes(field.value);
-          const selectValue: string | undefined = isValid ? String(field.value) : undefined;
+          const selectValue: string | undefined = isValid
+            ? String(field.value)
+            : undefined;
 
           return (
             <FormItem className="md:col-span-2">
@@ -335,7 +348,7 @@ function StepEducationFields() {
                   <FormControl>
                     <SelectTrigger
                       className="w-full max-w-full overflow-hidden"
-                      title={selectValue ?? ''}
+                      title={selectValue ?? ""}
                     >
                       <SelectValue
                         placeholder="Select level of study"
@@ -381,7 +394,9 @@ function StepDemographicsFields() {
             <FormLabel>Country of Residence</FormLabel>
             <FormControl>
               <CountryDropdown
-                value={typeof field.value === 'string' ? field.value : undefined}
+                value={
+                  typeof field.value === "string" ? field.value : undefined
+                }
                 onValueChange={(val) => field.onChange(val)}
                 valueKey="alpha2"
                 placeholder="Select a country"
@@ -400,7 +415,7 @@ function StepDemographicsFields() {
             <FormLabel>T-Shirt Size</FormLabel>
             <Select
               onValueChange={(v: string) => field.onChange(v)}
-              value={typeof field.value === 'string' ? field.value : undefined}
+              value={typeof field.value === "string" ? field.value : undefined}
             >
               <FormControl>
                 <SelectTrigger>
@@ -428,12 +443,17 @@ function StepDemographicsFields() {
             <FormLabel>Gender (optional)</FormLabel>
             <div className="min-w-0">
               <Select
-                value={typeof field.value === 'string' ? field.value : undefined}
+                value={
+                  typeof field.value === "string" ? field.value : undefined
+                }
                 onValueChange={(v: string) => field.onChange(v)}
               >
                 <FormControl>
                   <SelectTrigger className="w-full max-w-full overflow-hidden">
-                    <SelectValue placeholder="Select gender" className="truncate" />
+                    <SelectValue
+                      placeholder="Select gender"
+                      className="truncate"
+                    />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
@@ -459,11 +479,15 @@ function StepDemographicsFields() {
         control={control}
         name="pronouns"
         render={({ field }) => {
-          const valStr = typeof field.value === 'string' ? field.value.trim() : '';
+          const valStr =
+            typeof field.value === "string" ? field.value.trim() : "";
           const currentIsOther =
-            valStr === '' || (PRONOUN_OPTIONS as readonly string[]).includes(valStr) === false;
+            valStr === "" ||
+            (PRONOUN_OPTIONS as readonly string[]).includes(valStr) === false;
 
-          const selectValue: string | undefined = currentIsOther ? OTHER_PRONOUN : valStr;
+          const selectValue: string | undefined = currentIsOther
+            ? OTHER_PRONOUN
+            : valStr;
 
           return (
             <FormItem>
@@ -472,16 +496,19 @@ function StepDemographicsFields() {
                 <Select
                   value={selectValue}
                   onValueChange={(val: string) => {
-                    if (val === OTHER_PRONOUN) field.onChange('');
+                    if (val === OTHER_PRONOUN) field.onChange("");
                     else field.onChange(val);
                   }}
                 >
                   <FormControl>
                     <SelectTrigger
                       className="w-full max-w-full overflow-hidden"
-                      title={selectValue ?? ''}
+                      title={selectValue ?? ""}
                     >
-                      <SelectValue placeholder="Select pronouns" className="truncate" />
+                      <SelectValue
+                        placeholder="Select pronouns"
+                        className="truncate"
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
@@ -522,11 +549,15 @@ function StepDemographicsFields() {
         control={control}
         name="raceEthnicity"
         render={({ field }) => {
-          const valStr = typeof field.value === 'string' ? field.value.trim() : '';
+          const valStr =
+            typeof field.value === "string" ? field.value.trim() : "";
           const currentIsOther =
-            valStr === '' || (RACE_OPTIONS as readonly string[]).includes(valStr) === false;
+            valStr === "" ||
+            (RACE_OPTIONS as readonly string[]).includes(valStr) === false;
 
-          const selectValue: string | undefined = currentIsOther ? OTHER_RACE : valStr;
+          const selectValue: string | undefined = currentIsOther
+            ? OTHER_RACE
+            : valStr;
 
           return (
             <FormItem className="md:col-span-2">
@@ -535,16 +566,19 @@ function StepDemographicsFields() {
                 <Select
                   value={selectValue}
                   onValueChange={(val: string) => {
-                    if (val === OTHER_RACE) field.onChange('');
+                    if (val === OTHER_RACE) field.onChange("");
                     else field.onChange(val);
                   }}
                 >
                   <FormControl>
                     <SelectTrigger
                       className="w-full max-w-full overflow-hidden"
-                      title={selectValue ?? ''}
+                      title={selectValue ?? ""}
                     >
-                      <SelectValue placeholder="Select one" className="truncate" />
+                      <SelectValue
+                        placeholder="Select one"
+                        className="truncate"
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
@@ -589,12 +623,17 @@ function StepDemographicsFields() {
             <FormLabel>Sexual Orientation (optional)</FormLabel>
             <div className="min-w-0">
               <Select
-                value={typeof field.value === 'string' ? field.value : undefined}
+                value={
+                  typeof field.value === "string" ? field.value : undefined
+                }
                 onValueChange={(v: string) => field.onChange(v)}
               >
                 <FormControl>
                   <SelectTrigger className="w-full max-w-full overflow-hidden">
-                    <SelectValue placeholder="Select an option" className="truncate" />
+                    <SelectValue
+                      placeholder="Select an option"
+                      className="truncate"
+                    />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
@@ -621,9 +660,11 @@ function StepDemographicsFields() {
         name="educationLevel"
         render={({ field }) => {
           const isValid =
-            typeof field.value === 'string' &&
+            typeof field.value === "string" &&
             (LEVEL_OF_STUDY_OPTIONS as readonly string[]).includes(field.value);
-          const selectValue: string | undefined = isValid ? String(field.value) : undefined;
+          const selectValue: string | undefined = isValid
+            ? String(field.value)
+            : undefined;
 
           return (
             <FormItem className="md:col-span-2">
@@ -636,7 +677,7 @@ function StepDemographicsFields() {
                   <FormControl>
                     <SelectTrigger
                       className="w-full max-w-full overflow-hidden"
-                      title={selectValue ?? ''}
+                      title={selectValue ?? ""}
                     >
                       <SelectValue
                         placeholder="Select highest level"
@@ -673,9 +714,17 @@ function StepDietaryFields() {
   const { control } = useFormContext<FormValues>();
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <CheckField control={control} name="dietaryVegetarian" label="Vegetarian" />
+      <CheckField
+        control={control}
+        name="dietaryVegetarian"
+        label="Vegetarian"
+      />
       <CheckField control={control} name="dietaryVegan" label="Vegan" />
-      <CheckField control={control} name="dietaryCeliacDisease" label="Celiac Disease (gluten-free)" />
+      <CheckField
+        control={control}
+        name="dietaryCeliacDisease"
+        label="Celiac Disease (gluten-free)"
+      />
       <CheckField control={control} name="dietaryKosher" label="Kosher" />
       <CheckField control={control} name="dietaryHalal" label="Halal" />
     </div>
@@ -698,11 +747,17 @@ function StepMLHFields() {
         name="mlhAuthorizedDataShare"
         label={
           <>
-            I authorize the sharing of my application/registration information with Major League
-            Hacking for event administration, ranking, and MLH administration, per MLH policies:&nbsp;
-            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/privacy-policy.md">Privacy</LinkWord>
-            {' '}and{' '}
-            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md">Contest</LinkWord>.
+            I authorize the sharing of my application/registration information
+            with Major League Hacking for event administration, ranking, and MLH
+            administration, per MLH policies:&nbsp;
+            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/privacy-policy.md">
+              Privacy
+            </LinkWord>{" "}
+            and{" "}
+            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md">
+              Contest
+            </LinkWord>
+            .
           </>
         }
       />
@@ -712,16 +767,19 @@ function StepMLHFields() {
         name="mlhCodeOfConductAgreement"
         label={
           <>
-            I have read and agree to the MLH{' '}
-            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/code-of-conduct.md">Code</LinkWord>
-            {' '}of Conduct.
+            I have read and agree to the MLH{" "}
+            <LinkWord href="https://github.com/MLH/mlh-policies/blob/main/code-of-conduct.md">
+              Code
+            </LinkWord>{" "}
+            of Conduct.
           </>
         }
       />
 
       <Separator />
       <p className="text-sm text-muted-foreground">
-        By continuing, I confirm that all information is accurate to the best of my knowledge.
+        By continuing, I confirm that all information is accurate to the best of
+        my knowledge.
       </p>
     </div>
   );
@@ -734,29 +792,32 @@ function StepReviewFields() {
 
   const ordered: Array<[string, string]> = [
     // Removed: phone, dob, age (now on profile during sign-in)
-    ['School Email', String(all.schoolEmail ?? '')],
-    ['School', String(all.school ?? '')],
-    ['Graduation Year', String(all.graduationYear ?? '')],
-    ['Major / Field of Study', String(all.majorFieldOfStudy ?? '')],
-    ['Level of Study', String(all.levelOfStudy ?? '')],
+    ["School Email", String(all.schoolEmail ?? "")],
+    ["School", String(all.school ?? "")],
+    ["Graduation Year", String(all.graduationYear ?? "")],
+    ["Major / Field of Study", String(all.majorFieldOfStudy ?? "")],
+    ["Level of Study", String(all.levelOfStudy ?? "")],
 
-    ['Country of Residence', String(all.countryOfResidence ?? '')],
-    ['Gender', String(all.gender ?? '')],
-    ['Pronouns', String(all.pronouns ?? '')],
-    ['Race / Ethnicity', String(all.raceEthnicity ?? '')],
-    ['Sexual Orientation', String(all.sexualOrientation ?? '')],
-    ['Highest Education Level', String(all.educationLevel ?? '')],
-    ['T-Shirt Size', String(all.tshirtSize ?? '')],
+    ["Country of Residence", String(all.countryOfResidence ?? "")],
+    ["Gender", String(all.gender ?? "")],
+    ["Pronouns", String(all.pronouns ?? "")],
+    ["Race / Ethnicity", String(all.raceEthnicity ?? "")],
+    ["Sexual Orientation", String(all.sexualOrientation ?? "")],
+    ["Highest Education Level", String(all.educationLevel ?? "")],
+    ["T-Shirt Size", String(all.tshirtSize ?? "")],
 
-    ['Vegetarian', all.dietaryVegetarian ? 'Yes' : 'No'],
-    ['Vegan', all.dietaryVegan ? 'Yes' : 'No'],
-    ['Celiac Disease (gluten-free)', all.dietaryCeliacDisease ? 'Yes' : 'No'],
-    ['Kosher', all.dietaryKosher ? 'Yes' : 'No'],
-    ['Halal', all.dietaryHalal ? 'Yes' : 'No'],
+    ["Vegetarian", all.dietaryVegetarian ? "Yes" : "No"],
+    ["Vegan", all.dietaryVegan ? "Yes" : "No"],
+    ["Celiac Disease (gluten-free)", all.dietaryCeliacDisease ? "Yes" : "No"],
+    ["Kosher", all.dietaryKosher ? "Yes" : "No"],
+    ["Halal", all.dietaryHalal ? "Yes" : "No"],
 
-    ['MLH Promo Emails', all.mlhAuthorizedPromoEmail ? 'Yes' : 'No'],
-    ['MLH Data Share', all.mlhAuthorizedDataShare ? 'Yes' : 'No'],
-    ['MLH Code of Conduct', all.mlhCodeOfConductAgreement ? 'Agreed' : 'Not agreed'],
+    ["MLH Promo Emails", all.mlhAuthorizedPromoEmail ? "Yes" : "No"],
+    ["MLH Data Share", all.mlhAuthorizedDataShare ? "Yes" : "No"],
+    [
+      "MLH Code of Conduct",
+      all.mlhCodeOfConductAgreement ? "Agreed" : "Not agreed",
+    ],
   ];
 
   return (
@@ -794,27 +855,30 @@ export default function ApplyPage() {
     return (values, context, options) => r(values, context, options);
   }
 
-  const resolverRef = React.useRef<Resolver<FormValues>>(makeStepResolver(steps[0].schema));
+  const resolverRef = React.useRef<Resolver<FormValues>>(
+    makeStepResolver(steps[0].schema),
+  );
   React.useEffect(() => {
     resolverRef.current = makeStepResolver(steps[stepIndex].schema);
   }, [stepIndex]);
 
   const methods = useForm<FormValues>({
-    resolver: (values, context, options) => resolverRef.current(values, context, options),
+    resolver: (values, context, options) =>
+      resolverRef.current(values, context, options),
     shouldUnregister: false,
     defaultValues: {
       // Removed: phoneNumber, dob
-      school: '',
-      schoolEmail: '',
-      graduationYear: '',
-      majorFieldOfStudy: '',
-      levelOfStudy: '',
-      countryOfResidence: '',
-      gender: '',
-      pronouns: '',
-      raceEthnicity: '',
-      sexualOrientation: '',
-      educationLevel: '',
+      school: "",
+      schoolEmail: "",
+      graduationYear: "",
+      majorFieldOfStudy: "",
+      levelOfStudy: "",
+      countryOfResidence: "",
+      gender: "",
+      pronouns: "",
+      raceEthnicity: "",
+      sexualOrientation: "",
+      educationLevel: "",
       tshirtSize: undefined,
       dietaryVegetarian: false,
       dietaryVegan: false,
@@ -825,33 +889,33 @@ export default function ApplyPage() {
       mlhAuthorizedDataShare: false,
       mlhCodeOfConductAgreement: false,
     },
-    mode: 'onSubmit',
+    mode: "onSubmit",
   });
 
   // Auto-fill school based on .edu domain
-  const schoolEmail = methods.watch('schoolEmail');
+  const schoolEmail = methods.watch("schoolEmail");
   React.useEffect(() => {
-    const email = String(schoolEmail ?? '').trim();
-    if (!email || !email.endsWith('.edu') || !email.includes('@')) return;
+    const email = String(schoolEmail ?? "").trim();
+    if (!email || !email.endsWith(".edu") || !email.includes("@")) return;
 
-    const domain = email.split('@')[1].toLowerCase();
-    const supabase = createClient();
+    const domain = email.split("@")[1].toLowerCase();
+    const supabase = createSupabaseClient();
 
     type SchoolLookup = { school_id: string; schools: { name: string } | null };
 
     (async () => {
       const { data, error } = await supabase
-        .from('school_email_domains')
-        .select('school_id, schools(name)')
-        .eq('domain', domain)
+        .from("school_email_domains")
+        .select("school_id, schools(name)")
+        .eq("domain", domain)
         .maybeSingle<SchoolLookup>();
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error("Supabase error:", error);
         return;
       }
       if (data?.schools?.name) {
-        methods.setValue('school', data.schools.name, { shouldDirty: true });
+        methods.setValue("school", data.schools.name, { shouldDirty: true });
         // If I add schoolId to the schema later, I can set it here too.
       }
     })();
@@ -862,35 +926,37 @@ export default function ApplyPage() {
   const [err, setErr] = React.useState<string | null>(null);
 
   async function handleNext(values: FormValues) {
-  const ok = await methods.trigger(stepFields[current.key], { shouldFocus: true });
-  if (!ok) {
-    setErr('Please complete required fields.');
-    return;
-  }
+    const ok = await methods.trigger(stepFields[current.key], {
+      shouldFocus: true,
+    });
+    if (!ok) {
+      setErr("Please complete required fields.");
+      return;
+    }
 
-  if (stepIndex < steps.length - 1) {
-    setStepIndex((i) => i + 1);
-    setErr(null);
-    return;
-  }
+    if (stepIndex < steps.length - 1) {
+      setStepIndex((i) => i + 1);
+      setErr(null);
+      return;
+    }
 
-  const parsed = ApplicationPayload.safeParse(values);
-  if (!parsed.success) {
-    await methods.trigger();
-    setErr('Please complete required fields.');
-    return;
-  }
+    const parsed = ApplicationPayload.safeParse(values);
+    if (!parsed.success) {
+      await methods.trigger();
+      setErr("Please complete required fields.");
+      return;
+    }
 
-  try {
-    const result = await submitApplicationDemo(parsed.data);
-    setMsg('Application submitted!');
-    setErr(null);
-    console.log('[APPLICATION SUBMITTED]', result);
-  } catch (e) {
-    setErr(e instanceof Error ? e.message : 'Submission failed');
-    setMsg(null);
+    try {
+      const result = await submitApplicationDemo(parsed.data);
+      setMsg("Application submitted!");
+      setErr(null);
+      console.log("[APPLICATION SUBMITTED]", result);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Submission failed");
+      setMsg(null);
+    }
   }
-}
 
   function handleBack() {
     if (stepIndex > 0) setStepIndex((i) => i - 1);
@@ -902,8 +968,12 @@ export default function ApplyPage() {
         <Progress value={progress} className="h-2 rounded-full bg-muted" />
       </div>
 
-      <h1 className="text-4xl font-extrabold tracking-tight">Be Apart of SF Hacks 2026</h1>
-      <p className="mt-2 text-muted-foreground">February 14th @ Annex 1 | San Francisco State University</p>
+      <h1 className="text-4xl font-extrabold tracking-tight">
+        Be Apart of SF Hacks 2026
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        February 14th @ Annex 1 | San Francisco State University
+      </p>
 
       <Card className="mt-8">
         <CardHeader>
@@ -911,21 +981,33 @@ export default function ApplyPage() {
         </CardHeader>
         <CardContent>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(handleNext)} className="space-y-8">
-              {current.key === 'education' && <StepEducationFields />}
-              {current.key === 'demographics' && <StepDemographicsFields />}
-              {current.key === 'dietary' && <StepDietaryFields />}
-              {current.key === 'mlh' && <StepMLHFields />}
-              {current.key === 'review' && <StepReviewFields />}
+            <form
+              onSubmit={methods.handleSubmit(handleNext)}
+              className="space-y-8"
+            >
+              {current.key === "education" && <StepEducationFields />}
+              {current.key === "demographics" && <StepDemographicsFields />}
+              {current.key === "dietary" && <StepDietaryFields />}
+              {current.key === "mlh" && <StepMLHFields />}
+              {current.key === "review" && <StepReviewFields />}
 
               <div className="flex items-center gap-3">
                 {stepIndex > 0 && (
-                  <Button type="button" variant="secondary" onClick={handleBack} disabled={pending}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleBack}
+                    disabled={pending}
+                  >
                     Back
                   </Button>
                 )}
                 <Button type="submit" disabled={pending}>
-                  {stepIndex === steps.length - 1 ? (pending ? 'Submitting…' : 'Submit') : 'Next Step'}
+                  {stepIndex === steps.length - 1
+                    ? pending
+                      ? "Submitting…"
+                      : "Submit"
+                    : "Next Step"}
                 </Button>
               </div>
 
