@@ -4,8 +4,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-12 space-y-4 mt-18">
-      <div>
+    <main className="mx-auto w-full max-w-lg px-6 py-12 space-y-8 ">
+      <div className="flex flex-col items-center justify-center">
         <h1 className="text-4xl font-extrabold tracking-tight">
           Be Apart of SF Hacks 2026
         </h1>
