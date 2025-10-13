@@ -1,22 +1,22 @@
 "use client";
 
-import { useSupabase } from "@/context/SupabaseContext";
+import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSendOtp } from "../hooks/useSendOTPHook";
+import { useSendOtp } from "../../../hooks/auth";
 
 function useVerifyOtp(
   email: string,
   onVerifySuccess: () => void | Promise<void>
 ) {
-  const supabase = useSupabase();
+  const auth = useSupabaseAuth();
 
   return useMutation({
     mutationFn: async (otp: string) => {
       if (!otp || otp.length < 6) throw new Error("Enter the 6-digit code");
 
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { data, error } = await auth.verifyOtp({
         email,
         token: otp,
         type: "email",

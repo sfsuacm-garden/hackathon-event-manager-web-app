@@ -1,14 +1,18 @@
-"use client";
-
-import { SupabaseProvider } from "@/context/SupabaseContext";
+import { useUser } from "@/hooks/auth";
 import { trpc } from "@/utils/trpc";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export const TRPCProvider = ({
+  children,
+  queryClient,
+}: {
+  children: React.ReactNode;
+  queryClient: QueryClient;
+}) => {
   const eventId = process.env.EVENT_ID;
-  const [queryClient] = useState(() => new QueryClient());
+  const { data: user } = useUser();
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -17,6 +21,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           headers() {
             return {
               ...(eventId ? { "x-event-id": eventId } : {}),
+              ...(user?.id ? { "x-user-id": user.id } : {}),
             };
           },
         }),
@@ -26,11 +31,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <SupabaseProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </SupabaseProvider>
+      {children}
     </trpc.Provider>
   );
-}
+};

@@ -1,7 +1,7 @@
 "use client";
 
-import { useSupabase } from "@/context/SupabaseContext";
-import { useMutation } from "@tanstack/react-query";
+import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 type Role = "hacker" | "judge" | "mentor";
@@ -24,7 +24,7 @@ export function useSendOtp(
   mode: "login" | "signup" | "resend" = "login",
   options: UseSendOtpOptions = {}
 ) {
-  const supabase = useSupabase();
+  const auth = useSupabaseAuth();
   const router = useRouter();
 
   return useMutation({
@@ -32,7 +32,7 @@ export function useSendOtp(
       const trimmedEmail = email.trim();
       if (!trimmedEmail) throw new Error("Enter your email");
 
-      const { data: _, error } = await supabase.auth.signInWithOtp({
+      const { data: _, error } = await auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: mode === "signup",
@@ -69,3 +69,34 @@ export function useSendOtp(
     },
   });
 }
+
+export const useUser = () => {
+  const auth = useSupabaseAuth();
+
+  return useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await auth.getSession();
+      return session?.user ?? null;
+    },
+    staleTime: Infinity,
+  });
+};
+
+export const useSignOut = () => {
+  const auth = useSupabaseAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await auth.signOut();
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      queryClient.setQueryData(["user"], null);
+    },
+  });
+};

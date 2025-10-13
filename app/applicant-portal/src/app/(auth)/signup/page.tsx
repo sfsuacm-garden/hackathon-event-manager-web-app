@@ -9,7 +9,7 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import { todayYMD } from "@/utils/ageChecker";
-import { useSendOtp } from "../hooks/useSendOTPHook";
+import { useSendOtp } from "../../../hooks/auth";
 
 import RequiredStar from "@/components/form/RequiredStar";
 import {
@@ -83,7 +83,7 @@ export default function SignupPage() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof signupFormSchema>) {
+  function onSubmit(_: z.infer<typeof signupFormSchema>) {
     sendOtp();
   }
 
