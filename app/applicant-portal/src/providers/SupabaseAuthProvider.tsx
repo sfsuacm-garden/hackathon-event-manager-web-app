@@ -1,8 +1,6 @@
-"use client";
-
-import { createBrowserClient } from "@supabase/ssr";
+import { supabaseAuth } from "@/utils/supabase/client";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext } from "react";
 
 const SupabaseAuthContext = createContext<SupabaseAuthClient | null>(null);
 
@@ -11,17 +9,8 @@ export const SupabaseAuthProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const auth = useMemo(
-    () =>
-      createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      ).auth,
-    []
-  );
-
   return (
-    <SupabaseAuthContext.Provider value={auth}>
+    <SupabaseAuthContext.Provider value={supabaseAuth}>
       {children}
     </SupabaseAuthContext.Provider>
   );
