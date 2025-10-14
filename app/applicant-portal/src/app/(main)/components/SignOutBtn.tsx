@@ -9,6 +9,9 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/shadcn/ui/alert-dialog";
+import {
+  navigationMenuTriggerStyle,
+} from "@/components/shadcn/ui/navigation-menu";
 import { useSignOut } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner"
@@ -29,7 +32,7 @@ export default function SignOutBtn() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button className="btn btn-danger hover:cursor-pointer">Sign out</button>
+        <button className={`${navigationMenuTriggerStyle()} hover:cursor-pointer`}>Sign out</button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
