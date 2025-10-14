@@ -9,15 +9,21 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/shadcn/ui/alert-dialog";
+import { useSignOut } from "@/hooks/auth";
+import { useRouter } from "next/navigation";
 
-// branch off of frontend/auth (akim's branch, or the one in the notion (feature/auth-flow)) to add the sign out functionality
-// note provider in root layout
-// they're using hooks/provider or something
-// check where useUser is, where its being defined and use this instead of supabase sign out function
 export default function SignOutBtn() {
+  const { mutate: signOutMutation } = useSignOut()
+  const router = useRouter();
+
   const handleSignout = () => {
-    console.log("handle sign out called")
-  }
+    signOutMutation(undefined, {
+      onSuccess: () => {
+        console.log("successfully signed out using signoutmutation")
+        router.push("/")
+      }
+    })
+  };
 
   return (
     <AlertDialog>
