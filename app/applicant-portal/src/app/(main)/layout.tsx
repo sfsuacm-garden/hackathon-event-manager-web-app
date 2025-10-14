@@ -10,6 +10,11 @@ const components: NavigationTabOption[] = [
     href: "/my-dashboard",
     description: "",
   },
+  {
+    label: "Sign out",
+    href: "/sign-out",
+    description: "",
+  }
 ];
 
 export default function RootLayout({

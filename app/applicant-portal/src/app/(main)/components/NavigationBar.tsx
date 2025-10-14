@@ -11,6 +11,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/shadcn/ui/navigation-menu";
 import { NavigationTabOption } from "@/types/NavigationTab";
+import SignOutBtn from "./SignOutBtn.tsx"
 
 interface NavigationMenuProps {
   navigationOptions: NavigationTabOption[];
@@ -27,7 +28,11 @@ export function NavigationBar({ navigationOptions }: NavigationMenuProps) {
               asChild
               className={navigationMenuTriggerStyle()}
             >
-              <Link href={option.href}>{option.label}</Link>
+              {
+                option.label === "Sign out"
+                ? <SignOutBtn />
+                : <Link href={option.href}>{option.label}</Link>
+              }
             </NavigationMenuLink>
           ))}
         </NavigationMenuItem>
