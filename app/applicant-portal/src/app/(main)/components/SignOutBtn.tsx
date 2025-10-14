@@ -11,6 +11,7 @@ import {
 } from "@/components/shadcn/ui/alert-dialog";
 import { useSignOut } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner"
 
 export default function SignOutBtn() {
   const { mutate: signOutMutation } = useSignOut()
@@ -19,7 +20,7 @@ export default function SignOutBtn() {
   const handleSignout = () => {
     signOutMutation(undefined, {
       onSuccess: () => {
-        console.log("successfully signed out using signoutmutation")
+        toast("You have successfully signed out...")
         router.push("/")
       }
     })
