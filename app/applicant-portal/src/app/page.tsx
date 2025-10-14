@@ -1,14 +1,13 @@
 "use client";
 // src/pages/index.tsx (or src/App.tsx if CRA)
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 
 export default function Home() {
