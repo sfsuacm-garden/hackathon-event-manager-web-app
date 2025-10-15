@@ -8,13 +8,7 @@ export default function RootLayout({
   return (
     <main className="mx-auto w-full max-w-lg px-6 py-12 space-y-8 ">
       <EventHeader />
-
       {children}
     </main>
   );
 }
-
-//  <main className="mx-auto w-full max-w-3xl px-6 py-12">
-//       <div className="mb-8">
-//         <Progress value={progress} className="h-2 rounded-full bg-muted" />
-//       </div>
