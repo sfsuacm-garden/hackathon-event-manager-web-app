@@ -17,21 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import EventHeader from "@/components/ui/event-header";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const OTHER_OPTION = "Other";
-
-/** Step Schemas */
+const OTHER_OPTION = "other";
 const StepBasics = z
   .object({
     school: z.string().nonempty("School is required."),
@@ -81,7 +73,10 @@ type DropdownField = {
   fillerText: string;
   options: string[];
 };
-type CheckboxField = { type: "checkbox"; label: string };
+type CheckboxField = {
+  type: "checkbox";
+  label: string | React.ReactNode;
+};
 type CheckboxGroupField = {
   type: "checkbox-group";
   title: string;
@@ -99,6 +94,7 @@ type FormField =
 type StepConfig<Schema extends z.ZodTypeAny> = {
   key: string;
   label: string;
+  description?: string;
   schema: Schema;
   fields: Record<string, FormField>;
 };
@@ -108,9 +104,14 @@ const steps: StepConfig<any>[] = [
   {
     key: "basics",
     label: "Registration Basics",
+    description: "Let's start with some basic information about you.",
     schema: StepBasics,
     fields: {
-      school: { type: "text", label: "School", fillerText: "S" },
+      school: {
+        type: "text",
+        label: "School",
+        fillerText: "University of California, Berkeley",
+      },
       levelOfStudy: {
         type: "dropdown",
         label: "Level of Study",
@@ -124,13 +125,14 @@ const steps: StepConfig<any>[] = [
       linkedinUrl: {
         type: "text",
         label: "LinkedIn URL",
-        fillerText: "https://linkedin.com/sfhacks-2026",
+        fillerText: "https://linkedin.com/in/yourprofile",
       },
     },
   },
   {
     key: "preferences",
     label: "Day-Of Preferences",
+    description: "Help us make your experience comfortable and enjoyable.",
     schema: StepPreferences,
     fields: {
       dietaryGroup: {
@@ -148,13 +150,15 @@ const steps: StepConfig<any>[] = [
         type: "dropdown",
         label: "T-Shirt Size",
         options: ["XS", "S", "M", "L", "XL", "XXL"],
-        fillerText: "Select your preffered T-shirt-size",
+        fillerText: "Select your preferred T-shirt size",
       },
     },
   },
   {
     key: "insights",
     label: "Community Insights",
+    description:
+      "This information helps us build a diverse and inclusive community.",
     schema: StepInsights,
     fields: {
       majorFieldOfStudy: {
@@ -167,7 +171,7 @@ const steps: StepConfig<any>[] = [
         type: "dropdown",
         label: "Education Level",
         options: ["High School", "Undergraduate", "Graduate", OTHER_OPTION],
-        fillerText: "Select your education level.",
+        fillerText: "Select your education level",
       },
       gender: {
         type: "dropdown",
@@ -178,42 +182,74 @@ const steps: StepConfig<any>[] = [
       pronouns: {
         type: "text",
         label: "Pronouns",
-        fillerText: "Select your preffered pronouns.",
+        fillerText: "e.g., they/them, she/her, he/him",
       },
       raceEthnicity: {
         type: "text",
         label: "Race/Ethnicity",
-        fillerText: "Select your racial/ethnicity",
+        fillerText: "Optional",
       },
       sexualOrientation: {
         type: "text",
-        label: "Do you consider yourself to be any of the following?",
-        fillerText: "Select your preffered identity.",
+        label: "Sexual Orientation",
+        fillerText: "Optional",
       },
     },
   },
   {
     key: "mlh",
     label: "MLH Agreements",
+    description: "Please review and accept the following agreements.",
     schema: StepMLH,
     fields: {
       mlhAuthorizedPromoEmail: {
         type: "checkbox",
-        label: "Receive MLH promotional emails",
+        label:
+          "I authorize MLH to send me occasional emails about relevant events, career opportunities, and community updates.",
       },
       mlhAuthorizedDataShare: {
         type: "checkbox",
-        label: "Allow MLH to share my data",
+        label: (
+          <>
+            I authorize MLH to share my application/registration information
+            with event organizers, sponsors, and partners for purposes of event
+            administration and opportunities. Read more in the{" "}
+            <a
+              href="https://mlh.io/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              MLH Privacy Policy
+            </a>
+            .
+          </>
+        ),
       },
       mlhCodeOfConductAgreement: {
         type: "checkbox",
-        label: "Agree to MLH Code of Conduct",
+        label: (
+          <>
+            I agree to the terms of the{" "}
+            <a
+              href="https://mlh.io/code-of-conduct"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              MLH Code of Conduct
+            </a>
+            .
+          </>
+        ),
       },
     },
   },
   {
     key: "review",
-    label: "Review & Apply",
+    label: "Review & Submit",
+    description:
+      "Please review your information before submitting your application.",
     schema: StepReview,
     fields: {},
   },
@@ -292,18 +328,28 @@ export default function ApplyPage() {
   };
 
   return (
-    <main className="flex justify-center items-start mt-10">
-      <Card className="w-full sm:max-w-2xl">
-        <CardHeader>
-          <CardTitle>{step.label}</CardTitle>
-          <Progress
-            value={((currentStep + 1) / steps.length) * 100}
-            className="mt-2"
-          />
-        </CardHeader>
+    <main className="flex justify-center items-start min-h-screen py-12 ">
+      <div className="w-full max-w-2xl">
+        <div className="space-y-12">
+          <div className="space-y-4">
+            <Progress
+              value={((currentStep + 1) / steps.length) * 100}
+              className="h-2"
+            />
+            <EventHeader />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">{step.label}</h1>
+            {step.description && (
+              <p className="text-sm text-muted-foreground">
+                {step.description}
+              </p>
+            )}
+          </div>
+        </div>
 
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="mt-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {Object.entries(step.fields).map(([key, field]: [string, any]) => {
               // Text Input
               if (field.type === "text") {
@@ -313,15 +359,18 @@ export default function ApplyPage() {
                       name={key}
                       control={form.control}
                       render={({ field: f, fieldState }) => (
-                        <div>
+                        <div className="space-y-2">
                           <FieldLabel>
                             {field.label}
-                            <RequiredStar />
+                            {!step.schema.shape[key].isOptional() && (
+                              <RequiredStar />
+                            )}
                           </FieldLabel>
                           <Input
                             {...f}
-                            placeholder={field.label}
+                            placeholder={field.fillerText}
                             value={f.value ?? ""}
+                            className="w-full"
                           />
                           {fieldState.invalid && (
                             <FieldError
@@ -349,17 +398,19 @@ export default function ApplyPage() {
                       name={key}
                       control={form.control}
                       render={({ field: f, fieldState }) => (
-                        <div>
+                        <div className="space-y-2">
                           <FieldLabel>
                             {field.label}
-                            <RequiredStar />
+                            {!step.schema.shape[key].isOptional() && (
+                              <RequiredStar />
+                            )}
                           </FieldLabel>
                           <Select
                             onValueChange={f.onChange}
                             value={f.value ?? ""}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder={field.label} />
+                              <SelectValue placeholder={field.fillerText} />
                             </SelectTrigger>
                             <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
                               {field.options.map((opt: string) => (
@@ -372,7 +423,7 @@ export default function ApplyPage() {
 
                           {/* "Other" input */}
                           {f.value === OTHER_OPTION && (
-                            <div className="mt-2">
+                            <div className="mt-3">
                               <Input
                                 placeholder="Please specify"
                                 value={form.getValues(`${key}_other`) || ""}
@@ -380,14 +431,11 @@ export default function ApplyPage() {
                                   form.setValue(`${key}_other`, e.target.value)
                                 }
                               />
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                Add emphasis/concentration if applicable.
-                              </p>
                             </div>
                           )}
 
                           {fieldState.invalid && (
-                            <p className="text-sm text-destructive mt-1">
+                            <p className="text-sm text-destructive">
                               {fieldState.error?.message ||
                                 "This field is required."}
                             </p>
@@ -407,10 +455,12 @@ export default function ApplyPage() {
                       name={key}
                       control={form.control}
                       render={({ field: f, fieldState }) => (
-                        <div>
+                        <div className="space-y-2">
                           <FieldLabel>
                             {field.label}
-                            <RequiredStar />
+                            {!step.schema.shape[key].isOptional() && (
+                              <RequiredStar />
+                            )}
                           </FieldLabel>
                           <CountryDropdown
                             value={
@@ -446,13 +496,16 @@ export default function ApplyPage() {
                       name={key}
                       control={form.control}
                       render={({ field: f }) => (
-                        <label className="flex items-center gap-2">
+                        <label className="flex items-start gap-3 cursor-pointer">
                           <input
                             type="checkbox"
                             {...f}
                             checked={f.value ?? false}
+                            className="mt-1 cursor-pointer"
                           />
-                          {field.label}
+                          <span className="text-sm leading-relaxed">
+                            {field.label}
+                          </span>
                         </label>
                       )}
                     />
@@ -464,25 +517,28 @@ export default function ApplyPage() {
               if (field.type === "checkbox-group") {
                 return (
                   <FieldGroup key={key}>
-                    <FieldLabel>{field.title}</FieldLabel>
-                    <div className="flex flex-col gap-1">
-                      {field.options.map((opt: any) => (
-                        <Controller
-                          key={opt.name}
-                          name={opt.name}
-                          control={form.control}
-                          render={({ field: f }) => (
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                {...f}
-                                checked={f.value ?? false}
-                              />
-                              {opt.label}
-                            </label>
-                          )}
-                        />
-                      ))}
+                    <div className="space-y-3">
+                      <FieldLabel>{field.title}</FieldLabel>
+                      <div className="flex flex-col gap-3 pl-1">
+                        {field.options.map((opt: any) => (
+                          <Controller
+                            key={opt.name}
+                            name={opt.name}
+                            control={form.control}
+                            render={({ field: f }) => (
+                              <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  {...f}
+                                  checked={f.value ?? false}
+                                  className="cursor-pointer"
+                                />
+                                <span className="text-sm">{opt.label}</span>
+                              </label>
+                            )}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </FieldGroup>
                 );
@@ -491,19 +547,23 @@ export default function ApplyPage() {
               return null;
             })}
           </form>
-        </CardContent>
+        </div>
 
-        <CardFooter className="flex justify-between gap-2">
-          {currentStep > 0 && (
-            <Button variant="secondary" onClick={prevStep}>
+        <div className="flex justify-between gap-3 pt-6">
+          {currentStep > 0 ? (
+            <Button variant="outline" onClick={prevStep}>
               Back
             </Button>
+          ) : (
+            <div />
           )}
-          <Button onClick={form.handleSubmit(onSubmit)} className="ml-auto">
-            {currentStep === steps.length - 1 ? "Submit" : "Next"}
+          <Button onClick={form.handleSubmit(onSubmit)}>
+            {currentStep === steps.length - 1
+              ? "Submit Application"
+              : "Continue"}
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </main>
   );
 }
