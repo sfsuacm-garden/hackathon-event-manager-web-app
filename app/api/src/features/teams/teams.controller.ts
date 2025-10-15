@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
 import { PrismaClient } from '@prisma/client/extension';
+import { MAX_TEAM_SIZE } from '../../common/constants';
 
 export async function getTeamById(id: string) {
   try {
@@ -92,7 +93,7 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
       }
 
-      if (requestedTeam.members.length >= 4) { //make an enum or some shit somewhere config or some shit
+      if (requestedTeam.members.length >= MAX_TEAM_SIZE) { //make an enum or some shit somewhere config or some shit
         throw new TRPCError({
           code: 'CONFLICT',
           message: `Team with ID ${teamId} is full`,
