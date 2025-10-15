@@ -11,7 +11,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/shadcn/ui/navigation-menu";
 import { NavigationTabOption } from "@/types/NavigationTab";
-import SignOutBtn from "./SignOutBtn.tsx"
+import SignOutBtn from "./SignOutBtn"
 
 interface NavigationMenuProps {
   navigationOptions: NavigationTabOption[];
