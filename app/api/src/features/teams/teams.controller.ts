@@ -1,7 +1,9 @@
 import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
-import { PrismaClient } from '@prisma/client/extension';
+import { Prisma, PrismaClient } from '@prisma/client/extension';
 import { MAX_TEAM_SIZE } from '../../common/constants';
+
+type PrismaClientOrTx = PrismaClient | Prisma.TransactionClient;
 
 export async function getTeamById(id: string) {
   try {
@@ -276,7 +278,7 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
         });
       }
 
-      const newTeam = await createTeam(tx, memberKickingInfo.eventId);
+      const newTeam = await createTeam(tx, memberKickingInfo.event_id);
       await tx.teamMember.update({
         where: {
           teamId_userId: {
@@ -304,7 +306,7 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
 // HELPER FUNCTIONS
 // helper functions have a prisma client passed in because they can either be ran inside of a transaction
 // or outside of a transaction and I could not think of a better way to control that dual behavior.
-async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId: string) {
+async function fetchTeamMemberByTeam(tx: PrismaClientOrTx, memberId: string, teamId: string) {
   const teamMember = await tx.teamMember.findUnique({
     where: {
       teamId_userId: {
@@ -326,7 +328,7 @@ async function fetchTeamMemberByTeam(tx: PrismaClient, memberId: string, teamId:
   return teamMember;
 }
 
-export async function createTeam(prismaClient: PrismaClient, eventId: string) {
+export async function createTeam(prismaClient: PrismaClientOrTx, eventId: string) {
   const numTeamsInEvent = await prismaClient.team.count({
     where: {
       eventId: eventId
@@ -343,7 +345,7 @@ export async function createTeam(prismaClient: PrismaClient, eventId: string) {
   return newTeam;
 }
 
-async function reassignAdminToEarliestJoiningMember(tx: PrismaClient, teamId: string) {
+async function reassignAdminToEarliestJoiningMember(tx: PrismaClientOrTx, teamId: string) {
   const nextEarliestTeamMember = await tx.teamMember.findMany({
     where: {
       teamId: teamId
