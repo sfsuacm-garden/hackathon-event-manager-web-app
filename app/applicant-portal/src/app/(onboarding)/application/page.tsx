@@ -17,106 +17,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
+import { Separator } from "@/components/shadcn/ui/separator";
 import EventHeader from "@/components/ui/event-header";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const OTHER_OPTION = "other";
-const StepBasics = z
-  .object({
-    school: z.string().nonempty("School is required."),
-    levelOfStudy: z.string().nonempty("Level of study is required."),
-    countryOfResidence: z.string().nonempty("Country is required."),
-    linkedinUrl: z.string().url("Enter a valid URL."),
-  })
-  .loose();
-
-const StepPreferences = z
-  .object({
-    dietaryVegetarian: z.boolean(),
-    dietaryVegan: z.boolean(),
-    dietaryCeliacDisease: z.boolean(),
-    dietaryKosher: z.boolean(),
-    dietaryHalal: z.boolean(),
-    tshirtSize: z.string().nonempty("T-shirt size is required."),
-  })
-  .loose();
-
-const StepInsights = z
-  .object({
-    majorFieldOfStudy: z.string().nonempty("Major is required."),
-    educationLevel: z.string().nonempty("Education level is required."),
-    gender: z.string().nonempty("Gender is required."),
-    pronouns: z.string().optional(),
-    raceEthnicity: z.string().optional(),
-    sexualOrientation: z.string().optional(),
-  })
-  .loose();
-
-const StepMLH = z
-  .object({
-    mlhAuthorizedPromoEmail: z.boolean(),
-    mlhAuthorizedDataShare: z.boolean(),
-    mlhCodeOfConductAgreement: z.boolean(),
-  })
-  .loose();
-
-const StepReview = z.object({}).loose();
-
-/** Field Types */
-type TextField = { type: "text"; label: string; fillerText: string };
-type DropdownField = {
-  type: "dropdown";
-  label: string;
-  fillerText: string;
-  options: string[];
-};
-type CheckboxField = {
-  type: "checkbox";
-  label: string | React.ReactNode;
-};
-type CheckboxGroupField = {
-  type: "checkbox-group";
-  title: string;
-  options: { name: string; label: string }[];
-};
-type CountryDropdownField = { type: "country-dropdown"; label: string };
-
-type FormField =
-  | TextField
-  | DropdownField
-  | CheckboxField
-  | CheckboxGroupField
-  | CountryDropdownField;
-
-type StepConfig<Schema extends z.ZodTypeAny> = {
-  key: string;
-  label: string;
-  description?: string;
-  schema: Schema;
-  fields: Record<string, FormField>;
-};
+import { Controller } from "react-hook-form";
+import { useMultiStepForm } from "./hooks";
+import {
+  OTHER_OPTION,
+  StepBasics,
+  StepInsights,
+  StepMLH,
+  StepPreferences,
+  StepReview,
+} from "./schemas";
+import { StepConfig } from "./types";
 
 /** Step Definitions */
 const steps: StepConfig<any>[] = [
   {
     key: "basics",
     label: "Registration Basics",
-    description: "Let's start with some basic information about you.",
+    description:
+      "These questions help us make sure you’re eligible to participate and ensure everything runs smoothly.",
     schema: StepBasics,
     fields: {
       school: {
-        type: "text",
-        label: "School",
-        fillerText: "University of California, Berkeley",
+        type: "dropdown",
+        label: "What school do you attend?",
+        options: [
+          {
+            value: "less_than_secondary",
+            label: "Less than Secondary / High School",
+          },
+        ], // Keep as dynamic or prefilled list later
+        fillerText: "San Francisco State University",
       },
       levelOfStudy: {
         type: "dropdown",
-        label: "Level of Study",
+        label:
+          "What is the highest level of formal education that you have completed?",
         fillerText: "Select your level of study",
-        options: ["High School", "Undergraduate", "Graduate", OTHER_OPTION],
+        options: [
+          {
+            value: "less_than_secondary",
+            label: "Less than Secondary / High School",
+          },
+          { value: "secondary", label: "Secondary / High School" },
+          {
+            value: "undergrad_2yr",
+            label:
+              "Undergraduate University (2 year - community college or similar)",
+          },
+          {
+            value: "undergrad_3yr",
+            label: "Undergraduate University (3+ year)",
+          },
+          {
+            value: "graduate",
+            label: "Graduate University (Masters, Professional, Doctoral, etc)",
+          },
+          { value: "bootcamp", label: "Code School / Bootcamp" },
+          {
+            value: "vocational",
+            label: "Other Vocational / Trade Program or Apprenticeship",
+          },
+          { value: "post_doctorate", label: "Post Doctorate" },
+          { value: OTHER_OPTION, label: "Other" },
+          { value: "not_student", label: "I’m not currently a student" },
+          { value: "prefer_not_answer", label: "Prefer not to answer" },
+        ],
       },
       countryOfResidence: {
         type: "country-dropdown",
@@ -126,6 +94,8 @@ const steps: StepConfig<any>[] = [
         type: "text",
         label: "LinkedIn URL",
         fillerText: "https://linkedin.com/in/yourprofile",
+        helperText:
+          "Provide your LinkedIn URL so we can help connect you with partners after the event for potential job opportunities.",
       },
     },
   },
@@ -135,9 +105,22 @@ const steps: StepConfig<any>[] = [
     description: "Help us make your experience comfortable and enjoyable.",
     schema: StepPreferences,
     fields: {
+      tshirtSize: {
+        type: "dropdown",
+        label: "T-Shirt Size",
+        fillerText: "Select your preferred T-shirt size",
+        options: [
+          { value: "xs", label: "XS" },
+          { value: "s", label: "S" },
+          { value: "m", label: "M" },
+          { value: "l", label: "L" },
+          { value: "xl", label: "XL" },
+          { value: "xxl", label: "XXL" },
+        ],
+      },
       dietaryGroup: {
         type: "checkbox-group",
-        title: "Dietary Restrictions",
+        title: "Dietary Restrictions (For in-person events)",
         options: [
           { name: "dietaryVegetarian", label: "Vegetarian" },
           { name: "dietaryVegan", label: "Vegan" },
@@ -145,12 +128,6 @@ const steps: StepConfig<any>[] = [
           { name: "dietaryKosher", label: "Kosher" },
           { name: "dietaryHalal", label: "Halal" },
         ],
-      },
-      tshirtSize: {
-        type: "dropdown",
-        label: "T-Shirt Size",
-        options: ["XS", "S", "M", "L", "XL", "XXL"],
-        fillerText: "Select your preferred T-shirt size",
       },
     },
   },
@@ -163,59 +140,146 @@ const steps: StepConfig<any>[] = [
     fields: {
       majorFieldOfStudy: {
         type: "dropdown",
-        label: "Major",
-        options: ["CS", "Math", "Physics", OTHER_OPTION],
-        fillerText: "Enter your major",
-      },
-      educationLevel: {
-        type: "dropdown",
-        label: "Education Level",
-        options: ["High School", "Undergraduate", "Graduate", OTHER_OPTION],
-        fillerText: "Select your education level",
+        label: "What is your major or primary field of study?",
+        fillerText: "Select your major",
+        options: [
+          { value: "computer_science", label: "Computer Science" },
+          { value: "data_science", label: "Data Science" },
+          { value: "engineering", label: "Engineering" },
+          { value: "mathematics", label: "Mathematics" },
+          { value: "physics", label: "Physics" },
+          { value: "business", label: "Business" },
+          { value: "design", label: "Design / UI-UX" },
+          { value: "humanities", label: "Humanities" },
+          { value: "natural_sciences", label: "Natural Sciences" },
+          { value: "social_sciences", label: "Social Sciences" },
+          { value: "prefer_not_answer", label: "Prefer not to answer" },
+          { value: OTHER_OPTION, label: "Other" },
+        ],
       },
       gender: {
         type: "dropdown",
-        label: "Gender",
-        options: ["Male", "Female", "Non-binary", "Prefer not to say"],
-        fillerText: "Select your gender identity",
+        label: "What gender do you identify with?",
+        fillerText: "Select gender",
+        options: [
+          { value: "female", label: "Female" },
+          { value: "male", label: "Male" },
+          { value: "non_binary", label: "Non-binary" },
+          { value: "prefer_not_answer", label: "Prefer not to answer" },
+          { value: OTHER_OPTION, label: "Other" },
+        ],
       },
+
       pronouns: {
-        type: "text",
-        label: "Pronouns",
-        fillerText: "e.g., they/them, she/her, he/him",
+        type: "dropdown",
+        label: "What pronouns do you use?",
+        fillerText: "Select pronouns",
+        options: [
+          { value: "she_her", label: "She/Her" },
+          { value: "he_him", label: "He/Him" },
+          { value: "they_them", label: "They/Them" },
+          { value: "prefer_not_answer", label: "Prefer not to answer" },
+          { value: OTHER_OPTION, label: "Other" },
+        ],
       },
       raceEthnicity: {
-        type: "text",
-        label: "Race/Ethnicity",
-        fillerText: "Optional",
+        type: "dropdown",
+        label: "Race / Ethnicity",
+        fillerText: "Select your race or ethnicity",
+        options: [
+          { value: "asian_indian", label: "Asian Indian" },
+          { value: "black_african", label: "Black or African" },
+          { value: "chinese", label: "Chinese" },
+          { value: "filipino", label: "Filipino" },
+          { value: "guamanian_chamorro", label: "Guamanian or Chamorro" },
+          { value: "latino", label: "Hispanic / Latino / Spanish Origin" },
+          { value: "japanese", label: "Japanese" },
+          { value: "korean", label: "Korean" },
+          { value: "middle_eastern", label: "Middle Eastern" },
+          {
+            value: "native_american",
+            label: "Native American or Alaskan Native",
+          },
+          { value: "native_hawaiian", label: "Native Hawaiian" },
+          { value: "samoan", label: "Samoan" },
+          { value: "vietnamese", label: "Vietnamese" },
+          { value: "white", label: "White" },
+          {
+            value: "other_asian",
+            label: "Other Asian (Thai, Cambodian, etc.)",
+          },
+          { value: "other_pacific", label: "Other Pacific Islander" },
+          { value: "prefer_not_answer", label: "Prefer Not to Answer" },
+          { value: OTHER_OPTION, label: "Other (please specify)" },
+        ],
       },
       sexualOrientation: {
-        type: "text",
-        label: "Sexual Orientation",
-        fillerText: "Optional",
+        type: "dropdown",
+        label: "Do you consider yourself to be any of the following?",
+        fillerText: "Select your sexual orientation",
+        options: [
+          { value: "heterosexual", label: "Heterosexual or straight" },
+          { value: "gay_lesbian", label: "Gay or lesbian" },
+          { value: "bisexual", label: "Bisexual" },
+          { value: "different_identity", label: "Different identity" },
+          { value: "prefer_not_answer", label: "Prefer Not to Answer" },
+          { value: OTHER_OPTION, label: "Other (please specify)" },
+        ],
       },
     },
   },
   {
     key: "mlh",
     label: "MLH Agreements",
-    description: "Please review and accept the following agreements.",
+    description:
+      "We are currently in the process of partnering with MLH. The following 3 checkboxes are for this partnership. If we do not end up partnering with MLH, your information will not be shared.",
     schema: StepMLH,
+    seperateLastFieldWithLine: true,
     fields: {
-      mlhAuthorizedPromoEmail: {
+      mlhCodeOfConductAgreement: {
         type: "checkbox",
-        label:
-          "I authorize MLH to send me occasional emails about relevant events, career opportunities, and community updates.",
+        label: (
+          <>
+            I have read and agree to the{" "}
+            <a
+              href="https://github.com/MLH/mlh-policies/blob/main/code-of-conduct.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              MLH Code of Conduct
+            </a>
+            .
+          </>
+        ),
       },
       mlhAuthorizedDataShare: {
         type: "checkbox",
         label: (
           <>
-            I authorize MLH to share my application/registration information
-            with event organizers, sponsors, and partners for purposes of event
-            administration and opportunities. Read more in the{" "}
+            I authorize you to share my application/registration information
+            with Major League Hacking for event administration, ranking, and MLH
+            administration in-line with the{" "}
             <a
-              href="https://mlh.io/privacy"
+              href="https://github.com/MLH/mlh-policies/blob/main/privacy-policy.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              MLH Privacy Policy
+            </a>
+            . I further agree to the terms of both the{" "}
+            <a
+              href="https://github.com/MLH/mlh-policies/blob/main/contest-terms.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              MLH Contest Terms and Conditions
+            </a>{" "}
+            and the{" "}
+            <a
+              href="https://github.com/MLH/mlh-policies/blob/main/privacy-policy.md"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline hover:no-underline"
@@ -226,22 +290,10 @@ const steps: StepConfig<any>[] = [
           </>
         ),
       },
-      mlhCodeOfConductAgreement: {
+      mlhAuthorizedPromoEmail: {
         type: "checkbox",
-        label: (
-          <>
-            I agree to the terms of the{" "}
-            <a
-              href="https://mlh.io/code-of-conduct"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline hover:no-underline"
-            >
-              MLH Code of Conduct
-            </a>
-            .
-          </>
-        ),
+        label:
+          "I authorize MLH to send me occasional emails about relevant events, career opportunities, and community announcements.",
       },
     },
   },
@@ -255,77 +307,9 @@ const steps: StepConfig<any>[] = [
   },
 ];
 
-/** Multi-Step Form Component */
 export default function ApplyPage() {
-  const [currentStep, setCurrentStep] = React.useState(0);
-  const step = steps[currentStep];
-
-  // Initialize ALL fields from ALL steps at once
-  const allDefaultValues = React.useMemo(() => {
-    const values: Record<string, any> = {};
-    steps.forEach((s) => {
-      Object.entries(s.fields).forEach(([key, field]: [string, any]) => {
-        if (field.type === "checkbox") {
-          values[key] = false;
-        } else if (field.type === "checkbox-group") {
-          field.options.forEach((opt: any) => {
-            values[opt.name] = false;
-          });
-        } else {
-          values[key] = "";
-        }
-      });
-    });
-    return values;
-  }, []);
-
-  const form = useForm<any>({
-    resolver: zodResolver(step.schema),
-    defaultValues: allDefaultValues,
-  });
-
-  const nextStep = () =>
-    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-
-  const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
-
-  const onSubmit = async (data: any) => {
-    console.log("🔍 Submit triggered, current step:", currentStep);
-    console.log("📦 All form data:", data);
-
-    const stepSchema = step.schema;
-
-    // Collect step field keys including checkbox-group options
-    const allStepKeys = new Set<string>();
-    Object.entries(step.fields).forEach(([key, field]: [string, any]) => {
-      if (field.type === "checkbox-group") {
-        field.options.forEach((opt: any) => allStepKeys.add(opt.name));
-      } else {
-        allStepKeys.add(key);
-      }
-    });
-
-    const stepData = Object.fromEntries(
-      Array.from(allStepKeys).map((k) => [k, data[k]])
-    );
-
-    console.log("📋 Step data being validated:", stepData);
-
-    const result = await stepSchema.safeParseAsync(stepData);
-    console.log("✅ Validation result:", result);
-
-    if (!result.success) {
-      console.warn("❌ Validation failed:", result.error.format());
-      return;
-    }
-
-    if (currentStep < steps.length - 1) {
-      console.log("➡️ Going to next step");
-      nextStep();
-    } else {
-      console.log("✅ Final submission:", data);
-    }
-  };
+  const { currentStep, step, form, nextStep, prevStep, onSubmit } =
+    useMultiStepForm(steps);
 
   return (
     <main className="flex justify-center items-start min-h-screen py-12 ">
@@ -372,6 +356,11 @@ export default function ApplyPage() {
                             value={f.value ?? ""}
                             className="w-full"
                           />
+                          {field.helperText && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {field.helperText}
+                            </p>
+                          )}
                           {fieldState.invalid && (
                             <FieldError
                               errors={[
@@ -413,11 +402,13 @@ export default function ApplyPage() {
                               <SelectValue placeholder={field.fillerText} />
                             </SelectTrigger>
                             <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
-                              {field.options.map((opt: string) => (
-                                <SelectItem key={opt} value={opt}>
-                                  {opt}
-                                </SelectItem>
-                              ))}
+                              {field.options.map(
+                                (opt: { value: string; label: string }) => (
+                                  <SelectItem key={opt.label} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                )
+                              )}
                             </SelectContent>
                           </Select>
 
@@ -492,11 +483,19 @@ export default function ApplyPage() {
               if (field.type === "checkbox") {
                 return (
                   <FieldGroup key={key}>
+                    {step.seperateLastFieldWithLine &&
+                      key ===
+                        Object.keys(step.fields)[
+                          Object.keys(step.fields).length - 1
+                        ] && <Separator />}
                     <Controller
                       name={key}
                       control={form.control}
-                      render={({ field: f }) => (
+                      render={({ field: f, fieldState }) => (
                         <label className="flex items-start gap-3 cursor-pointer">
+                          {!step.schema.shape[key]?.isOptional?.() && (
+                            <RequiredStar />
+                          )}
                           <input
                             type="checkbox"
                             {...f}
@@ -520,9 +519,9 @@ export default function ApplyPage() {
                     <div className="space-y-3">
                       <FieldLabel>{field.title}</FieldLabel>
                       <div className="flex flex-col gap-3 pl-1">
-                        {field.options.map((opt: any) => (
+                        {field.options.map((opt: any, index: number) => (
                           <Controller
-                            key={opt.name}
+                            key={opt.name || index}
                             name={opt.name}
                             control={form.control}
                             render={({ field: f }) => (
@@ -533,7 +532,13 @@ export default function ApplyPage() {
                                   checked={f.value ?? false}
                                   className="cursor-pointer"
                                 />
-                                <span className="text-sm">{opt.label}</span>
+                                <span className="text-sm">
+                                  {opt.label}
+                                  {/* Optional RequiredStar if field is required */}
+                                  {!step.schema.shape[
+                                    opt.name
+                                  ]?.isOptional?.() && <RequiredStar />}
+                                </span>
                               </label>
                             )}
                           />
