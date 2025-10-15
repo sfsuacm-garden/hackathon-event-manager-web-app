@@ -1,11 +1,14 @@
+import { useUser } from "@/hooks/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StepConfig } from "./types";
 
 export function useMultiStepForm(steps: StepConfig<any>[]) {
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
+
+  const [optionsForSchools, setOptionsForSchools] = useState(0);
 
   // Initialize ALL fields from ALL steps at once
   const allDefaultValues = useMemo(() => {
@@ -82,4 +85,26 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
     prevStep,
     onSubmit,
   };
+}
+
+export function prepopulateSchoolField() {
+  const { data: user, isLoading: isUserLoading } = useUser();
+
+  useEffect(() => {
+    //TODO handle case of no user with error alert.
+    if (isUserLoading || !user) {
+      return;
+    }
+
+    if (user.email == "") {
+      return;
+    }
+
+    const email = user.email;
+
+    if (!email || !email.endsWith(".edu") || !email.includes("@")) return;
+    const domain = email.split("@")[1].toLowerCase();
+
+    //TODO complete w/ TRPC.
+  }, [user]);
 }

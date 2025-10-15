@@ -22,7 +22,7 @@ export default function ChooseRolePage() {
         <RoleBlock
           title="Participate as a Hacker!"
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
-          onPrimary={() => handleRoleSelection("hacker")}
+          onPrimary={() => handleRoleSelection("hacker", "/signup")}
           primary="Sign up as a hacker"
           onSecondary={() => router.push("/login")}
           secondary="Log into Portal"
