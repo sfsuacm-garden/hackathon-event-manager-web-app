@@ -4,6 +4,7 @@
  * Displays the user's team information, including team lock-in time,
  * invite link, team members, and an option to leave the team.
  */
+import React, { useState } from 'react'
 import { Button } from "@/components/shadcn/ui/button";
 import TeamMemberCard from "./MemberCard";
 import { Icons } from "@/lib/icons";
@@ -19,15 +20,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/ui/tooltip";
+import { trpc } from "@/utils/trpc";
+import ErrorStateAlert from "../../components/ErrorStateAlert";
 
 export default function TeamView() {
-  const error = false;
-  const loading = false;
-  const isTeamAdmin = true;
-  const isTeamManagementUnlocked = false;
-  const teamCount = 4;
+  const utils = trpc.useUtils();
+  const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao 
+
+  const {data: team, isLoading: loading, error} = trpc.teams.getOwnTeam.useQuery();
+  const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
+  const isLoggedInAdmin = team?.isTeamAdmin ?? false;
+
+  const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
 
   if (error) {
     return (
@@ -41,6 +47,27 @@ export default function TeamView() {
         </AlertDescription>
       </Alert>
     );
+  }
+
+  const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
+    onSuccess: ()=> {
+      utils.teams.getOwnTeam.invalidate();
+    },
+    onError: () => {
+      setLeaveTeamMutationFailError(true);
+    }
+  });
+
+  const handleLeaveTeam = ()=> {
+    //TODO: need to add a component for ARE YOU SURE dialogues
+    leaveTeamMutation.mutate();
+  }
+
+  const handleCopyInviteLink = () => {
+    //TODO: implement some sort of brief popup or something to indicate that the link was copied
+    const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`;
+    console.log(`Team Invite Link: ${teamInviteLink}`);
+    navigator.clipboard.writeText(teamInviteLink);
   }
 
   return (
@@ -63,6 +90,7 @@ export default function TeamView() {
                 variant="secondary"
                 size="lg"
                 className="w-full md:w-auto"
+                onClick={handleCopyInviteLink}
                 disabled={isTeamFull}
               >
                 <Icons.copy /> Copy Invite Link
@@ -79,9 +107,17 @@ export default function TeamView() {
       </div>
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
-          {[...Array(teamCount)].map((_, idx) => (
-            <TeamMemberCard key={idx} userId={""} isTeamAdmin={isTeamAdmin} />
+          
+          {team?.team.members.map((member, idx) => ( 
+            <TeamMemberCard 
+              key={idx}
+              teamMemberInfo={member}
+              isMemberLoggedInUser={member.userId === team.requestorUserId}
+              isAdminLoggedInUser={isLoggedInAdmin}
+              isTeamAdmin={member.isAdmin ?? false}
+            />
           ))}
+
         </div>
       ) : (
         <div className="h-56 flex items-center justify-center w-full mx-auto">
@@ -90,9 +126,16 @@ export default function TeamView() {
       )}
 
       {isTeam && !loading && !isTeamManagementUnlocked && (
-        <Button variant="outline" size="lg">
+        <Button variant="outline" size="lg" onClick={handleLeaveTeam}>
           <Icons.logOut /> Leave Team
         </Button>
+      )}
+
+      {showLeaveTeamMutationFailError && (
+        <ErrorStateAlert 
+          title={{text: 'Error leaving team'}}
+          description={{text: 'There was an error leaving the team. Please try again or contact the team.'}}
+        />
       )}
     </div>
   );
