@@ -1,20 +1,37 @@
 import { useUser } from "@/hooks/auth";
+import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StepConfig } from "./types";
 
+// Utility function to extract domain from email
+function extractEmailDomain(email: string): string | null {
+  if (!email || !email.includes("@")) return null;
+  const parts = email.split("@");
+  return parts.length === 2 ? parts[1].toLowerCase().trim() : null;
+}
+
 export function useMultiStepForm(steps: StepConfig<any>[]) {
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
 
-  const [optionsForSchools, setOptionsForSchools] = useState(0);
+  const { schoolSelection, isLoadingSchool, userEmailDomain, schoolError } =
+    usePrepopulateSchoolFieldDropwdownSelection();
 
   // Initialize ALL fields from ALL steps at once
   const allDefaultValues = useMemo(() => {
     const values: Record<string, any> = {};
-    steps.forEach((s) => {
-      Object.entries(s.fields).forEach(([key, field]: [string, any]) => {
+
+    for (const s of steps) {
+      for (const [key, field] of Object.entries(s.fields)) {
+        // Base defaults
+
+        if (field.type === "dropdown") {
+          if (field.hasOtherOption) {
+            values[key + `_other`] = "";
+          }
+        }
         if (field.type === "checkbox") {
           values[key] = false;
         } else if (field.type === "checkbox-group") {
@@ -24,8 +41,9 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
         } else {
           values[key] = "";
         }
-      });
-    });
+      }
+    }
+
     return values;
   }, [steps]);
 
@@ -33,6 +51,17 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
     resolver: zodResolver(step.schema),
     defaultValues: allDefaultValues,
   });
+
+  useEffect(() => {
+    if (schoolSelection) {
+      const newValues = { ...allDefaultValues };
+
+      form.setValue("school", schoolSelection.value, {
+        shouldValidate: false,
+        shouldDirty: true,
+      });
+    }
+  }, [schoolSelection, isLoadingSchool, form, allDefaultValues]);
 
   const nextStep = () =>
     currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
@@ -84,27 +113,51 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
     nextStep,
     prevStep,
     onSubmit,
+    isLoadingSchool,
   };
 }
 
-export function prepopulateSchoolField() {
+export function usePrepopulateSchoolFieldDropwdownSelection() {
   const { data: user, isLoading: isUserLoading } = useUser();
 
+  const [schoolSelection, setSchoolSelection] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  // Extract domain from user email
+  const userEmailDomain = useMemo(() => {
+    if (!user?.email) return null;
+    const domain = extractEmailDomain(user.email);
+    return domain?.endsWith(".edu") ? domain : null;
+  }, [user?.email]);
+
+  // Query school by email domain
+  const {
+    data: school,
+    isLoading: isSchoolLoading,
+    error: schoolError,
+  } = trpc.schools.getByEmailDomain.useQuery(
+    { domain: userEmailDomain! },
+    {
+      enabled: !!userEmailDomain,
+      retry: false,
+    }
+  );
+
   useEffect(() => {
-    //TODO handle case of no user with error alert.
-    if (isUserLoading || !user) {
-      return;
+    if (school) {
+      setSchoolSelection({ value: school.id, label: school.id });
     }
 
-    if (user.email == "") {
-      return;
+    if (schoolError) {
+      console.warn("Could not find school for domain:", userEmailDomain);
     }
+  }, [school, schoolError, userEmailDomain]);
 
-    const email = user.email;
-
-    if (!email || !email.endsWith(".edu") || !email.includes("@")) return;
-    const domain = email.split("@")[1].toLowerCase();
-
-    //TODO complete w/ TRPC.
-  }, [user]);
+  return {
+    schoolSelection,
+    isLoadingSchool: isUserLoading || isSchoolLoading,
+    userEmailDomain,
+    schoolError,
+  };
 }

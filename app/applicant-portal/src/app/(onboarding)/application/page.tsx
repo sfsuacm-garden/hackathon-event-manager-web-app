@@ -20,6 +20,7 @@ import {
 import { Separator } from "@/components/shadcn/ui/separator";
 import EventHeader from "@/components/ui/event-header";
 import { Controller } from "react-hook-form";
+import { SchoolCombobox } from "./components/ComboBoxSchools";
 import { useMultiStepForm } from "./hooks";
 import {
   OTHER_OPTION,
@@ -41,15 +42,10 @@ const steps: StepConfig<any>[] = [
     schema: StepBasics,
     fields: {
       school: {
-        type: "dropdown",
+        type: "school-combobox",
         label: "What school do you attend?",
-        options: [
-          {
-            value: "less_than_secondary",
-            label: "Less than Secondary / High School",
-          },
-        ], // Keep as dynamic or prefilled list later
-        fillerText: "San Francisco State University",
+        fillerText: "Search for your university",
+        helperText: "Start typing to search for your school",
       },
       levelOfStudy: {
         type: "dropdown",
@@ -81,10 +77,12 @@ const steps: StepConfig<any>[] = [
             label: "Other Vocational / Trade Program or Apprenticeship",
           },
           { value: "post_doctorate", label: "Post Doctorate" },
-          { value: OTHER_OPTION, label: "Other" },
+
           { value: "not_student", label: "I’m not currently a student" },
           { value: "prefer_not_answer", label: "Prefer not to answer" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Other",
       },
       countryOfResidence: {
         type: "country-dropdown",
@@ -117,6 +115,7 @@ const steps: StepConfig<any>[] = [
           { value: "xl", label: "XL" },
           { value: "xxl", label: "XXL" },
         ],
+        hasOtherOption: false,
       },
       dietaryGroup: {
         type: "checkbox-group",
@@ -154,8 +153,9 @@ const steps: StepConfig<any>[] = [
           { value: "natural_sciences", label: "Natural Sciences" },
           { value: "social_sciences", label: "Social Sciences" },
           { value: "prefer_not_answer", label: "Prefer not to answer" },
-          { value: OTHER_OPTION, label: "Other" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Other (please specify)",
       },
       gender: {
         type: "dropdown",
@@ -166,8 +166,9 @@ const steps: StepConfig<any>[] = [
           { value: "male", label: "Male" },
           { value: "non_binary", label: "Non-binary" },
           { value: "prefer_not_answer", label: "Prefer not to answer" },
-          { value: OTHER_OPTION, label: "Other" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Prefer to self-describe",
       },
 
       pronouns: {
@@ -179,8 +180,9 @@ const steps: StepConfig<any>[] = [
           { value: "he_him", label: "He/Him" },
           { value: "they_them", label: "They/Them" },
           { value: "prefer_not_answer", label: "Prefer not to answer" },
-          { value: OTHER_OPTION, label: "Other" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Other",
       },
       raceEthnicity: {
         type: "dropdown",
@@ -210,21 +212,23 @@ const steps: StepConfig<any>[] = [
           },
           { value: "other_pacific", label: "Other Pacific Islander" },
           { value: "prefer_not_answer", label: "Prefer Not to Answer" },
-          { value: OTHER_OPTION, label: "Other (please specify)" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Other (please specify)",
       },
       sexualOrientation: {
         type: "dropdown",
         label: "Do you consider yourself to be any of the following?",
-        fillerText: "Select your sexual orientation",
+        fillerText: "Select your identity",
         options: [
           { value: "heterosexual", label: "Heterosexual or straight" },
           { value: "gay_lesbian", label: "Gay or lesbian" },
           { value: "bisexual", label: "Bisexual" },
           { value: "different_identity", label: "Different identity" },
           { value: "prefer_not_answer", label: "Prefer Not to Answer" },
-          { value: OTHER_OPTION, label: "Other (please specify)" },
         ],
+        hasOtherOption: true,
+        otherLabel: "Different identity ________",
       },
     },
   },
@@ -308,7 +312,7 @@ const steps: StepConfig<any>[] = [
 ];
 
 export default function ApplyPage() {
-  const { currentStep, step, form, nextStep, prevStep, onSubmit } =
+  const { currentStep, step, form, prevStep, onSubmit, isLoadingSchool } =
     useMultiStepForm(steps);
 
   return (
@@ -381,6 +385,7 @@ export default function ApplyPage() {
 
               // Dropdown / Select
               if (field.type === "dropdown") {
+                const selectedValue = form.watch(key);
                 return (
                   <FieldGroup key={key}>
                     <Controller
@@ -409,27 +414,91 @@ export default function ApplyPage() {
                                   </SelectItem>
                                 )
                               )}
+                              {field.hasOtherOption && (
+                                <SelectItem
+                                  key={OTHER_OPTION}
+                                  value={OTHER_OPTION}
+                                >
+                                  {field.otherLabel}
+                                </SelectItem>
+                              )}
                             </SelectContent>
                           </Select>
 
                           {/* "Other" input */}
-                          {f.value === OTHER_OPTION && (
-                            <div className="mt-3">
-                              <Input
-                                placeholder="Please specify"
-                                value={form.getValues(`${key}_other`) || ""}
-                                onChange={(e) =>
-                                  form.setValue(`${key}_other`, e.target.value)
-                                }
-                              />
-                            </div>
-                          )}
 
                           {fieldState.invalid && (
                             <p className="text-sm text-destructive">
                               {fieldState.error?.message ||
                                 "This field is required."}
                             </p>
+                          )}
+                        </div>
+                      )}
+                    />
+                    {/* TODO: Hide spacing between button */}
+                    {selectedValue == OTHER_OPTION && (
+                      <Controller
+                        key={key + `_other`}
+                        control={form.control}
+                        render={({ field: f, fieldState }) => (
+                          <Input
+                            {...f}
+                            placeholder={"Please specify here"}
+                            value={f.value ?? ""}
+                            className="w-full"
+                          />
+                        )}
+                        name={key + `_other`}
+                      />
+                    )}
+                  </FieldGroup>
+                );
+              }
+
+              // School Combobox
+              if (field.type === "school-combobox") {
+                const selectedValue = form.watch(key);
+                return (
+                  <FieldGroup key={key}>
+                    <Controller
+                      name={key}
+                      control={form.control}
+                      render={({ field: f, fieldState }) => (
+                        <div className="space-y-2">
+                          <FieldLabel>
+                            {field.label}
+                            {!step.schema.shape[key].isOptional() && (
+                              <RequiredStar />
+                            )}
+                          </FieldLabel>
+                          <SchoolCombobox
+                            defaultSelectedSchool={f.value}
+                            onValueChange={f.onChange}
+                            placeholder={field.label}
+                            isDefaultLoading={isLoadingSchool}
+                          />
+                          {field.helperText && (
+                            <p className="text-xs text-muted-foreground">
+                              {field.helperText}
+                            </p>
+                          )}
+                          {selectedValue == OTHER_OPTION && (
+                            <Controller
+                              key={key + `_other`}
+                              control={form.control}
+                              render={({ field: f, fieldState }) => (
+                                <Input
+                                  {...f}
+                                  placeholder={
+                                    "Please specify your school here"
+                                  }
+                                  value={f.value ?? ""}
+                                  className="w-full"
+                                />
+                              )}
+                              name={key + `_other`}
+                            />
                           )}
                         </div>
                       )}
@@ -492,20 +561,28 @@ export default function ApplyPage() {
                       name={key}
                       control={form.control}
                       render={({ field: f, fieldState }) => (
-                        <label className="flex items-start gap-3 cursor-pointer">
-                          {!step.schema.shape[key]?.isOptional?.() && (
-                            <RequiredStar />
+                        <div>
+                          <label className="flex items-start gap-3 cursor-pointer">
+                            {!step.schema.shape[key]?.isOptional?.() && (
+                              <RequiredStar />
+                            )}
+                            <input
+                              type="checkbox"
+                              {...f}
+                              checked={f.value}
+                              className="mt-1 cursor-pointer"
+                            />
+                            <span className="text-sm leading-relaxed">
+                              {field.label}
+                            </span>
+                          </label>
+                          {fieldState.invalid && (
+                            <p className="text-sm text-destructive">
+                              {fieldState.error?.message ||
+                                "This field is required."}
+                            </p>
                           )}
-                          <input
-                            type="checkbox"
-                            {...f}
-                            checked={f.value ?? false}
-                            className="mt-1 cursor-pointer"
-                          />
-                          <span className="text-sm leading-relaxed">
-                            {field.label}
-                          </span>
-                        </label>
+                        </div>
                       )}
                     />
                   </FieldGroup>
@@ -530,6 +607,7 @@ export default function ApplyPage() {
                                   type="checkbox"
                                   {...f}
                                   checked={f.value ?? false}
+                                  onChange={(e) => f.onChange(e.target.checked)}
                                   className="cursor-pointer"
                                 />
                                 <span className="text-sm">

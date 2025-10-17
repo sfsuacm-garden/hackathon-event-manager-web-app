@@ -34,8 +34,16 @@ export const StepInsights = z
 export const StepMLH = z
   .object({
     mlhAuthorizedPromoEmail: z.boolean().optional(),
-    mlhAuthorizedDataShare: z.boolean(),
-    mlhCodeOfConductAgreement: z.boolean(),
+     mlhAuthorizedDataShare: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "You must authorize data sharing to continue.",
+    }),
+  mlhCodeOfConductAgreement: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "You must agree to the MLH Code of Conduct.",
+    }),
   })
   .loose();
 

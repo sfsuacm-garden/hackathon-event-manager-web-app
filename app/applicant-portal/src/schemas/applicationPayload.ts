@@ -66,7 +66,7 @@ export const ApplicationPayload = z
     linkedinUrl: Url.optional(),
 
     mlhAuthorizedPromoEmail: z.boolean().optional(),
-    mlhAuthorizedDataShare: z.boolean().optional(),
+    mlhAuthorizedDataShare: z.boolean(),
     mlhCodeOfConductAgreement: z.boolean().optional(),
 
     dietaryVegetarian: z.boolean().optional(),
