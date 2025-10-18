@@ -185,7 +185,7 @@ export function SchoolCombobox({
                   .map((school: School) => (
                     <CommandItem
                       key={school.id}
-                      value={`id` + school.id}
+                      value={school.id}
                       onSelect={
                         isAnyLoading
                           ? undefined

@@ -66,6 +66,18 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
   const nextStep = () =>
     currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
 
+  const goToStep = (stepKey: string) => {
+    // Find the index of the step with the given key
+    const index = steps.findIndex((s) => s.key === stepKey);
+
+    // If found, update the current step
+    if (index !== -1) {
+      setCurrentStep(index);
+    } else {
+      console.warn(`Step "${stepKey}" not found`);
+    }
+  };
+
   const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
 
   const onSubmit = async (data: any) => {

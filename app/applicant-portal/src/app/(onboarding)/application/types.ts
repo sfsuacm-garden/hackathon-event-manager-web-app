@@ -23,7 +23,7 @@ export type OtherTextField = TextField & {
 }
 export type CheckboxGroupField = {
   type: "checkbox-group";
-  title: string;
+  label: string;
   options: { name: string; label: string }[];
   helperText?: string,
 };

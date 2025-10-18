@@ -28,7 +28,6 @@ import {
   StepInsights,
   StepMLH,
   StepPreferences,
-  StepReview,
 } from "./schemas";
 import { StepConfig } from "./types";
 
@@ -119,7 +118,7 @@ const steps: StepConfig<any>[] = [
       },
       dietaryGroup: {
         type: "checkbox-group",
-        title: "Dietary Restrictions (For in-person events)",
+        label: "Dietary Restrictions (For in-person events)",
         options: [
           { name: "dietaryVegetarian", label: "Vegetarian" },
           { name: "dietaryVegan", label: "Vegan" },
@@ -300,14 +299,6 @@ const steps: StepConfig<any>[] = [
           "I authorize MLH to send me occasional emails about relevant events, career opportunities, and community announcements.",
       },
     },
-  },
-  {
-    key: "review",
-    label: "Review & Submit",
-    description:
-      "Please review your information before submitting your application.",
-    schema: StepReview,
-    fields: {},
   },
 ];
 
@@ -630,6 +621,66 @@ export default function ApplyPage() {
               return null;
             })}
           </form>
+          {step.key === "review" && (
+            <div className="space-y-6">
+              {Object.entries(form.getValues()).map(([key, value]) => {
+                // Skip null/undefined/false/empty string
+                if (value === undefined || value === "" || value === false)
+                  return null;
+
+                // Find the field definition
+                let fieldLabel = key;
+
+                // If the key ends with `_other`, find the original field
+                if (key.endsWith("_other")) {
+                  const originalKey = key.replace(/_other$/, "");
+                  for (const s of steps) {
+                    if (s.fields[originalKey]) {
+                      const originalLabel = s.fields[originalKey].label;
+                      fieldLabel =
+                        typeof originalLabel === "string"
+                          ? `${originalLabel} (specified)`
+                          : s.label; // fallback if label is JSX
+                      break;
+                    }
+                  }
+                } else {
+                  // Regular fields
+                  for (const s of steps) {
+                    if (s.fields[key]) {
+                      const label = s.fields[key].label;
+                      fieldLabel = typeof label === "string" ? label : s.label; // fallback if JSX
+                      break;
+                    }
+                  }
+                }
+
+                // Handle special display values
+                const displayValue =
+                  typeof value === "object" && value !== null
+                    ? "label" in value
+                      ? value.label
+                      : JSON.stringify(value)
+                    : typeof value === "boolean"
+                      ? value
+                        ? "Yes"
+                        : "No"
+                      : Array.isArray(value)
+                        ? value.join(", ")
+                        : value;
+
+                return (
+                  <div key={key} className="flex-col space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {fieldLabel}
+                    </p>
+                    <p className="text-base">{displayValue as String}</p>
+                    <Separator className="mt-2" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between gap-3 pt-6">
