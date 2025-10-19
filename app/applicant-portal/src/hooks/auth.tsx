@@ -1,6 +1,7 @@
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type Role = "hacker" | "judge" | "mentor";
 
@@ -9,7 +10,6 @@ interface SignupData {
   lastName?: string;
   phoneNumber?: string;
   dob?: string;
-  role: Role;
 }
 
 interface UseSendOtpOptions {
@@ -24,6 +24,8 @@ export function useSendOtp(
 ) {
   const auth = useSupabaseAuth();
   const router = useRouter();
+
+  const { clearSignupData, saveSignupData } = useSignupData();
 
   return useMutation({
     mutationFn: async () => {
@@ -48,6 +50,13 @@ export function useSendOtp(
       });
 
       if (error) throw new Error(error.message);
+
+      clearSignupData();
+
+      if (options.signupData) {
+        saveSignupData(options.signupData);
+      }
+
       return true;
     },
     onError: (err) => {
@@ -69,7 +78,22 @@ export function useSendOtp(
 }
 
 export const useUser = () => {
+  const session = useUserSession();
+
+  return session.data?.user ?? null;
+};
+
+export const useUserSession = () => {
   const auth = useSupabaseAuth();
+  const client = useQueryClient();
+
+  useEffect(() => {
+    const { data: listener } = auth.onAuthStateChange((_event, session) => {
+      client.setQueryData(["user"], session);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, [auth, client]);
 
   return useQuery({
     queryKey: ["user"],
@@ -77,7 +101,7 @@ export const useUser = () => {
       const {
         data: { session },
       } = await auth.getSession();
-      return session?.user ?? null;
+      return session;
     },
     staleTime: Infinity,
   });
@@ -98,3 +122,34 @@ export const useSignOut = () => {
     },
   });
 };
+
+export function useSignupData() {
+  const queryClient = useQueryClient();
+
+  // Save data locally
+  const saveSignupData = (data: {
+    firstName?: string;
+    lastName?: string;
+    dob?: string;
+    phoneNumber?: string;
+  }): void => {
+    queryClient.setQueryData(["signupData"], data);
+  };
+
+  // Read data (will return undefined if not set)
+  const getSignupData = () => {
+    return queryClient.getQueryData(["signupData"]) as SignupData | undefined;
+  };
+
+  // Optional: clear when done
+  const clearSignupData = () => {
+    queryClient.removeQueries({ queryKey: ["signupData"] });
+  };
+
+  const hasSignupData = () => {
+    const data = getSignupData();
+    return data != null && Object.keys(data).length > 0;
+  };
+
+  return { saveSignupData, getSignupData, clearSignupData, hasSignupData };
+}

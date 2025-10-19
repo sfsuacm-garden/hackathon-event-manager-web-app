@@ -1,6 +1,5 @@
 "use client";
 
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import { useUser } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -11,22 +10,13 @@ export const AuthProtectedProvider = ({
   children: React.ReactNode;
 }) => {
   const router = useRouter();
-  const { data: user, isLoading } = useUser();
+  const user = useUser();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!user) {
       router.push("/choose-role");
     }
-  }, [user, isLoading, router]);
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
+  }, [user, router]);
 
   // If user is authenticated, render the app
   if (user) {

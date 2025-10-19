@@ -1,17 +1,9 @@
-import { TRPCError } from '@trpc/server';
+import { requireAuth, requireEvent, requireEventAccess } from '../../common/common.middleware';
 import { t } from '../../core/trpc';
-import { applicationCreateSchema } from './application.schemas';
 import { createOrUpdateApplication, getMyApplication } from './application.controller';
+import { applicationCreateSchema } from './application.schemas';
 
-const requireAuth = t.middleware(({ ctx, next }) => {
-  if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-  return next({ ctx });
-});
 
-const requireEvent = t.middleware(({ ctx, next }) => {
-  if (!ctx.event) throw new TRPCError({ code: 'BAD_REQUEST', message: 'x-event-id header required' });
-  return next({ ctx });
-});
 
 export const applicationRouter = t.router({
   createOrUpdate: t.procedure
@@ -21,7 +13,6 @@ export const applicationRouter = t.router({
     .mutation(({ ctx, input }) => createOrUpdateApplication(ctx, input)),
 
   me: t.procedure
-    .use(requireAuth)
-    .use(requireEvent)
+    .use(requireEventAccess)
     .query(({ ctx }) => getMyApplication(ctx))
 });

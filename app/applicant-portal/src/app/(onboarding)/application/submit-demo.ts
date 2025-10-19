@@ -1,83 +1,129 @@
 "use client";
 
-import { createSupabaseClient } from "@/utils/supabase/client";
-import { z } from "zod";
-import { ApplicationPayload as ApplicationPayloadSchema } from "@/schemas/applicationPayload";
+import { ApplicationFormValues } from "@/schemas/applicationPayload";
+import { addUnderscores } from "@/utils/addUnderscore";
+import { trpc } from "@/utils/trpc";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { OTHER_OPTION } from "./schemas";
 
-type FormValues = z.input<typeof ApplicationPayloadSchema>;
+export function useStepCompletionHandler(
+  steps: any[],
+  currentStep: number,
+  nextStep: () => void,
+  onSubmissionSuccess: () => void,
+  onSubmissionError: () => void
+) {
+  const router = useRouter();
 
-const EVENT_ID = "8924dd52-1358-4853-9871-c9e0fe46cb30";
+  // Keep all form values cumulatively across steps
+  const [allFormData, setAllFormData] = useState<Record<string, any>>({});
 
-function toDbRow(v: FormValues, userId: string) {
-  const row: Record<string, unknown> = {
-    user_id: userId,
-    event_id: EVENT_ID,
+  // Mutation hook
+  const { submit, isPending, isError, error } = useCreateApplication(
+    onSubmissionSuccess,
+    onSubmissionError
+  );
 
-    school_email: v.schoolEmail ?? null,
-    school: v.school ?? null,
-    graduation_year:
-      typeof v.graduationYear === "string"
-        ? v.graduationYear
-          ? Number(v.graduationYear)
-          : null
-        : (v.graduationYear ?? null),
-    major_field_of_study: v.majorFieldOfStudy ?? null,
-    level_of_study: v.levelOfStudy ?? null,
+  const onSubmit = async (data: Record<string, any>) => {
+    const step = steps[currentStep];
+    const stepSchema = step.schema;
 
-    country_of_residence: v.countryOfResidence ?? null,
-    gender: v.gender ?? null,
-    pronouns: v.pronouns ?? null,
-    race_ethnicity: v.raceEthnicity ?? null,
-    sexual_orientation: v.sexualOrientation ?? null,
-    education_level: v.educationLevel ?? null,
-    tshirt_size: v.tshirtSize ?? null,
+    // Collect all step keys (including checkbox-group options)
+    const stepKeys = new Set<string>();
+    Object.entries(step.fields).forEach(([key, field]: [string, any]) => {
+      if (field.type === "checkbox-group") {
+        field.options.forEach((opt: any) => stepKeys.add(opt.name));
+      } else {
+        stepKeys.add(key);
+      }
+    });
 
-    dietary_vegetarian: v.dietaryVegetarian ?? null,
-    dietary_vegan: v.dietaryVegan ?? null,
-    dietary_celiac_disease: v.dietaryCeliacDisease ?? null,
-    dietary_kosher: v.dietaryKosher ?? null,
-    dietary_halal: v.dietaryHalal ?? null,
-
-    mlh_authorized_promo_email: v.mlhAuthorizedPromoEmail ?? null,
-    mlh_authorized_data_share: v.mlhAuthorizedDataShare ?? null,
-    mlh_code_of_conduct_aggreemeant: v.mlhCodeOfConductAgreement ?? null,
-  };
-
-  for (const k of Object.keys(row)) {
-    if (row[k] === undefined) delete row[k];
-  }
-  return row;
-}
-
-export async function submitApplicationDemo(form: FormValues) {
-  const supabase = createSupabaseClient();
-
-  const {
-    data: { user },
-    error: userErr,
-  } = await supabase.auth.getUser();
-  if (userErr) throw new Error(userErr.message);
-  if (!user) throw new Error("Not signed in");
-
-  const appRow = toDbRow(form, user.id);
-
-  const { data: app, error: upsertErr } = await supabase
-    .from("applications")
-    .upsert(appRow, { onConflict: "event_id,user_id" })
-    .select()
-    .single();
-
-  if (upsertErr) throw new Error(upsertErr.message);
-
-  const role = (user.user_metadata?.role as string) || "hacker";
-  const { error: epErr } = await supabase
-    .from("event_profiles")
-    .upsert(
-      { event_id: EVENT_ID, profile_id: user.id, role },
-      { onConflict: "event_id,profile_id" },
+    // Extract only current step data
+    const stepData = Object.fromEntries(
+      Array.from(stepKeys).map((k) => [k, data[k]])
     );
 
-  if (epErr) throw new Error(epErr.message);
+    // Validate current step data
+    const result = await stepSchema.safeParseAsync(stepData);
+    if (!result.success) {
+      console.warn("❌ Validation failed:", result.error.format());
+      return;
+    }
+    
+    // Merge current step data into cumulative form data
+    setAllFormData((prev) => ({ ...prev, ...stepData }));
 
-  return app;
+    console.log(allFormData);
+    // If not the last step, just go to next step
+    if (currentStep < steps.length - 1) {
+      console.log("➡️ Going to next step");
+      nextStep();
+      return;
+    }
+
+
+    // If last step, process allFormData + current step data
+    const finalApplication: Partial<ApplicationFormValues> = {};
+
+    const combinedData = { ...allFormData, ...stepData };
+    (Object.entries(combinedData) as [keyof ApplicationFormValues, any][]).forEach(
+      ([key, value]) => {
+        let formKey: string = key;
+
+        // Conditional handling for "school" and "schoolId" 
+        if (key === "schoolId") {
+          console.log("found")
+          formKey = "school";
+          if(combinedData[formKey] === OTHER_OPTION ) {
+            return;
+          }
+        
+        }
+
+
+
+        // Transform t-shirt size
+        if (key === "tshirtSize" && typeof combinedData[formKey] === "string") {
+          combinedData[formKey] = addUnderscores(combinedData[formKey]);
+        }
+
+        // Append "_other" suffix if value is OTHER_OPTION
+        if (combinedData[formKey] === OTHER_OPTION) {
+          formKey = `${formKey}_other`;
+        }
+
+        // Assign non-empty values
+        if (combinedData[formKey] !== undefined && combinedData[formKey] !== null && combinedData[formKey] !== "") {
+          finalApplication[key] = combinedData[formKey];
+        }
+      }
+    );
+
+    // Submit all data
+    await submit(finalApplication as ApplicationFormValues);
+  };
+
+  return {
+    onSubmit,
+    isPending,
+    isError,
+    error,
+  };
+}
+
+
+function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
+  // tRPC already provides its own useMutation hook
+  const mutation = trpc.applications.createOrUpdate.useMutation({
+   onSuccess: onVerifySuccess, onError: onError
+  });
+
+    const submit = async (form: ApplicationFormValues) => {
+      console.log(form)
+    const data = await mutation.mutateAsync(form);
+    if (!data) throw new Error("No user found.");
+    return data}
+
+  return { ...mutation, submit };
 }

@@ -19,6 +19,9 @@ import {
 } from "@/components/shadcn/ui/select";
 import { Separator } from "@/components/shadcn/ui/separator";
 import EventHeader from "@/components/ui/event-header";
+import { Spinner } from "@/components/ui/shadcn-io/spinner";
+
+import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 import { SchoolCombobox } from "./components/ComboBoxSchools";
 import { useMultiStepForm } from "./hooks";
@@ -30,7 +33,6 @@ import {
   StepPreferences,
 } from "./schemas";
 import { StepConfig } from "./types";
-
 /** Step Definitions */
 const steps: StepConfig<any>[] = [
   {
@@ -107,12 +109,18 @@ const steps: StepConfig<any>[] = [
         label: "T-Shirt Size",
         fillerText: "Select your preferred T-shirt size",
         options: [
-          { value: "xs", label: "XS" },
-          { value: "s", label: "S" },
-          { value: "m", label: "M" },
-          { value: "l", label: "L" },
-          { value: "xl", label: "XL" },
-          { value: "xxl", label: "XXL" },
+          { value: "US_XS", label: "USXS" },
+          { value: "US_S", label: "USS" },
+          { value: "US_M", label: "USM" },
+          { value: "US_L", label: "USL" },
+          { value: "US_XL", label: "USXL" },
+          { value: "US_XXL", label: "USXXL" },
+          { value: "UK_6", label: "UK6" },
+          { value: "UK_8", label: "UK8" },
+          { value: "UK_10", label: "UK10" },
+          { value: "UK_12", label: "UK12" },
+          { value: "UK_14", label: "UK14" },
+          { value: "UK_16", label: "UK16" },
         ],
         hasOtherOption: false,
       },
@@ -303,8 +311,23 @@ const steps: StepConfig<any>[] = [
 ];
 
 export default function ApplyPage() {
-  const { currentStep, step, form, prevStep, onSubmit, isLoadingSchool } =
-    useMultiStepForm(steps);
+  const router = useRouter();
+  const onSubmissionSuccess = () => {
+    router.push("choose-roles");
+  };
+
+  const onSubmissionError = () => {
+    console.error("Error submitting application");
+  };
+  const {
+    currentStep,
+    step,
+    form,
+    prevStep,
+    onSubmit,
+    isLoadingSchool,
+    isStepLoading,
+  } = useMultiStepForm(steps, onSubmissionSuccess, onSubmissionError);
 
   return (
     <main className="flex justify-center items-start min-h-screen py-12 ">
@@ -692,9 +715,13 @@ export default function ApplyPage() {
             <div />
           )}
           <Button onClick={form.handleSubmit(onSubmit)}>
-            {currentStep === steps.length - 1
-              ? "Submit Application"
-              : "Continue"}
+            {isStepLoading ? (
+              <Spinner />
+            ) : currentStep === steps.length - 1 ? (
+              "Submit Application"
+            ) : (
+              "Continue"
+            )}
           </Button>
         </div>
       </div>

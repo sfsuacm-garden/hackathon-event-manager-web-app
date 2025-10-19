@@ -79,7 +79,6 @@ export default function SignupPage() {
       lastName: form.watch("lastName"),
       phoneNumber: form.watch("phoneNumber"),
       dob: form.watch("dob"),
-      role: "hacker",
     },
   });
 

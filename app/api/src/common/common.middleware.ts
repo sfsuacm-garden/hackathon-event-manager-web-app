@@ -1,16 +1,29 @@
 import { TRPCError } from '@trpc/server';
-import { t } from '../core/trpc';
 import prisma from '../config/prismaClient';
+import { t } from '../core/trpc';
 
 export const requireAuth = t.middleware(({ ctx, next }) => {
   if (!ctx.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      user: ctx.user // makes sure `ctx.user` is strongly typed in downstream resolvers
+    }
+  });
+});
+
+
+export const requireEvent = t.middleware(({ ctx, next }) => {
+  if (!ctx.event) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 
   return next({
     ctx: {
       ...ctx,
-      user: ctx.user // makes sure `ctx.user` is strongly typed in downstream resolvers
+      event: ctx.event
     }
   });
 });

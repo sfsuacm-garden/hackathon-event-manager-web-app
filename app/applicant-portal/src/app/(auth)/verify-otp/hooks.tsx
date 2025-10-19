@@ -1,38 +1,66 @@
 "use client";
 
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
+import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSendOtp } from "../../../hooks/auth";
+import { useSendOtp, useSignupData } from "../../../hooks/auth";
 
-function useVerifyOtp(
+export function useVerifyOtp(
   email: string,
   onVerifySuccess: () => void | Promise<void>
 ) {
   const auth = useSupabaseAuth();
+  const createProfile = trpc.profile.create.useMutation();
+  const { getSignupData, clearSignupData } = useSignupData();
 
   return useMutation({
     mutationFn: async (otp: string) => {
       if (!otp || otp.length < 6) throw new Error("Enter the 6-digit code");
 
+      // Step 1: Verify OTP
       const { data, error } = await auth.verifyOtp({
         email,
         token: otp,
         type: "email",
       });
 
-      if (error) throw error.message;
-      if (!data.user) throw "No user found.";
+      if (error) {
+        console.error("❌ OTP verification failed:", error);
+        throw new Error(error.message ?? "OTP verification failed");
+      }
+
+      if (!data.user) throw new Error("No user found.");
+
+      // Step 2: Persist session
+      if (data.session) {
+        await auth.setSession(data.session);
+      }
+
+      // Step 3: Create profile if signup data exists
+      const signUpData = getSignupData();
+      if (signUpData) {
+        try {
+          await createProfile.mutateAsync(signUpData);
+          clearSignupData(); // optional: clear signup data on success
+        } catch (err: any) {
+          console.error("❌ Failed to create profile:", err);
+          throw new Error(err?.message ?? "Failed to set up user profile");
+        }
+      }
 
       return data.user;
     },
+
     onSuccess: async () => {
       await onVerifySuccess();
     },
-    onError: (err) => {
-      console.error(err);
-      return err.message;
+
+    onError: (err: any) => {
+      // err is now either OTP error or profile creation error
+      console.error("❌ Verification failed:", err);
+      return err?.message ?? "An unknown error occurred";
     },
   });
 }

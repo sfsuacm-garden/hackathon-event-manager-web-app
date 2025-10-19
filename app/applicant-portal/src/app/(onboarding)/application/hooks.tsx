@@ -3,6 +3,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useStepCompletionHandler } from "./submit-demo";
 import { StepConfig } from "./types";
 
 // Utility function to extract domain from email
@@ -12,7 +13,11 @@ function extractEmailDomain(email: string): string | null {
   return parts.length === 2 ? parts[1].toLowerCase().trim() : null;
 }
 
-export function useMultiStepForm(steps: StepConfig<any>[]) {
+export function useMultiStepForm(
+  steps: StepConfig<any>[],
+  onSuccess: () => void,
+  onError: () => void
+) {
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
 
@@ -66,57 +71,20 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
   const nextStep = () =>
     currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
 
-  const goToStep = (stepKey: string) => {
-    // Find the index of the step with the given key
-    const index = steps.findIndex((s) => s.key === stepKey);
-
-    // If found, update the current step
-    if (index !== -1) {
-      setCurrentStep(index);
-    } else {
-      console.warn(`Step "${stepKey}" not found`);
-    }
-  };
-
   const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
 
-  const onSubmit = async (data: any) => {
-    console.log("🔍 Submit triggered, current step:", currentStep);
-    console.log("📦 All form data:", data);
-
-    const stepSchema = step.schema;
-
-    // Collect step field keys including checkbox-group options
-    const allStepKeys = new Set<string>();
-    Object.entries(step.fields).forEach(([key, field]: [string, any]) => {
-      if (field.type === "checkbox-group") {
-        field.options.forEach((opt: any) => allStepKeys.add(opt.name));
-      } else {
-        allStepKeys.add(key);
-      }
-    });
-
-    const stepData = Object.fromEntries(
-      Array.from(allStepKeys).map((k) => [k, data[k]])
-    );
-
-    console.log("📋 Step data being validated:", stepData);
-
-    const result = await stepSchema.safeParseAsync(stepData);
-    console.log("✅ Validation result:", result);
-
-    if (!result.success) {
-      console.warn("❌ Validation failed:", result.error.format());
-      return;
-    }
-
-    if (currentStep < steps.length - 1) {
-      console.log("➡️ Going to next step");
-      nextStep();
-    } else {
-      console.log("✅ Final submission:", data);
-    }
-  };
+  const {
+    onSubmit,
+    isPending: isStepLoading,
+    isError,
+    error,
+  } = useStepCompletionHandler(
+    steps,
+    currentStep,
+    nextStep,
+    onSuccess,
+    onError
+  );
 
   return {
     currentStep,
@@ -126,11 +94,12 @@ export function useMultiStepForm(steps: StepConfig<any>[]) {
     prevStep,
     onSubmit,
     isLoadingSchool,
+    isStepLoading,
   };
 }
 
 export function usePrepopulateSchoolFieldDropwdownSelection() {
-  const { data: user, isLoading: isUserLoading } = useUser();
+  const user = useUser();
 
   const [schoolSelection, setSchoolSelection] = useState<{
     value: string;
@@ -168,7 +137,7 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
 
   return {
     schoolSelection,
-    isLoadingSchool: isUserLoading || isSchoolLoading,
+    isLoadingSchool: isSchoolLoading,
     userEmailDomain,
     schoolError,
   };

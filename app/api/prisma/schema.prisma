@@ -157,7 +157,7 @@ model UserProfile {
   firstName     String?             @map("first_name")
   lastName      String?             @map("last_name")
   dob           String?
-  phone_number  String?
+  phoneNumber   String?             @map("phone_number")
   applications  Application[]
   eventProfiles EventProfile[]
   mailingLists  MailingListMember[]
