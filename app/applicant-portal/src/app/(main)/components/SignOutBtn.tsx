@@ -24,7 +24,7 @@ export default function SignOutBtn() {
     signOutMutation(undefined, {
       onSuccess: () => {
         toast("You have successfully signed out...")
-        router.push("/")
+        router.push("/");
       }
     })
   };
