@@ -9,12 +9,12 @@ on:
 
 env:
   SUPABASE_SERVICE_ROLE_KEY: "test"
-  SUPABASE_URL: "test"
-  DATABASE_URL: "test"
+  SUPABASE_URL: "https://xyzcompany.supabase.co"
+  DATABASE_URL: "https://xyzcompany.supabase.co"
   DIRECT_URL: "test"
-  NEXT_PUBLIC_SUPABASE_URL: "test"
+  NEXT_PUBLIC_SUPABASE_URL: "https://xyzcompany.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "test"
-  NEXT_PUBLIC_API_URL: "test"
+  NEXT_PUBLIC_API_URL: "https://xyzcompany.supabase.co"
   NEXT_PUBLIC_EVENT_ID: "test"
 
 jobs:
