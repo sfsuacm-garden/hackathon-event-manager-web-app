@@ -9,7 +9,7 @@ export const trpcRouter = t.router({
   //TODO change event directory to be plural.
   events: eventRouter,
   teams: teamsRouter,
-  appplications: applicationRouter,
+  applications: applicationRouter,
   schools: schoolsRouter,
   profile: userProfileRouter
 });
