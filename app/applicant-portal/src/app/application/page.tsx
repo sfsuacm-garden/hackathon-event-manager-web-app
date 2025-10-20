@@ -56,11 +56,12 @@ export default function ApplyPage() {
       <div className="w-full max-w-2xl">
         <div className="space-y-12">
           <div className="space-y-4">
-            <Progress
+          
+            <EventHeader />
+              <Progress
               value={((currentStep + 1) / steps.length) * 100}
               className="h-2"
             />
-            <EventHeader />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">{step.label}</h1>
