@@ -170,7 +170,7 @@ export default function TeamMemberCard({
                   ) : (
                     <>
                       <h3 className="text-sm font-semibold">
-                        {!isMemberLoggedInUser ? firstName + lastName : "You"}
+                        {!isMemberLoggedInUser ? firstName + " " + lastName : "You"}
                         {isTeamAdmin && " - Team Admin"}
                       </h3>
                       <p className="text-sm">{email}</p>
