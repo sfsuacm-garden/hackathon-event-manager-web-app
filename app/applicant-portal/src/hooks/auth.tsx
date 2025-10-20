@@ -1,4 +1,7 @@
+import { OtpErrorType } from "@/app/application/types";
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
+import { trpc } from "@/utils/trpc";
+import { User } from "@supabase/supabase-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -69,6 +72,79 @@ export const useUserSession = () => {
     staleTime: Infinity,
   });
 };
+
+export function useVerifyOtp(
+  email: string,
+  onVerifySuccess: () => void | Promise<void>
+) {
+  const auth = useSupabaseAuth();
+  const createProfile = trpc.profile.create.useMutation();
+  const { getSignupData, clearSignupData } = useSignupData();
+
+  return useMutation<
+    User,            
+    OtpErrorType,    
+    string            
+  >({
+    mutationFn: async (otp: string) => {
+      if (!otp || otp.length < 6)
+        throw { type: "INVALID_OTP", message: "Enter the 6-digit code" };
+
+      const { data, error } = await auth.verifyOtp({
+        email,
+        token: otp,
+        type: "email",
+      });
+
+      if (error) {
+        console.error("❌ OTP verification failed:", error);
+        throw { type: "VERIFY_FAIL", message: error.message ?? "OTP verification failed" };
+      }
+
+      if (!data.user)
+        throw { type: "NO_USER", message: "No user found." };
+
+      if (data.session) {
+        await auth.setSession(data.session);
+      }
+      
+
+      //TODO The verify step should be moved to a TRPC route
+      // because of the create profile step.
+      const signUpData = getSignupData();
+      if (signUpData) {
+        try {
+          await createProfile.mutateAsync(signUpData);
+          clearSignupData();
+        } catch (err) {
+          console.error("❌ Failed to create profile:", err);
+          throw { type: "PROFILE_FAIL", message: "Failed to set up user profile" };
+        }
+      }
+
+      return data.user;
+    },
+
+    onSuccess: async () => {
+      await onVerifySuccess();
+    },
+
+    onError: (err) => {
+      // ✅ `err` is now type `OtpErrorType`
+      switch (err.type) {
+        case "INVALID_OTP":
+          console.error("Invalid code:", err.message);
+          break;
+        case "VERIFY_FAIL":
+          console.error("Verification failed:", err.message);
+          break;
+        case "PROFILE_FAIL":
+          console.error("Profile creation failed:", err.message);
+          break;
+      }
+    },
+  });
+}
 
 export function useSendOtp(
   email: string,

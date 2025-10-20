@@ -1,3 +1,4 @@
+import { RouterInputs } from "@/utils/trpc";
 import z from "zod";
 
 export type TextField = { type: "text"; label: string; fillerText: string, helperText?: string, };
@@ -59,3 +60,5 @@ export type OtpErrorType =
   | { type: "VERIFY_FAIL"; message: string }
   | { type: "NO_USER"; message: string }
   | { type: "PROFILE_FAIL"; message: string };
+
+export type ApplicationFormValues = RouterInputs["applications"]["createOrUpdate"];
