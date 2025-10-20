@@ -32,11 +32,12 @@ export function useMultiStepForm(
       for (const [key, field] of Object.entries(s.fields)) {
         // Base defaults
 
-        if (field.type === "dropdown") {
+        if (field.type === "dropdown" || field.type === "school-combobox") {
           if (field.hasOtherOption) {
             values[key + `_other`] = "";
           }
         }
+
         if (field.type === "checkbox") {
           values[key] = false;
         } else if (field.type === "checkbox-group") {

@@ -47,6 +47,8 @@ const steps: StepConfig<any>[] = [
         label: "What school do you attend?",
         fillerText: "Search for your university",
         helperText: "Start typing to search for your school",
+        hasOtherOption: true,
+        otherLabel: "Other",
       },
       levelOfStudy: {
         type: "dropdown",
@@ -231,7 +233,6 @@ const steps: StepConfig<any>[] = [
           { value: "heterosexual", label: "Heterosexual or straight" },
           { value: "gay_lesbian", label: "Gay or lesbian" },
           { value: "bisexual", label: "Bisexual" },
-          { value: "different_identity", label: "Different identity" },
           { value: "prefer_not_answer", label: "Prefer Not to Answer" },
         ],
         hasOtherOption: true,
@@ -497,7 +498,7 @@ export default function ApplyPage() {
                               {field.helperText}
                             </p>
                           )}
-                          {selectedValue == OTHER_OPTION && (
+                          {selectedValue === OTHER_OPTION && (
                             <Controller
                               key={key + `_other`}
                               control={form.control}

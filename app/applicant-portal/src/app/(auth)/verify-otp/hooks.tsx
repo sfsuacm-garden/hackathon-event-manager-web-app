@@ -88,7 +88,7 @@ export function useOtpVerification(
   };
 
   const onVerifySuccess: () => void = () => {
-    router.push(`/dashboard`);
+    router.push(`/my-dashboard`);
   };
 
   const onResendSuccess: () => void = () => {

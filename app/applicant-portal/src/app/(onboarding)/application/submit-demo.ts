@@ -32,6 +32,12 @@ export function useStepCompletionHandler(
     // Collect all step keys (including checkbox-group options)
     const stepKeys = new Set<string>();
     Object.entries(step.fields).forEach(([key, field]: [string, any]) => {
+      if (field.type === "dropdown" || field.type === "school-combobox") {
+          if (field.hasOtherOption) {
+            stepKeys.add(key + `_other`);
+          }
+        }
+
       if (field.type === "checkbox-group") {
         field.options.forEach((opt: any) => stepKeys.add(opt.name));
       } else {
@@ -53,7 +59,7 @@ export function useStepCompletionHandler(
     
     // Merge current step data into cumulative form data
     setAllFormData((prev) => ({ ...prev, ...stepData }));
-
+    
     console.log(allFormData);
     // If not the last step, just go to next step
     if (currentStep < steps.length - 1) {
@@ -64,43 +70,41 @@ export function useStepCompletionHandler(
 
 
     // If last step, process allFormData + current step data
-    const finalApplication: Partial<ApplicationFormValues> = {};
+    const finalApplication: Record<string, any>= {};
 
     const combinedData = { ...allFormData, ...stepData };
-    (Object.entries(combinedData) as [keyof ApplicationFormValues, any][]).forEach(
+    setAllFormData((prev) => ({ ...prev, ...stepData }));
+    
+    (Object.entries(combinedData)).forEach(
       ([key, value]) => {
-        let formKey: string = key;
+
+        let appKey: string = key;
 
         // Conditional handling for "school" and "schoolId" 
-        if (key === "schoolId") {
-          console.log("found")
-          formKey = "school";
-          if(combinedData[formKey] === OTHER_OPTION ) {
+        if(key === "school") {
+          if(combinedData[key] === OTHER_OPTION) {
             return;
           }
-        
         }
-
-
-
         // Transform t-shirt size
-        if (key === "tshirtSize" && typeof combinedData[formKey] === "string") {
-          combinedData[formKey] = addUnderscores(combinedData[formKey]);
+        if (key === "tshirtSize" && typeof combinedData[key] === "string") {
+          combinedData[key] = addUnderscores(combinedData[key]);
         }
 
         // Append "_other" suffix if value is OTHER_OPTION
-        if (combinedData[formKey] === OTHER_OPTION) {
-          formKey = `${formKey}_other`;
+        if (key.endsWith("_other")) {
+          appKey = key.replace("_other", "")
         }
 
         // Assign non-empty values
-        if (combinedData[formKey] !== undefined && combinedData[formKey] !== null && combinedData[formKey] !== "") {
-          finalApplication[key] = combinedData[formKey];
+        if (combinedData[key] !== undefined && combinedData[key] !== null && combinedData[key] !== "" && combinedData[key] !== OTHER_OPTION) {
+          finalApplication[appKey] = combinedData[key];
         }
       }
     );
 
     // Submit all data
+    console.log(finalApplication)
     await submit(finalApplication as ApplicationFormValues);
   };
 
@@ -116,11 +120,11 @@ export function useStepCompletionHandler(
 function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
   // tRPC already provides its own useMutation hook
   const mutation = trpc.applications.createOrUpdate.useMutation({
-   onSuccess: onVerifySuccess, onError: onError
+   onSuccess: () => {}, onError: onError
   });
 
     const submit = async (form: ApplicationFormValues) => {
-      console.log(form)
+
     const data = await mutation.mutateAsync(form);
     if (!data) throw new Error("No user found.");
     return data}
