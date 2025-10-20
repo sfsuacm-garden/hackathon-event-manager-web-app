@@ -7,6 +7,16 @@ on:
     branches: ["**"] # Trigger workflow on pull requests targeting any branch
   workflow_dispatch: # Allow manual triggering from GitHub Actions tab
 
+env:
+  SUPABASE_SERVICE_ROLE_KEY: "test"
+  SUPABASE_URL: "test"
+  DATABASE_URL: "test"
+  DIRECT_URL: "test"
+  NEXT_PUBLIC_SUPABASE_URL: "test"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "test"
+  NEXT_PUBLIC_API_URL: "test"
+  NEXT_PUBLIC_EVENT_ID: "test"
+
 jobs:
   build:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
