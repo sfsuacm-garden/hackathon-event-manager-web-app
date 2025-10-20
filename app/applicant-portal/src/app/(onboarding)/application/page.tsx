@@ -34,12 +34,8 @@ import {
 } from "./schemas";
 import { FormField, StepConfig } from "./types";
 /** Step Definitions */
-const steps: StepConfig<
-  | typeof StepBasics
-  | typeof StepPreferences
-  | typeof StepInsights
-  | typeof StepMLH
->[] = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const steps: StepConfig<any>[] = [
   {
     key: "basics",
     label: "Registration Basics",
@@ -542,16 +538,13 @@ export default function ApplyPage() {
                                       {fieldStateOther.invalid && (
                                         <p className="text-sm text-destructive">
                                           {fieldStateOther.error?.message ||
-                                            "This field is required."} 
+                                            "This field is required."}
                                         </p>
-                                        )}
-                                  </>
-                                   
-                                )}
-                                
+                                      )}
+                                    </>
+                                  )}
                                   name={key + `_other`}
                                 />
-                              
                               </>
                             )}
                           </div>

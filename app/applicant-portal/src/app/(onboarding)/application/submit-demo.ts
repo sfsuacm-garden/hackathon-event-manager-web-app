@@ -4,7 +4,7 @@ import { ApplicationFormValues } from "@/schemas/applicationPayload";
 import { addUnderscores } from "@/utils/addUnderscore";
 import { trpc } from "@/utils/trpc";
 import { useState } from "react";
-import { OTHER_OPTION, StepBasics, StepInsights, StepMLH, StepPreferences } from "./schemas";
+import { OTHER_OPTION } from "./schemas";
 import { FormField, StepConfig } from "./types";
 
 function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
@@ -24,12 +24,8 @@ function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void
 
 
 export function useStepCompletionHandler(
- steps: StepConfig<
-    typeof StepBasics
-    | typeof StepPreferences
-    | typeof StepInsights
-    | typeof StepMLH
-  >[],
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ steps: StepConfig<any>[],
   currentStep: number,
   nextStep: () => void,
   onSubmissionSuccess: () => void,
