@@ -17,14 +17,14 @@ export const StepPreferences = z
         dietaryCeliacDisease: z.boolean().optional().default(false),
         dietaryKosher: z.boolean().optional().default(false),
         dietaryHalal: z.boolean().optional().default(false),
-        tshirtSize: z.string().nonempty("T-shirt size is required."),
+        tshirtSize: z.string(),
     })
     .loose();
 
 export const StepInsights = z
   .object({
-    majorFieldOfStudy: z.string().nonempty("Major is required."),
-    gender: z.string().nonempty("Gender is required."),
+    majorFieldOfStudy: z.string(),
+    gender: z.string(),
     pronouns: z.string().optional(),
     raceEthnicity: z.string().optional(),
     sexualOrientation: z.string().optional(),
