@@ -13,40 +13,11 @@ function toParticipationLevel(s?: string): participation_level | null {
 }
 
 function buildUpdateData(input: CreateApplicationInput): Prisma.ApplicationUncheckedUpdateInput {
-  const data: Prisma.ApplicationUncheckedUpdateInput = {};
-
-  if (input.schoolEmail !== undefined) data.school_email = input.schoolEmail;
-  if (input.school !== undefined) data.school = input.school;
-  if (input.schoolId !== undefined) data.schoolId = input.schoolId;
-
-  if (input.graduationYear !== undefined) data.graduationYear = input.graduationYear;
-  if (input.experienceLevel !== undefined) data.experienceLevel = input.experienceLevel;
-
-  if (input.levelOfStudy !== undefined) data.levelOfStudy = input.levelOfStudy;
-  if (input.countryOfResidence !== undefined) data.countryOfResidence = input.countryOfResidence;
-  if (input.linkedinUrl !== undefined) data.linkedinUrl = input.linkedinUrl;
-
-  if (input.mlhAuthorizedPromoEmail !== undefined) data.mlhAuthorizedPromoEmail = input.mlhAuthorizedPromoEmail;
-  if (input.mlhAuthorizedDataShare !== undefined) data.mlhAuthorizedDataShare = input.mlhAuthorizedDataShare;
-  if (input.mlhCodeOfConductAgreement !== undefined) data.mlhCodeOfConductAgreement = input.mlhCodeOfConductAgreement;
-
-  if (input.dietaryVegetarian !== undefined) data.dietaryVegetarian = input.dietaryVegetarian;
-  if (input.dietaryVegan !== undefined) data.dietaryVegan = input.dietaryVegan;
-  if (input.dietaryCeliacDisease !== undefined) data.dietaryCeliacDisease = input.dietaryCeliacDisease;
-  if (input.dietaryKosher !== undefined) data.dietaryKosher = input.dietaryKosher;
-  if (input.dietaryHalal !== undefined) data.dietaryHalal = input.dietaryHalal;
-
-  if (input.gender !== undefined) data.gender = input.gender;
-  if (input.pronouns !== undefined) data.pronouns = input.pronouns;
-  if (input.raceEthnicity !== undefined) data.raceEthnicity = input.raceEthnicity;
-  if (input.sexualOrientation !== undefined) data.sexualOrientation = input.sexualOrientation;
-  if (input.educationLevel !== undefined) data.educationLevel = input.educationLevel;
-  if (input.tshirtSize !== undefined) data.tshirtSize = input.tshirtSize;
-  if (input.majorFieldOfStudy !== undefined) data.majorFieldOfStudy = input.majorFieldOfStudy;
-
-  return data;
+  // Filter out undefined values
+  return Object.fromEntries(
+    Object.entries(input).filter(([_, value]) => value !== undefined)
+  ) as Prisma.ApplicationUncheckedUpdateInput;
 }
-
 
 async function buildCreateData(
   userId: string,
@@ -58,7 +29,7 @@ async function buildCreateData(
   ) as Partial<CreateApplicationInput>;
 
   // 1️⃣ Create or find the user's eventProfile
-  const eventProfile = await prisma.eventProfile.create({
+  await prisma.eventProfile.create({
     data: {
       eventId,
       profileId: userId, // assuming userId === profileId (if not, fix this)

@@ -1,7 +1,9 @@
 "use client";
 
+import { OtpErrorType } from "@/app/(onboarding)/application/types";
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
 import { trpc } from "@/utils/trpc";
+import { User } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,11 +17,15 @@ export function useVerifyOtp(
   const createProfile = trpc.profile.create.useMutation();
   const { getSignupData, clearSignupData } = useSignupData();
 
-  return useMutation({
+  return useMutation<
+    User,              // ✅ TData (return value)
+    OtpErrorType,      // ✅ TError (error type)
+    string             // ✅ TVariables (the OTP input)
+  >({
     mutationFn: async (otp: string) => {
-      if (!otp || otp.length < 6) throw new Error("Enter the 6-digit code");
+      if (!otp || otp.length < 6)
+        throw { type: "INVALID_OTP", message: "Enter the 6-digit code" };
 
-      // Step 1: Verify OTP
       const { data, error } = await auth.verifyOtp({
         email,
         token: otp,
@@ -28,25 +34,24 @@ export function useVerifyOtp(
 
       if (error) {
         console.error("❌ OTP verification failed:", error);
-        throw new Error(error.message ?? "OTP verification failed");
+        throw { type: "VERIFY_FAIL", message: error.message ?? "OTP verification failed" };
       }
 
-      if (!data.user) throw new Error("No user found.");
+      if (!data.user)
+        throw { type: "NO_USER", message: "No user found." };
 
-      // Step 2: Persist session
       if (data.session) {
         await auth.setSession(data.session);
       }
 
-      // Step 3: Create profile if signup data exists
       const signUpData = getSignupData();
       if (signUpData) {
         try {
           await createProfile.mutateAsync(signUpData);
-          clearSignupData(); // optional: clear signup data on success
-        } catch (err: unknown) {
+          clearSignupData();
+        } catch (err) {
           console.error("❌ Failed to create profile:", err);
-          throw new Error("Failed to set up user profile");
+          throw { type: "PROFILE_FAIL", message: "Failed to set up user profile" };
         }
       }
 
@@ -57,10 +62,19 @@ export function useVerifyOtp(
       await onVerifySuccess();
     },
 
-    onError: (err: unknown) => {
-      // err is now either OTP error or profile creation error
-      console.error("❌ Verification failed:", err);
-      throw new Error("Verification failed.");
+    onError: (err) => {
+      // ✅ `err` is now type `OtpErrorType`
+      switch (err.type) {
+        case "INVALID_OTP":
+          console.error("Invalid code:", err.message);
+          break;
+        case "VERIFY_FAIL":
+          console.error("Verification failed:", err.message);
+          break;
+        case "PROFILE_FAIL":
+          console.error("Profile creation failed:", err.message);
+          break;
+      }
     },
   });
 }

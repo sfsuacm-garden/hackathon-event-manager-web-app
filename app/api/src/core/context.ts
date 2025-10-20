@@ -5,7 +5,7 @@ import { supabase } from '../config/supabase';
 
 export async function createContext({ req, res }: CreateExpressContextOptions) {
   
-  const authHeader = req.headers.authorization
+  const authHeader = req.headers.authorization;
       
   const token = authHeader?.startsWith('Bearer ')
     ? authHeader.slice(7)
@@ -33,7 +33,7 @@ export async function createContext({ req, res }: CreateExpressContextOptions) {
     req,
     res,
     user,
-    event,
+    event
   };
 }
 

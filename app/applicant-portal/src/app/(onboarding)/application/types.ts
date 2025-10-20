@@ -52,3 +52,9 @@ export type StepConfig<Schema extends z.ZodTypeAny> = {
   fields: Record<string, FormField>;
   seperateLastFieldWithLine?: boolean;
 };
+
+export type OtpErrorType =
+  | { type: "INVALID_OTP"; message: string }
+  | { type: "VERIFY_FAIL"; message: string }
+  | { type: "NO_USER"; message: string }
+  | { type: "PROFILE_FAIL"; message: string };

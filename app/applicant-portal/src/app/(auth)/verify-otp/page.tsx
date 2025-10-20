@@ -83,7 +83,7 @@ export default function AuthBase() {
                   phone.
                 </FieldDescription>
                 {isVerifyOtpError && (
-                  <FieldError errors={[{ message: verifyOtpError?.message }]} />
+                  <FieldError errors={[{ message: verifyOtpError?.message ?? ""}]} />
                 )}
               </Field>
             </FieldGroup>
