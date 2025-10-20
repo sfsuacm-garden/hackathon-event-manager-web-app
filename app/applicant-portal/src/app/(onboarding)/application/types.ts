@@ -53,6 +53,7 @@ export type StepConfig<Schema extends z.ZodTypeAny> = {
   seperateLastFieldWithLine?: boolean;
 };
 
+// In use for handling OTP error types but should be expanding to handle more error types properly. 
 export type OtpErrorType =
   | { type: "INVALID_OTP"; message: string }
   | { type: "VERIFY_FAIL"; message: string }

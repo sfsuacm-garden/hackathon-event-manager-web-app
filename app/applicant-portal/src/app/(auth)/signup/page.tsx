@@ -57,6 +57,8 @@ const signupFormSchema = z
   .required();
 
 export default function SignupPage() {
+
+  //TODO move this logic over to its own hook.
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {

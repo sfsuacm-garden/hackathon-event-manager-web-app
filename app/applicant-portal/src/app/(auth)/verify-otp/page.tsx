@@ -2,6 +2,10 @@
 
 import { VerifyOtpPage } from "./components/VerifyOTPPage";
 
+
+// TODO In Next.js 15+, searchParams is now asynchronous and needs to be awaited. 
+// For some reason though there is a console error popping up from this being async though. 
+// Don't have time to investigate but works fine.
 type VerifyOtpPageProps = {
   searchParams: Promise<{
     email?: string;

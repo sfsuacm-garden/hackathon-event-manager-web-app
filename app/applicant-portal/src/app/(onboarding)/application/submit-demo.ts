@@ -96,6 +96,7 @@ export function useStepCompletionHandler(
         let appKey: string = key;
 
         // Conditional handling for "school" and "schoolId" 
+        // TODO (more on the backend) specify a cleaner way to handle schoolIds and other options.
         if(key === "school") {
           if(combinedData[key] === OTHER_OPTION) {
             return;

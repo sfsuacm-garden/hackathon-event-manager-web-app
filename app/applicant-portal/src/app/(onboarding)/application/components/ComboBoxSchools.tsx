@@ -23,6 +23,8 @@ import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
 import { OTHER_OPTION } from "../schemas";
 
+
+//TODO refer and use the type from the school endpoint. 
 interface School {
   id: string;
   name: string;

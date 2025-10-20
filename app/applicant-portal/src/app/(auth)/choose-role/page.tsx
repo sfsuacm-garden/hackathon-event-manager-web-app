@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 
 import { RoleBlock } from "./components/RoleBlockCard";
 
+
+// TODO Currently roles are not being used. Would be good for future functionality. 
 export type Role = "hacker" | "judge" | "mentor";
 
 export default function ChooseRolePage() {

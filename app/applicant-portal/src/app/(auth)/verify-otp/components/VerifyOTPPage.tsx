@@ -3,7 +3,6 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/shadcn/ui/input-otp";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { Button } from "react-day-picker";
 import { useOtpVerification } from "../hooks";
 
 
@@ -63,7 +62,7 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
               </Field>
             </FieldGroup>
 
-            <Button
+            <button
               type="submit"
               className="w-full"
               disabled={isVerifyOtpPending}
@@ -76,7 +75,7 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
               ) : (
                 messages.buttonText
               )}
-            </Button>
+            </button>
 
             <CardFooter className="flex justify-between text-xs text-muted-foreground">
               <button

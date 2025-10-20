@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSendOtp, useSignupData } from "../../../hooks/auth";
 
+
+//TODO This hook should be moved over to the auth.tsx.
 export function useVerifyOtp(
   email: string,
   onVerifySuccess: () => void | Promise<void>
@@ -18,9 +20,9 @@ export function useVerifyOtp(
   const { getSignupData, clearSignupData } = useSignupData();
 
   return useMutation<
-    User,              // ✅ TData (return value)
-    OtpErrorType,      // ✅ TError (error type)
-    string             // ✅ TVariables (the OTP input)
+    User,            
+    OtpErrorType,    
+    string            
   >({
     mutationFn: async (otp: string) => {
       if (!otp || otp.length < 6)
@@ -43,7 +45,10 @@ export function useVerifyOtp(
       if (data.session) {
         await auth.setSession(data.session);
       }
+      
 
+      //TODO The verify step should be moved to a TRPC route
+      // because of the create profile step.
       const signUpData = getSignupData();
       if (signUpData) {
         try {

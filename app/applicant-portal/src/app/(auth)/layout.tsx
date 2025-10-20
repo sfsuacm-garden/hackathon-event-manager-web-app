@@ -13,8 +13,3 @@ export default function RootLayout({
     </main>
   );
 }
-
-//  <main className="mx-auto w-full max-w-3xl px-6 py-12">
-//       <div className="mb-8">
-//         <Progress value={progress} className="h-2 rounded-full bg-muted" />
-//       </div>

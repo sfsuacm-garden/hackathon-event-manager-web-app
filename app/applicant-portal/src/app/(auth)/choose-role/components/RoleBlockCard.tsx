@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-/** Moved above usage to satisfy no-use-before-define */
+
 export function RoleBlock({
   title,
   body,

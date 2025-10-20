@@ -37,6 +37,8 @@ const loginFormSchema = z.object({
 });
 
 export default function LoginPage() {
+
+  //TODO move this logic over to its own hook.
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {

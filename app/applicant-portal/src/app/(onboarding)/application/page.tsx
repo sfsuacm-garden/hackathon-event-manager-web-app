@@ -34,6 +34,10 @@ import {
 } from "./schemas";
 import { FormField, StepConfig } from "./types";
 /** Step Definitions */
+
+// Due to the large union created from combining typeof step schemas, 
+// its neccessary to use any here to avoid excessive processing. 
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const steps: StepConfig<any>[] = [
   {
@@ -687,7 +691,10 @@ export default function ApplyPage() {
               }
             )}
           </form>
-          {step.key === "review" && (
+          
+          {
+          // TODO work on review page.
+          step.key === "review" && (
             <div className="space-y-6">
               {Object.entries(form.getValues()).map(([key, value]) => {
                 // Skip null/undefined/false/empty string
