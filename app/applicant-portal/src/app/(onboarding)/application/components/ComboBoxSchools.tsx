@@ -68,7 +68,9 @@ export function SchoolCombobox({
   const { data: selectedSchool, isLoading: isSelectedSchoolLoading } =
     trpc.schools.getById.useQuery(
       { id: selectedSchoolId! },
-      { enabled: !!selectedSchoolId && selectedSchoolId !== OTHER_OPTION }
+      {
+        enabled: Boolean(selectedSchoolId) && selectedSchoolId !== OTHER_OPTION,
+      }
     );
 
   // Fetch default school info
@@ -77,7 +79,8 @@ export function SchoolCombobox({
       { id: defaultSelectedSchool! },
       {
         enabled:
-          !!defaultSelectedSchool && defaultSelectedSchool !== OTHER_OPTION,
+          Boolean(defaultSelectedSchool) &&
+          defaultSelectedSchool !== OTHER_OPTION,
       }
     );
 

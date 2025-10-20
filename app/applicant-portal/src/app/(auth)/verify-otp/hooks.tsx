@@ -44,9 +44,9 @@ export function useVerifyOtp(
         try {
           await createProfile.mutateAsync(signUpData);
           clearSignupData(); // optional: clear signup data on success
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error("❌ Failed to create profile:", err);
-          throw new Error(err?.message ?? "Failed to set up user profile");
+          throw new Error("Failed to set up user profile");
         }
       }
 
@@ -57,10 +57,10 @@ export function useVerifyOtp(
       await onVerifySuccess();
     },
 
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       // err is now either OTP error or profile creation error
       console.error("❌ Verification failed:", err);
-      return err?.message ?? "An unknown error occurred";
+      throw new Error("Verification failed.");
     },
   });
 }

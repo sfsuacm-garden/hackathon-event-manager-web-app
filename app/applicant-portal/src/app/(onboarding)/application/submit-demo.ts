@@ -3,21 +3,40 @@
 import { ApplicationFormValues } from "@/schemas/applicationPayload";
 import { addUnderscores } from "@/utils/addUnderscore";
 import { trpc } from "@/utils/trpc";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { OTHER_OPTION } from "./schemas";
+import { OTHER_OPTION, StepBasics, StepInsights, StepMLH, StepPreferences } from "./schemas";
+import { FormField, StepConfig } from "./types";
+
+function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
+  // tRPC already provides its own useMutation hook
+  const mutation = trpc.applications.createOrUpdate.useMutation({
+   onSuccess: () => {}, onError: onError
+  });
+
+    const submit = async (form: ApplicationFormValues) => {
+
+    const data = await mutation.mutateAsync(form);
+    if (!data) throw new Error("No user found.");
+    return data}
+
+  return { ...mutation, submit };
+}
+
 
 export function useStepCompletionHandler(
-  steps: any[],
+ steps: StepConfig<
+    typeof StepBasics
+    | typeof StepPreferences
+    | typeof StepInsights
+    | typeof StepMLH
+  >[],
   currentStep: number,
   nextStep: () => void,
   onSubmissionSuccess: () => void,
   onSubmissionError: () => void
 ) {
-  const router = useRouter();
-
   // Keep all form values cumulatively across steps
-  const [allFormData, setAllFormData] = useState<Record<string, any>>({});
+  const [allFormData, setAllFormData] = useState<Record<string, string | boolean>>({});
 
   // Mutation hook
   const { submit, isPending, isError, error } = useCreateApplication(
@@ -25,13 +44,13 @@ export function useStepCompletionHandler(
     onSubmissionError
   );
 
-  const onSubmit = async (data: Record<string, any>) => {
+  const onSubmit = async (data: Record<string, string | boolean>) => {
     const step = steps[currentStep];
     const stepSchema = step.schema;
 
     // Collect all step keys (including checkbox-group options)
     const stepKeys = new Set<string>();
-    Object.entries(step.fields).forEach(([key, field]: [string, any]) => {
+    Object.entries(step.fields).forEach(([key, field]: [string, FormField]) => {
       if (field.type === "dropdown" || field.type === "school-combobox") {
           if (field.hasOtherOption) {
             stepKeys.add(key + `_other`);
@@ -39,7 +58,7 @@ export function useStepCompletionHandler(
         }
 
       if (field.type === "checkbox-group") {
-        field.options.forEach((opt: any) => stepKeys.add(opt.name));
+        field.options.forEach((opt: {name: string, label: string}) => stepKeys.add(opt.name));
       } else {
         stepKeys.add(key);
       }
@@ -70,13 +89,13 @@ export function useStepCompletionHandler(
 
 
     // If last step, process allFormData + current step data
-    const finalApplication: Record<string, any>= {};
+    const finalApplication: Record<string, string | boolean>= {};
 
     const combinedData = { ...allFormData, ...stepData };
     setAllFormData((prev) => ({ ...prev, ...stepData }));
     
     (Object.entries(combinedData)).forEach(
-      ([key, value]) => {
+      ([key, _]) => {
 
         let appKey: string = key;
 
@@ -114,20 +133,4 @@ export function useStepCompletionHandler(
     isError,
     error,
   };
-}
-
-
-function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
-  // tRPC already provides its own useMutation hook
-  const mutation = trpc.applications.createOrUpdate.useMutation({
-   onSuccess: () => {}, onError: onError
-  });
-
-    const submit = async (form: ApplicationFormValues) => {
-
-    const data = await mutation.mutateAsync(form);
-    if (!data) throw new Error("No user found.");
-    return data}
-
-  return { ...mutation, submit };
 }

@@ -3,6 +3,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { StepBasics, StepInsights, StepMLH, StepPreferences } from "./schemas";
 import { useStepCompletionHandler } from "./submit-demo";
 import { StepConfig } from "./types";
 
@@ -11,92 +12,6 @@ function extractEmailDomain(email: string): string | null {
   if (!email || !email.includes("@")) return null;
   const parts = email.split("@");
   return parts.length === 2 ? parts[1].toLowerCase().trim() : null;
-}
-
-export function useMultiStepForm(
-  steps: StepConfig<any>[],
-  onSuccess: () => void,
-  onError: () => void
-) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const step = steps[currentStep];
-
-  const { schoolSelection, isLoadingSchool, userEmailDomain, schoolError } =
-    usePrepopulateSchoolFieldDropwdownSelection();
-
-  // Initialize ALL fields from ALL steps at once
-  const allDefaultValues = useMemo(() => {
-    const values: Record<string, any> = {};
-
-    for (const s of steps) {
-      for (const [key, field] of Object.entries(s.fields)) {
-        // Base defaults
-
-        if (field.type === "dropdown" || field.type === "school-combobox") {
-          if (field.hasOtherOption) {
-            values[key + `_other`] = "";
-          }
-        }
-
-        if (field.type === "checkbox") {
-          values[key] = false;
-        } else if (field.type === "checkbox-group") {
-          field.options.forEach((opt: any) => {
-            values[opt.name] = false;
-          });
-        } else {
-          values[key] = "";
-        }
-      }
-    }
-
-    return values;
-  }, [steps]);
-
-  const form = useForm<any>({
-    resolver: zodResolver(step.schema),
-    defaultValues: allDefaultValues,
-  });
-
-  useEffect(() => {
-    if (schoolSelection) {
-      const newValues = { ...allDefaultValues };
-
-      form.setValue("school", schoolSelection.value, {
-        shouldValidate: false,
-        shouldDirty: true,
-      });
-    }
-  }, [schoolSelection, isLoadingSchool, form, allDefaultValues]);
-
-  const nextStep = () =>
-    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
-
-  const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
-
-  const {
-    onSubmit,
-    isPending: isStepLoading,
-    isError,
-    error,
-  } = useStepCompletionHandler(
-    steps,
-    currentStep,
-    nextStep,
-    onSuccess,
-    onError
-  );
-
-  return {
-    currentStep,
-    step,
-    form,
-    nextStep,
-    prevStep,
-    onSubmit,
-    isLoadingSchool,
-    isStepLoading,
-  };
 }
 
 export function usePrepopulateSchoolFieldDropwdownSelection() {
@@ -121,7 +36,7 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
   } = trpc.schools.getByEmailDomain.useQuery(
     { domain: userEmailDomain! },
     {
-      enabled: !!userEmailDomain,
+      enabled: Boolean(userEmailDomain),
       retry: false,
     }
   );
@@ -141,5 +56,98 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
     isLoadingSchool: isSchoolLoading,
     userEmailDomain,
     schoolError,
+  };
+}
+
+export function useMultiStepForm(
+  steps: StepConfig<
+    typeof StepBasics
+    | typeof StepPreferences
+    | typeof StepInsights
+    | typeof StepMLH
+  >[],
+  onSuccess: () => void,
+  onError: () => void
+) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const step = steps[currentStep];
+
+  const { schoolSelection, isLoadingSchool } =
+    usePrepopulateSchoolFieldDropwdownSelection();
+
+  // Initialize ALL fields from ALL steps at once
+  const allDefaultValues = useMemo(() => {
+    const values: Record<string, string | boolean> = {};
+
+    for (const s of steps) {
+      for (const [key, field] of Object.entries(s.fields)) {
+        // Base defaults
+
+        if (field.type === "dropdown" || field.type === "school-combobox") {
+          if (field.hasOtherOption) {
+            values[key + `_other`] = "";
+          }
+        }
+
+        if (field.type === "checkbox") {
+          values[key] = false;
+        } else if (field.type === "checkbox-group") {
+          field.options.forEach((opt: { name: string; label: string }) => {
+            values[opt.name] = false;
+          });
+        } else {
+          values[key] = "";
+        }
+      }
+    }
+
+    return values;
+  }, [steps]);
+
+  const form = useForm<
+    | typeof StepBasics
+    | typeof StepPreferences
+    | typeof StepInsights
+    | typeof StepMLH
+  >({
+    resolver: zodResolver(step.schema),
+    defaultValues: allDefaultValues,
+  });
+
+  useEffect(() => {
+    if (schoolSelection) {
+
+      form.setValue("school", schoolSelection.value, {
+        shouldValidate: false,
+        shouldDirty: true,
+      });
+    }
+  }, [schoolSelection, isLoadingSchool, form, allDefaultValues]);
+
+  const nextStep = () =>
+    currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
+
+  const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
+
+  const {
+    onSubmit,
+    isPending: isStepLoading,
+  } = useStepCompletionHandler(
+    steps,
+    currentStep,
+    nextStep,
+    onSuccess,
+    onError
+  );
+
+  return {
+    currentStep,
+    step,
+    form,
+    nextStep,
+    prevStep,
+    onSubmit,
+    isLoadingSchool,
+    isStepLoading,
   };
 }

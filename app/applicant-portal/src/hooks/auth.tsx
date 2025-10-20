@@ -3,8 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-type Role = "hacker" | "judge" | "mentor";
-
 interface SignupData {
   firstName?: string;
   lastName?: string;
@@ -16,6 +14,61 @@ interface UseSendOtpOptions {
   signupData?: SignupData;
   onSuccess?: () => void;
 }
+
+export function useSignupData() {
+  const queryClient = useQueryClient();
+
+  // Save data locally
+  const saveSignupData = (data: {
+    firstName?: string;
+    lastName?: string;
+    dob?: string;
+    phoneNumber?: string;
+  }): void => {
+    queryClient.setQueryData(["signupData"], data);
+  };
+
+  // Read data (will return undefined if not set)
+  const getSignupData = () => {
+    return queryClient.getQueryData(["signupData"]) as SignupData | undefined;
+  };
+
+  // Optional: clear when done
+  const clearSignupData = () => {
+    queryClient.removeQueries({ queryKey: ["signupData"] });
+  };
+
+  const hasSignupData = () => {
+    const data = getSignupData();
+    return data != null && Object.keys(data).length > 0;
+  };
+
+  return { saveSignupData, getSignupData, clearSignupData, hasSignupData };
+}
+
+export const useUserSession = () => {
+  const auth = useSupabaseAuth();
+  const client = useQueryClient();
+
+  useEffect(() => {
+    const { data: listener } = auth.onAuthStateChange((_event, session) => {
+      client.setQueryData(["user"], session);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, [auth, client]);
+
+  return useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await auth.getSession();
+      return session;
+    },
+    staleTime: Infinity,
+  });
+};
 
 export function useSendOtp(
   email: string,
@@ -83,30 +136,6 @@ export const useUser = () => {
   return session.data?.user ?? null;
 };
 
-export const useUserSession = () => {
-  const auth = useSupabaseAuth();
-  const client = useQueryClient();
-
-  useEffect(() => {
-    const { data: listener } = auth.onAuthStateChange((_event, session) => {
-      client.setQueryData(["user"], session);
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, [auth, client]);
-
-  return useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const {
-        data: { session },
-      } = await auth.getSession();
-      return session;
-    },
-    staleTime: Infinity,
-  });
-};
-
 export const useSignOut = () => {
   const auth = useSupabaseAuth();
   const queryClient = useQueryClient();
@@ -122,34 +151,3 @@ export const useSignOut = () => {
     },
   });
 };
-
-export function useSignupData() {
-  const queryClient = useQueryClient();
-
-  // Save data locally
-  const saveSignupData = (data: {
-    firstName?: string;
-    lastName?: string;
-    dob?: string;
-    phoneNumber?: string;
-  }): void => {
-    queryClient.setQueryData(["signupData"], data);
-  };
-
-  // Read data (will return undefined if not set)
-  const getSignupData = () => {
-    return queryClient.getQueryData(["signupData"]) as SignupData | undefined;
-  };
-
-  // Optional: clear when done
-  const clearSignupData = () => {
-    queryClient.removeQueries({ queryKey: ["signupData"] });
-  };
-
-  const hasSignupData = () => {
-    const data = getSignupData();
-    return data != null && Object.keys(data).length > 0;
-  };
-
-  return { saveSignupData, getSignupData, clearSignupData, hasSignupData };
-}

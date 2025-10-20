@@ -1,7 +1,7 @@
 // eslint.config.js
+import { FlatCompat } from "@eslint/eslintrc";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
 
 // Resolve current file's directory for FlatCompat base
 const __filename = fileURLToPath(import.meta.url);
@@ -15,8 +15,9 @@ const compat = new FlatCompat({
 // Export ESLint config
 export default [
   ...compat.extends(
+    "next",
     "next/core-web-vitals", // Next.js core web vitals rules
-    "next/typescript", // Next.js + TypeScript recommended rules
+    "next/typescript" // Next.js + TypeScript recommended rules
   ),
   {
     languageOptions: {

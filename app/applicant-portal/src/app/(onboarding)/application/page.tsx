@@ -32,9 +32,14 @@ import {
   StepMLH,
   StepPreferences,
 } from "./schemas";
-import { StepConfig } from "./types";
+import { FormField, StepConfig } from "./types";
 /** Step Definitions */
-const steps: StepConfig<any>[] = [
+const steps: StepConfig<
+  | typeof StepBasics
+  | typeof StepPreferences
+  | typeof StepInsights
+  | typeof StepMLH
+>[] = [
   {
     key: "basics",
     label: "Registration Basics",
@@ -353,297 +358,341 @@ export default function ApplyPage() {
 
         <div className="mt-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {Object.entries(step.fields).map(([key, field]: [string, any]) => {
-              // Text Input
-              if (field.type === "text") {
-                return (
-                  <FieldGroup key={key}>
-                    <Controller
-                      name={key}
-                      control={form.control}
-                      render={({ field: f, fieldState }) => (
-                        <div className="space-y-2">
-                          <FieldLabel>
-                            {field.label}
-                            {!step.schema.shape[key].isOptional() && (
-                              <RequiredStar />
-                            )}
-                          </FieldLabel>
-                          <Input
-                            {...f}
-                            placeholder={field.fillerText}
-                            value={f.value ?? ""}
-                            className="w-full"
-                          />
-                          {field.helperText && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {field.helperText}
-                            </p>
-                          )}
-                          {fieldState.invalid && (
-                            <FieldError
-                              errors={[
-                                {
-                                  message:
-                                    fieldState.error?.message ||
-                                    "This field is required.",
-                                },
-                              ]}
-                            />
-                          )}
-                        </div>
-                      )}
-                    />
-                  </FieldGroup>
-                );
-              }
-
-              // Dropdown / Select
-              if (field.type === "dropdown") {
-                const selectedValue = form.watch(key);
-                return (
-                  <FieldGroup key={key}>
-                    <Controller
-                      name={key}
-                      control={form.control}
-                      render={({ field: f, fieldState }) => (
-                        <div className="space-y-2">
-                          <FieldLabel>
-                            {field.label}
-                            {!step.schema.shape[key].isOptional() && (
-                              <RequiredStar />
-                            )}
-                          </FieldLabel>
-                          <Select
-                            onValueChange={f.onChange}
-                            value={f.value ?? ""}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder={field.fillerText} />
-                            </SelectTrigger>
-                            <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
-                              {field.options.map(
-                                (opt: { value: string; label: string }) => (
-                                  <SelectItem key={opt.label} value={opt.value}>
-                                    {opt.label}
-                                  </SelectItem>
-                                )
-                              )}
-                              {field.hasOtherOption && (
-                                <SelectItem
-                                  key={OTHER_OPTION}
-                                  value={OTHER_OPTION}
-                                >
-                                  {field.otherLabel}
-                                </SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-
-                          {/* "Other" input */}
-
-                          {fieldState.invalid && (
-                            <p className="text-sm text-destructive">
-                              {fieldState.error?.message ||
-                                "This field is required."}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    />
-                    {/* TODO: Hide spacing between button */}
-                    {selectedValue == OTHER_OPTION && (
+            {Object.entries(step.fields).map(
+              ([key, field]: [string, FormField]) => {
+                // Text Input
+                if (field.type === "text") {
+                  return (
+                    <FieldGroup key={key}>
                       <Controller
-                        key={key + `_other`}
+                        name={key}
                         control={form.control}
                         render={({ field: f, fieldState }) => (
-                          <Input
-                            {...f}
-                            placeholder={"Please specify here"}
-                            value={f.value ?? ""}
-                            className="w-full"
-                          />
-                        )}
-                        name={key + `_other`}
-                      />
-                    )}
-                  </FieldGroup>
-                );
-              }
-
-              // School Combobox
-              if (field.type === "school-combobox") {
-                const selectedValue = form.watch(key);
-                return (
-                  <FieldGroup key={key}>
-                    <Controller
-                      name={key}
-                      control={form.control}
-                      render={({ field: f, fieldState }) => (
-                        <div className="space-y-2">
-                          <FieldLabel>
-                            {field.label}
-                            {!step.schema.shape[key].isOptional() && (
-                              <RequiredStar />
-                            )}
-                          </FieldLabel>
-                          <SchoolCombobox
-                            defaultSelectedSchool={f.value}
-                            onValueChange={f.onChange}
-                            placeholder={field.label}
-                            isDefaultLoading={isLoadingSchool}
-                          />
-                          {field.helperText && (
-                            <p className="text-xs text-muted-foreground">
-                              {field.helperText}
-                            </p>
-                          )}
-                          {selectedValue === OTHER_OPTION && (
-                            <Controller
-                              key={key + `_other`}
-                              control={form.control}
-                              render={({ field: f, fieldState }) => (
-                                <Input
-                                  {...f}
-                                  placeholder={
-                                    "Please specify your school here"
-                                  }
-                                  value={f.value ?? ""}
-                                  className="w-full"
-                                />
-                              )}
-                              name={key + `_other`}
-                            />
-                          )}
-                        </div>
-                      )}
-                    />
-                  </FieldGroup>
-                );
-              }
-
-              // Country Dropdown
-              if (field.type === "country-dropdown") {
-                return (
-                  <FieldGroup key={key}>
-                    <Controller
-                      name={key}
-                      control={form.control}
-                      render={({ field: f, fieldState }) => (
-                        <div className="space-y-2">
-                          <FieldLabel>
-                            {field.label}
-                            {!step.schema.shape[key].isOptional() && (
-                              <RequiredStar />
-                            )}
-                          </FieldLabel>
-                          <CountryDropdown
-                            value={
-                              typeof f.value === "string" ? f.value : undefined
-                            }
-                            onValueChange={f.onChange}
-                            valueKey="alpha2"
-                            placeholder={field.label}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError
-                              errors={[
-                                {
-                                  message:
-                                    fieldState.error?.message ||
-                                    "This field is required.",
-                                },
-                              ]}
-                            />
-                          )}
-                        </div>
-                      )}
-                    />
-                  </FieldGroup>
-                );
-              }
-
-              // Checkbox
-              if (field.type === "checkbox") {
-                return (
-                  <FieldGroup key={key}>
-                    {step.seperateLastFieldWithLine &&
-                      key ===
-                        Object.keys(step.fields)[
-                          Object.keys(step.fields).length - 1
-                        ] && <Separator />}
-                    <Controller
-                      name={key}
-                      control={form.control}
-                      render={({ field: f, fieldState }) => (
-                        <div>
-                          <label className="flex items-start gap-3 cursor-pointer">
-                            {!step.schema.shape[key]?.isOptional?.() && (
-                              <RequiredStar />
-                            )}
-                            <input
-                              type="checkbox"
-                              {...f}
-                              checked={f.value}
-                              className="mt-1 cursor-pointer"
-                            />
-                            <span className="text-sm leading-relaxed">
+                          <div className="space-y-2">
+                            <FieldLabel>
                               {field.label}
-                            </span>
-                          </label>
-                          {fieldState.invalid && (
-                            <p className="text-sm text-destructive">
-                              {fieldState.error?.message ||
-                                "This field is required."}
-                            </p>
+                              {!step.schema.shape[key].isOptional() && (
+                                <RequiredStar />
+                              )}
+                            </FieldLabel>
+                            <Input
+                              {...f}
+                              placeholder={field.fillerText}
+                              value={f.value ?? ""}
+                              className="w-full"
+                            />
+                            {field.helperText && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {field.helperText}
+                              </p>
+                            )}
+                            {fieldState.invalid && (
+                              <FieldError
+                                errors={[
+                                  {
+                                    message:
+                                      fieldState.error?.message ||
+                                      "This field is required.",
+                                  },
+                                ]}
+                              />
+                            )}
+                          </div>
+                        )}
+                      />
+                    </FieldGroup>
+                  );
+                }
+
+                // Dropdown / Select
+                if (field.type === "dropdown") {
+                  const selectedValue = form.watch(key);
+                  return (
+                    <FieldGroup key={key}>
+                      <Controller
+                        name={key}
+                        control={form.control}
+                        render={({ field: f, fieldState }) => (
+                          <div className="space-y-2">
+                            <FieldLabel>
+                              {field.label}
+                              {!step.schema.shape[key].isOptional() && (
+                                <RequiredStar />
+                              )}
+                            </FieldLabel>
+                            <Select
+                              onValueChange={f.onChange}
+                              value={f.value ?? ""}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder={field.fillerText} />
+                              </SelectTrigger>
+                              <SelectContent className="w-[--radix-select-trigger-width] max-h-72">
+                                {field.options.map(
+                                  (opt: { value: string; label: string }) => (
+                                    <SelectItem
+                                      key={opt.label}
+                                      value={opt.value}
+                                    >
+                                      {opt.label}
+                                    </SelectItem>
+                                  )
+                                )}
+                                {field.hasOtherOption && (
+                                  <SelectItem
+                                    key={OTHER_OPTION}
+                                    value={OTHER_OPTION}
+                                  >
+                                    {field.otherLabel}
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+
+                            {fieldState.invalid && (
+                              <p className="text-sm text-destructive">
+                                {fieldState.error?.message ||
+                                  "This field is required."}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      />
+                      {/* TODO: Hide spacing between button */}
+                      {selectedValue == OTHER_OPTION && (
+                        <Controller
+                          key={key + `_other`}
+                          control={form.control}
+                          render={({ field: f, fieldState }) => (
+                            <>
+                              <Input
+                                {...f}
+                                placeholder={"Please specify here"}
+                                value={f.value ?? ""}
+                                className="w-full"
+                              />
+                              {fieldState.invalid && (
+                                <p className="text-sm text-destructive">
+                                  {fieldState.error?.message ||
+                                    "This field is required."}
+                                </p>
+                              )}
+                            </>
+                          )}
+                          name={key + `_other`}
+                        />
+                      )}
+                    </FieldGroup>
+                  );
+                }
+
+                // School Combobox
+                if (field.type === "school-combobox") {
+                  const selectedValue = form.watch(key);
+                  return (
+                    <FieldGroup key={key}>
+                      <Controller
+                        name={key}
+                        control={form.control}
+                        render={({ field: f, fieldState }) => (
+                          <div className="space-y-2">
+                            <FieldLabel>
+                              {field.label}
+                              {!step.schema.shape[key].isOptional() && (
+                                <RequiredStar />
+                              )}
+                            </FieldLabel>
+                            <SchoolCombobox
+                              defaultSelectedSchool={f.value}
+                              onValueChange={f.onChange}
+                              placeholder={field.label}
+                              isDefaultLoading={isLoadingSchool}
+                            />
+                            {field.helperText && (
+                              <p className="text-xs text-muted-foreground">
+                                {field.helperText}
+                              </p>
+                            )}
+
+                            {fieldState.invalid && (
+                              <p className="text-sm text-destructive">
+                                {fieldState.error?.message ||
+                                  "This field is required."}
+                              </p>
+                            )}
+
+                            {selectedValue === OTHER_OPTION && (
+                              <>
+                                <Controller
+                                  key={key + `_other`}
+                                  control={form.control}
+                                  render={({
+                                    field: f,
+                                    fieldState: fieldStateOther,
+                                  }) => (
+                                    <>
+                                      <Input
+                                        {...f}
+                                        placeholder={
+                                          "Please specify your school here"
+                                        }
+                                        value={f.value ?? ""}
+                                        className="w-full"
+                                      />
+                                      {fieldStateOther.invalid && (
+                                        <p className="text-sm text-destructive">
+                                          {fieldStateOther.error?.message ||
+                                            "This field is required."} 
+                                        </p>
+                                        )}
+                                  </>
+                                   
+                                )}
+                                
+                                  name={key + `_other`}
+                                />
+                              
+                              </>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </FieldGroup>
+                  );
+                }
+
+                // Country Dropdown
+                if (field.type === "country-dropdown") {
+                  return (
+                    <FieldGroup key={key}>
+                      <Controller
+                        name={key}
+                        control={form.control}
+                        render={({ field: f, fieldState }) => (
+                          <div className="space-y-2">
+                            <FieldLabel>
+                              {field.label}
+                              {!step.schema.shape[key].isOptional() && (
+                                <RequiredStar />
+                              )}
+                            </FieldLabel>
+                            <CountryDropdown
+                              value={
+                                typeof f.value === "string"
+                                  ? f.value
+                                  : undefined
+                              }
+                              onValueChange={f.onChange}
+                              valueKey="alpha2"
+                              placeholder={field.label}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError
+                                errors={[
+                                  {
+                                    message:
+                                      fieldState.error?.message ||
+                                      "This field is required.",
+                                  },
+                                ]}
+                              />
+                            )}
+                          </div>
+                        )}
+                      />
+                    </FieldGroup>
+                  );
+                }
+
+                // Checkbox
+                if (field.type === "checkbox") {
+                  return (
+                    <FieldGroup key={key}>
+                      {step.seperateLastFieldWithLine &&
+                        key ===
+                          Object.keys(step.fields)[
+                            Object.keys(step.fields).length - 1
+                          ] && <Separator />}
+                      <Controller
+                        name={key}
+                        control={form.control}
+                        render={({ field: f, fieldState }) => (
+                          <div>
+                            <label className="flex items-start gap-3 cursor-pointer">
+                              {!step.schema.shape[key]?.isOptional?.() && (
+                                <RequiredStar />
+                              )}
+                              <input
+                                type="checkbox"
+                                {...f}
+                                checked={f.value}
+                                className="mt-1 cursor-pointer"
+                              />
+                              <span className="text-sm leading-relaxed">
+                                {field.label}
+                              </span>
+                            </label>
+                            {fieldState.invalid && (
+                              <p className="text-sm text-destructive">
+                                {fieldState.error?.message ||
+                                  "This field is required."}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </FieldGroup>
+                  );
+                }
+
+                // Checkbox Group
+                if (field.type === "checkbox-group") {
+                  return (
+                    <FieldGroup key={key}>
+                      <div className="space-y-3">
+                        <FieldLabel>{field.label}</FieldLabel>
+                        <div className="flex flex-col gap-3 pl-1">
+                          {field.options.map(
+                            (
+                              opt: { name: string; label: string },
+                              index: number
+                            ) => (
+                              <Controller
+                                key={opt.name || index}
+                                name={opt.name}
+                                control={form.control}
+                                render={({ field: f }) => (
+                                  <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      {...f}
+                                      checked={f.value ?? false}
+                                      onChange={(e) =>
+                                        f.onChange(e.target.checked)
+                                      }
+                                      className="cursor-pointer"
+                                    />
+                                    <span className="text-sm">
+                                      {opt.label}
+                                      {/* Optional RequiredStar if field is required */}
+                                      {!step.schema.shape[
+                                        opt.name
+                                      ]?.isOptional?.() && <RequiredStar />}
+                                    </span>
+                                  </label>
+                                )}
+                              />
+                            )
                           )}
                         </div>
-                      )}
-                    />
-                  </FieldGroup>
-                );
-              }
-
-              // Checkbox Group
-              if (field.type === "checkbox-group") {
-                return (
-                  <FieldGroup key={key}>
-                    <div className="space-y-3">
-                      <FieldLabel>{field.title}</FieldLabel>
-                      <div className="flex flex-col gap-3 pl-1">
-                        {field.options.map((opt: any, index: number) => (
-                          <Controller
-                            key={opt.name || index}
-                            name={opt.name}
-                            control={form.control}
-                            render={({ field: f }) => (
-                              <label className="flex items-center gap-3 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  {...f}
-                                  checked={f.value ?? false}
-                                  onChange={(e) => f.onChange(e.target.checked)}
-                                  className="cursor-pointer"
-                                />
-                                <span className="text-sm">
-                                  {opt.label}
-                                  {/* Optional RequiredStar if field is required */}
-                                  {!step.schema.shape[
-                                    opt.name
-                                  ]?.isOptional?.() && <RequiredStar />}
-                                </span>
-                              </label>
-                            )}
-                          />
-                        ))}
                       </div>
-                    </div>
-                  </FieldGroup>
-                );
-              }
+                    </FieldGroup>
+                  );
+                }
 
-              return null;
-            })}
+                return null;
+              }
+            )}
           </form>
           {step.key === "review" && (
             <div className="space-y-6">
@@ -698,7 +747,7 @@ export default function ApplyPage() {
                     <p className="text-sm font-medium text-muted-foreground">
                       {fieldLabel}
                     </p>
-                    <p className="text-base">{displayValue as String}</p>
+                    <p className="text-base">{displayValue as string}</p>
                     <Separator className="mt-2" />
                   </div>
                 );
