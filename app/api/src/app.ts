@@ -16,11 +16,10 @@ const app: Application = express();
 app.use(express.json());
 app.use(helmet());
 
-
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
-    credentials: true, // if you're sending cookies or auth headers
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true // if you're sending cookies or auth headers
   })
 );
 
@@ -38,5 +37,3 @@ app.use(
 app.use('/api', apiRouter);
 
 export default app;
-
-

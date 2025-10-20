@@ -1,8 +1,8 @@
-import { initTRPC } from "@trpc/server";
-import { z } from "zod";
-import { idParamsSchema } from "../../common/common.schema";
-import { getSchoolByEmailDomain, getSchoolById, getSchoolsByQuery } from "./schools.controller";
-import { getSchoolsByQuerySchema } from "./schools.schemas";
+import { initTRPC } from '@trpc/server';
+import { z } from 'zod';
+import { idParamsSchema } from '../../common/common.schema';
+import { getSchoolByEmailDomain, getSchoolById, getSchoolsByQuery } from './schools.controller';
+import { getSchoolsByQuerySchema } from './schools.schemas';
 
 const t = initTRPC.create();
 
@@ -18,12 +18,9 @@ export const schoolsRouter = t.router({
   }),
 
   // GET /by-domain -> getByEmailDomain procedure
-  getByEmailDomain: t.procedure
-    .input(z.object({ domain: z.string() }))
-    .query(async ({ input }) => {
-      return await getSchoolByEmailDomain(input.domain);
-    })
-  
+  getByEmailDomain: t.procedure.input(z.object({ domain: z.string() })).query(async ({ input }) => {
+    return await getSchoolByEmailDomain(input.domain);
+  })
 });
 
 export type SchoolRouter = typeof schoolsRouter;

@@ -1,15 +1,13 @@
-import type z from "zod";
-import prisma from "../../config/prismaClient";
-import type { UserProfileCreateInputObjectSchema } from "../../zod/schemas";
+import type z from 'zod';
+import prisma from '../../config/prismaClient';
+import type { UserProfileCreateInputObjectSchema } from '../../zod/schemas';
 
-export async function createUserProfile(
-  input: z.infer<typeof UserProfileCreateInputObjectSchema>
-) {
+export async function createUserProfile(input: z.infer<typeof UserProfileCreateInputObjectSchema>) {
   try {
-    const profile = await prisma.userProfile.create({data: {...input}})
+    const profile = await prisma.userProfile.create({ data: { ...input } });
     return profile;
   } catch (error: any) {
-    console.error("❌ Error creating user profile:", error);
-    throw new Error(error.message ?? "Failed to create user profile");
+    console.error('❌ Error creating user profile:', error);
+    throw new Error(error.message ?? 'Failed to create user profile');
   }
 }

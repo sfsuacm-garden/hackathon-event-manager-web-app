@@ -27,6 +27,6 @@ const Url = emptyToUndefined(z.url());
 export const applicationCreateSchema = ApplicationCreateInputObjectSchema.omit({
   event: true,
   profile: true
-})
+});
 
 export type ApplicationCreate = z.infer<typeof applicationCreateSchema>;

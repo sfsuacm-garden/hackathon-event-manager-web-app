@@ -1,7 +1,7 @@
-import { requireAuth } from "../../common/common.middleware";
-import { t } from "../../core/trpc";
-import { UserProfileCreateInputObjectSchema } from "../../zod/schemas";
-import { createUserProfile } from "./userProfile.controller";
+import { requireAuth } from '../../common/common.middleware';
+import { t } from '../../core/trpc';
+import { UserProfileCreateInputObjectSchema } from '../../zod/schemas';
+import { createUserProfile } from './userProfile.controller';
 
 export const userProfileRouter = t.router({
   create: t.procedure
@@ -11,11 +11,11 @@ export const userProfileRouter = t.router({
       // Set the id to the authenticated user's id
       const profileData = {
         ...input,
-        id: ctx.user.id, 
+        id: ctx.user.id
       };
 
       return await createUserProfile(profileData);
-    }),
+    })
 });
 
 export type UserProfileRouter = typeof userProfileRouter;

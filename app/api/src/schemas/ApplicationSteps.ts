@@ -18,8 +18,18 @@ export const Step3Schema = z.object({
   linkedinUrl: z.string().url().optional().or(z.literal('')),
   experienceLevel: z.string().min(2),
   tshirtSize: z.enum([
-    'US_XS', 'US_S', 'US_M', 'US_L', 'US_XL', 'US_XXL',
-    'UK_6', 'UK_8', 'UK_10', 'UK_12', 'UK_14', 'UK_16'
+    'US_XS',
+    'US_S',
+    'US_M',
+    'US_L',
+    'US_XL',
+    'US_XXL',
+    'UK_6',
+    'UK_8',
+    'UK_10',
+    'UK_12',
+    'UK_14',
+    'UK_16'
   ])
 });
 

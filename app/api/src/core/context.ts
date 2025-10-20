@@ -4,12 +4,9 @@ import prisma from '../config/prismaClient';
 import { supabase } from '../config/supabase';
 
 export async function createContext({ req, res }: CreateExpressContextOptions) {
-  
   const authHeader = req.headers.authorization;
-      
-  const token = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : null;
+
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   let user: User | null = null;
 
@@ -25,9 +22,7 @@ export async function createContext({ req, res }: CreateExpressContextOptions) {
   }
 
   const eventId = req.headers['x-event-id'] as string | undefined;
-  const event = eventId
-    ? await prisma.event.findUnique({ where: { id: eventId } })
-    : null;
+  const event = eventId ? await prisma.event.findUnique({ where: { id: eventId } }) : null;
 
   return {
     req,

@@ -3,8 +3,6 @@ import { t } from '../../core/trpc';
 import { createOrUpdateApplication, getMyApplication } from './application.controller';
 import { applicationCreateSchema } from './application.schemas';
 
-
-
 export const applicationRouter = t.router({
   createOrUpdate: t.procedure
     .use(requireAuth)
@@ -12,7 +10,5 @@ export const applicationRouter = t.router({
     .input(applicationCreateSchema)
     .mutation(({ ctx, input }) => createOrUpdateApplication(ctx, input)),
 
-  me: t.procedure
-    .use(requireEventAccess)
-    .query(({ ctx }) => getMyApplication(ctx))
+  me: t.procedure.use(requireEventAccess).query(({ ctx }) => getMyApplication(ctx))
 });

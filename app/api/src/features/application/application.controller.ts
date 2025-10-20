@@ -32,16 +32,15 @@ async function buildCreateData(
   await prisma.eventProfile.create({
     data: {
       eventId,
-      profileId: userId, // assuming userId === profileId (if not, fix this)
-    },
+      profileId: userId // assuming userId === profileId (if not, fix this)
+    }
   });
 
   // 2️⃣ Return Prisma-compliant data
   return {
     userId,
     eventId,
-   
-    ...filteredInput,
+    ...filteredInput
   };
 }
 
@@ -62,12 +61,12 @@ export async function createOrUpdateApplication(ctx: Context, input: CreateAppli
 
   const application = existing
     ? await prisma.application.update({
-      where: { id: existing.id },
-      data: buildUpdateData(input)
-    })
+        where: { id: existing.id },
+        data: buildUpdateData(input)
+      })
     : await prisma.application.create({
-      data: await buildCreateData(userId, eventId, input)
-    });
+        data: await buildCreateData(userId, eventId, input)
+      });
 
   const roleStr =
     (typeof ctx.user.user_metadata?.role === 'string' && ctx.user.user_metadata.role) || 'hacker';

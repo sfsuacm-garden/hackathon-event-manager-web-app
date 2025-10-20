@@ -5,6 +5,4 @@ const apiRouter = Router();
 
 apiRouter.use('/health', healthRouter);
 
-
-
 export default apiRouter;

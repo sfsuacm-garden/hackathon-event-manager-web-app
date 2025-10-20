@@ -1,6 +1,6 @@
-import { TRPCError } from "@trpc/server";
-import prisma from "../../config/prismaClient";
-import { getSchoolsByQuerySchema, type GetSchoolsQuerySchema } from "./schools.schemas";
+import { TRPCError } from '@trpc/server';
+import prisma from '../../config/prismaClient';
+import { getSchoolsByQuerySchema, type GetSchoolsQuerySchema } from './schools.schemas';
 
 export async function getSchoolById(id: string) {
   try {
@@ -24,30 +24,29 @@ export async function getSchoolById(id: string) {
   }
 }
 
-
 export async function getSchoolsByQuery(query: GetSchoolsQuerySchema) {
-    try {
-        const params = getSchoolsByQuerySchema.parse(query);
-        const schools = await prisma.school.findMany(params);
-        console.log(schools)
-        return schools;
-    } catch (error) {
-        if (error instanceof TRPCError) throw error;
+  try {
+    const params = getSchoolsByQuerySchema.parse(query);
+    const schools = await prisma.school.findMany(params);
+    console.log(schools);
+    return schools;
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
 
-        console.log(error);
-        throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to fetch schools',
-            cause: error
-        });
-    }
+    console.log(error);
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to fetch schools',
+      cause: error
+    });
+  }
 }
 
 export async function getSchoolByEmailDomain(domain: string) {
   try {
     // Normalize the domain to lowercase for consistent matching
     const normalizedDomain = domain.toLowerCase().trim();
-    
+
     if (!normalizedDomain) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
@@ -83,4 +82,3 @@ export async function getSchoolByEmailDomain(domain: string) {
     });
   }
 }
-

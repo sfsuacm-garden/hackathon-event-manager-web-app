@@ -14,7 +14,6 @@ export const requireAuth = t.middleware(({ ctx, next }) => {
   });
 });
 
-
 export const requireEvent = t.middleware(({ ctx, next }) => {
   if (!ctx.event) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
