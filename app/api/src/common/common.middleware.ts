@@ -65,6 +65,30 @@ export const requireEventUnlocked = t.middleware(({ ctx, next }) => {
   });
 });
 
+export const requireTeam = requireAuth.unstable_pipe(async ({ ctx, next }) => {
+  const teamAndMember = await prisma.teamMember.findFirst({
+    where: {
+      userId: ctx.user?.id!,
+      event_id: ctx.event?.id!
+    },
+    include: {
+      team: true
+    }
+  });
+
+  if (!teamAndMember) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: 'User is not part of any team for this event' });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      teamId: teamAndMember.teamId,
+      isTeamAdmin: teamAndMember.isAdmin
+    }
+  });
+});
+
 // Protected base procedure
 export const protectedProcedure = t.procedure.use(requireAuth);
 
@@ -73,3 +97,6 @@ export const eventProcedure = protectedProcedure.use(requireEventAccess);
 
 // team-management scoped procedure
 export const teamManagementProcedure = eventProcedure.use(requireEventUnlocked);
+
+// getting team information middleware
+export const teamProcedure = t.procedure.use(requireAuth).use(requireTeam);

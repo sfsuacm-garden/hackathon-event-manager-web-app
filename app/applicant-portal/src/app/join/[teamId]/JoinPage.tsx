@@ -12,17 +12,38 @@ import { Separator } from "@radix-ui/react-separator";
 import { Alert, AlertDescription } from "@/components/shadcn/ui/alert";
 import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorStateAlert from "../(main)/components/ErrorStateAlert";
+import ErrorStateAlert from "../../(main)/components/ErrorStateAlert"
+import { trpc } from "@/utils/trpc";
+import { useRouter } from "next/navigation";
+//import { useRouter } from "next/router";
 
-export default function JoinPage() {
-  const isUserOnTeam = true;
-  const isTeamFull = true;
-  const teamName = "TeamName01";
-  const isLoading = false;
-  const error = true;
+export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {
+  const isUserOnTeam = true; // user is always on a team
+
+  const utils = trpc.useUtils();
+  const router = useRouter();
+
+  const {data: team, isPending: loading } = trpc.teams.getTeamById.useQuery(
+    {id: teamIdToJoin as string},
+    {enabled: Boolean(teamIdToJoin)}
+  );
+
+  const teamMemberCount = team?.members.length ?? 4;
+  const isTeamFull = teamMemberCount >= 4;
+
+  const  joinTeamMutation = trpc.teams.joinTeamById.useMutation({
+    onSuccess: async () => {
+      await utils.teams.getOwnTeam.invalidate();
+      router.push('/my-dashboard'); // idk what to do here redirect user to team page or what?
+    }
+  });
+
+  const handleJoinTeam = () => {
+    joinTeamMutation.mutate({teamId: teamIdToJoin});
+  }
 
   //TODO enhance loading experience
-  if (isLoading) {
+  if (loading || joinTeamMutation.isPending) {
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
@@ -35,10 +56,17 @@ export default function JoinPage() {
   }
 
   //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
-  if (error) {
+  if (joinTeamMutation.error || !team) {
     // Determine error type for better messaging
-    const isInvalidLink = true;
-    const isServerError = true;
+    let isInvalidLink = false;
+    let isServerError = false;
+    
+    if(!team) {
+      isInvalidLink = true;
+    }
+    else {
+      isServerError = true;
+    }
 
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
@@ -72,19 +100,19 @@ export default function JoinPage() {
           <CardHeader>
             <CardTitle>
               <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                You are joining {teamName}
+                You are joining {team?.name}
               </h3>
             </CardTitle>
             <CardDescription>
               This means that your application to participate in SF Hacks 2026
-              will be evualated together.
+              will be evaluated together.
             </CardDescription>
           </CardHeader>
         ) : (
           <CardHeader>
             <CardTitle>
               <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                {teamName} is unable to accept new members.
+                {team?.name} is unable to accept new members.
               </h3>
             </CardTitle>
             <CardDescription>
@@ -101,7 +129,7 @@ export default function JoinPage() {
               <AlertDescription className=" text-accent">
                 <p>
                   It looks like you are currently already in a team. Joining{" "}
-                  <b>{teamName}</b> will
+                  <b>{team?.name}</b> will
                   <span>
                     {" "}
                     <b>remove</b>{" "}
@@ -116,15 +144,21 @@ export default function JoinPage() {
               <CardContent>
                 <div className="flex gap-x-2 items-baseline">
                   <small className="text-sm leading-none font-semibold">
-                    {teamName} Team
+                    {team?.name} Team
                   </small>
                   <code className="bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-                    {1}/{4}
+                    {teamMemberCount}/{4}
                   </code>
                 </div>
-                {[...Array(2)].map((_, idx) => (
+                {team.members.map((member, idx) => (
                   <>
-                    <MemberPreview key={idx} />
+                    <MemberPreview 
+                      key={idx}
+                      firstName={member.profile.firstName}
+                      lastName={member.profile.lastName}
+                      email={member.profile.applications[0].schoolEmail}
+                      status={member.profile.applications[0].status} 
+                    />
                     <Separator />
                   </>
                 ))}
@@ -133,12 +167,12 @@ export default function JoinPage() {
           )}
           {!isTeamFull ? (
             <div className="space-x-2">
-              <Button onClick={() => alert("Hello from shadcn!")}>
+              <Button onClick={handleJoinTeam} disabled={joinTeamMutation.isPending}>
                 Join New Team
               </Button>
               <Button
                 variant={"secondary"}
-                onClick={() => alert("Hello from shadcn!")}
+                onClick={() => router.push('/my-dashboard')}
               >
                 Decline
               </Button>
