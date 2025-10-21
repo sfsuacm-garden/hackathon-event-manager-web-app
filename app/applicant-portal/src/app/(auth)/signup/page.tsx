@@ -12,6 +12,7 @@ import { todayYMD } from "@/utils/ageChecker";
 import { useSendOtp } from "../../../hooks/auth";
 
 import RequiredStar from "@/components/form/RequiredStar";
+import { PhoneInput } from "@/components/PhoneInput";
 import {
   Field,
   FieldDescription,
@@ -179,8 +180,8 @@ export default function SignupPage() {
                       Phone Number
                       <RequiredStar />
                     </FieldLabel>
-                    <Input
-                      {...field}
+                    <PhoneInput
+                     {...field}
                       type="tel"
                       placeholder="(555) 555-5555"
                       autoComplete="tel"

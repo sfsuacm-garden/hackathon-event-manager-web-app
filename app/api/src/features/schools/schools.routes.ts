@@ -3,8 +3,7 @@ import { z } from 'zod';
 import { idParamsSchema } from '../../common/common.schema';
 import { getSchoolByEmailDomain, getSchoolById, getSchoolsByQuery } from './schools.controller';
 import { getSchoolsByQuerySchema } from './schools.schemas';
-
-const t = initTRPC.create();
+import { t } from '../../core/trpc';
 
 export const schoolsRouter = t.router({
   // GET /:id -> getById procedure

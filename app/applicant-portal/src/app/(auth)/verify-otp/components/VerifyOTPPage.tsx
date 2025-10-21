@@ -1,4 +1,7 @@
+"use client";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/shadcn/ui/alert";
+import { Button } from "@/components/shadcn/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/shadcn/ui/field";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/shadcn/ui/input-otp";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +65,7 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
               </Field>
             </FieldGroup>
 
-            <button
+            <Button
               type="submit"
               className="w-full"
               disabled={isVerifyOtpPending}
@@ -75,7 +78,7 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
               ) : (
                 messages.buttonText
               )}
-            </button>
+            </Button>
 
             <CardFooter className="flex justify-between text-xs text-muted-foreground">
               <button

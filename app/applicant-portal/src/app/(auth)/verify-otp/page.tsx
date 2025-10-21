@@ -1,5 +1,4 @@
-"use client";
-
+import { Suspense } from "react";
 import { VerifyOtpPage } from "./components/VerifyOTPPage";
 
 
@@ -18,5 +17,9 @@ export default async function VerifyOtp({ searchParams }: VerifyOtpPageProps) {
   const email = params?.email ?? "";
   const authFlow = params?.auth ?? null;
 
-  return <VerifyOtpPage email={email} authFlow={authFlow} />;
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <VerifyOtpPage email={email} authFlow={authFlow} />
+    </Suspense>
+  );
 }

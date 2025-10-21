@@ -35,7 +35,7 @@ import { FormField } from "./types";
 export default function ApplyPage() {
   const router = useRouter();
   const onSubmissionSuccess = () => {
-    router.push("choose-roles");
+    router.push("/my-dashboard");
   };
 
   const onSubmissionError = () => {

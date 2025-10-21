@@ -7,7 +7,7 @@ import { ApplicationFormValues, FormField, StepConfig } from "../types";
 function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void) {
   // tRPC already provides its own useMutation hook
   const mutation = trpc.applications.createOrUpdate.useMutation({
-   onSuccess: () => {}, onError: onError
+   onSuccess: onVerifySuccess, onError: onError
   });
 
     const submit = async (form: ApplicationFormValues) => {
