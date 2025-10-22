@@ -11,11 +11,6 @@ interface SignupData {
   dob?: string;
 }
 
-interface UseSendOtpOptions {
-  signupData?: SignupData;
-  onSuccess?: () => void;
-}
-
 export function useSignupData() {
   const queryClient = useQueryClient();
 

@@ -18,16 +18,12 @@ export function VerifyOtpPage({email}:  Props) {
   const {
     otp,
     setOtp,
-    showResendAlert,
-    setShowResendAlert,
     handleVerify,
     handleResend,
     isVerifying,
     isVerifyError,
     verifyError,
     isResending,
-    isResendError,
-    resendError,
     messages,
     onRenavigate,
   } = useOtpVerification(email);

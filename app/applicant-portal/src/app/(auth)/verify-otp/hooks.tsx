@@ -22,9 +22,10 @@ export function useOtpVerification(email: string) {
     router.push("/my-dashboard");
   };
 
-  const onResendSuccess = () => {
-    setShowResendAlert(true);
-  };
+  // TODO handle on resend updates
+  // const onResendSuccess = () => {
+  //   setShowResendAlert(true);
+  // };
 
 
   const {

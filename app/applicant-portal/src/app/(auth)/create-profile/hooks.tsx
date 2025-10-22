@@ -38,7 +38,6 @@ export function useCreateProfile() {
   const {refetchUserProfile} = useRefreshProtectedData();
   const { user, isLoading: isLoadingUser } = useUser();
   const {data, isLoading: isProfileLoading} = trpc.profile.me.useQuery();
-  const authenticating = !isLoadingUser && !user || data && !isProfileLoading;
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const form = useForm<ProfileFormData>({
@@ -76,7 +75,7 @@ export function useCreateProfile() {
          setIsRedirecting(true)
         router.replace("/my-dashboard");
     }
-  }, [user, isLoadingUser, user, data, isProfileLoading, router]);
+  }, [user, isLoadingUser, data, isProfileLoading, router]);
 
 
   const shouldHideUI =
