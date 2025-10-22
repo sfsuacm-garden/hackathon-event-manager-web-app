@@ -13,7 +13,7 @@ import { Icons } from "@/lib/icons";
 import { trpc } from "@/utils/trpc";
 import { Separator } from "@radix-ui/react-separator";
 import { useRouter } from "next/navigation";
-import ErrorStateAlert from "../../(protected)/(main)/components/ErrorStateAlert";
+import ErrorStateAlert from "../../(main)/components/ErrorStateAlert";
 import MemberPreview from "./components/MemberPreviewCard";
 //import { useRouter } from "next/router";
 
