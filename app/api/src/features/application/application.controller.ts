@@ -44,13 +44,7 @@ async function buildCreateData(
   };
 }
 
-export async function createOrUpdateApplication(ctx: Context, input: CreateApplicationInput) {
-  if (!ctx.user) {
-    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not signed in' });
-  }
-
-  const userId = ctx.user.id;
-  const eventId = ctx.event?.id;
+export async function createOrUpdateApplication(userId: string, eventId: string, input: CreateApplicationInput) {
   if (!eventId) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'eventId header is required' });
   }
@@ -68,8 +62,8 @@ export async function createOrUpdateApplication(ctx: Context, input: CreateAppli
         data: await buildCreateData(userId, eventId, input)
       });
 
-  const roleStr =
-    (typeof ctx.user.user_metadata?.role === 'string' && ctx.user.user_metadata.role) || 'hacker';
+  //TODO clarify this later on with different roles.
+  const roleStr = 'hacker';
   const roleEnum = toParticipationLevel(roleStr);
 
   await prisma.eventProfile.upsert({
