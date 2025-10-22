@@ -4,7 +4,7 @@ import { trpc } from "@/utils/trpc";
 import { useEffect, useMemo, useState } from "react";
 
 export function usePrepopulateSchoolFieldDropwdownSelection() {
-  const user = useUser();
+  const {user, isLoading} = useUser();
 
   const [schoolSelection, setSchoolSelection] = useState<{
     value: string;
@@ -12,10 +12,11 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
   } | null>(null);
   // Extract domain from user email
   const userEmailDomain = useMemo(() => {
-    if (!user?.email) return null;
+
+    if (isLoading || !user?.email) return null;
     const domain = extractEmailDomain(user.email);
     return domain?.endsWith(".edu") ? domain : null;
-  }, [user?.email]);
+  }, [user?.email, isLoading]);
 
   // Query school by email domain
   const {
@@ -42,7 +43,7 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
 
   return {
     schoolSelection,
-    isLoadingSchool: isSchoolLoading,
+    isLoadingSchool: isSchoolLoading || isLoading,
     userEmailDomain,
     schoolError,
   };
