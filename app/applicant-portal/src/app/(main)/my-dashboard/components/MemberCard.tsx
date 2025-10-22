@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
+  // AvatarImage,
 } from "@/components/shadcn/ui/avatar";
 import { Badge } from "@/components/shadcn/ui/badge";
 import { BadgeCheckIcon } from "lucide-react";
@@ -32,40 +32,95 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/shadcn/ui/alert-dialog";
+import { trpc } from "@/utils/trpc";
+import { useState } from "react";
+import ErrorStateAlert from "../../components/ErrorStateAlert";
+
+interface TeamMember {
+  teamId: string;
+  userId: string;
+  isAdmin: boolean | null;
+  joinedAt: string | null;
+  event_id: string;
+  profile: {
+    applications: {
+      createdAt: string | null;
+      status: string | null;
+      schoolEmail: string | null;
+    }[];
+    firstName: string | null;
+    lastName: string | null;
+  };
+}
 
 interface TeamMemberCardProps {
-  userId: string;
+  teamMemberInfo: TeamMember
   isTeamAdmin: boolean;
+  isMemberLoggedInUser: boolean;
+  isAdminLoggedInUser: boolean;
 }
 
 export default function TeamMemberCard({
-  userId,
+  teamMemberInfo,
   isTeamAdmin: isTeamAdmin,
+  isMemberLoggedInUser,
+  isAdminLoggedInUser,
   className,
 }: TeamMemberCardProps & React.ComponentProps<"div">) {
   const loading = false;
   const error = false;
-  const isMemberUser = false;
-  const isTeamManagementUnlocked = true;
+  //const isMemberUser = false;
+  const isTeamManagementUnlocked = true; // maybe this should be passed in as a prop or something or we need to find some sort of global context for this because having to calculate this multiple times via an API call will be crazy
 
-  const member = {
-    name: "John Smith",
-    email: "jsmith@sfsu.edu",
-    joined: "April 2nd, 5:00pm",
-    avatarUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe-UxhlswN7mS_tqXj0L9a00hL_NHisSSqn4Mm6FW8BuvQI_8wHrLG7pUlkvozlpwASp0&usqp=CAU",
-    initials: userId,
-  };
+  const applicationStatus = teamMemberInfo.profile.applications[0].status?.toUpperCase() as "PENDING" | "REJECTED" | "ACCEPTED" | "WAITLISTED";
+  const firstName = teamMemberInfo.profile.firstName ?? 'Unknown';
+  const lastName = teamMemberInfo.profile.lastName ?? 'Unknown';
+  const firstInitial = teamMemberInfo.profile.firstName?.[0] ?? '?';
+  const lastInitial = teamMemberInfo.profile.lastName?.[0] ?? '?';
+  const memberInitials = firstInitial + lastInitial;
+  const email = teamMemberInfo?.profile?.applications?.[0].schoolEmail ?? 'Unknown email';
+  const joinedTeamDate = teamMemberInfo?.joinedAt ?? 'Unknown'
+  const userId = teamMemberInfo.userId;
+
+  const [kickMutationSuccess, setKickMutationSuccess] = useState(true);
+
+  const utils = trpc.useUtils();
+  const kickFromTeamMutation = trpc.teams.kickTeamMemberById.useMutation({
+    onSuccess: () => {
+      setKickMutationSuccess(true);
+      utils.teams.getOwnTeam.invalidate();
+    },
+    onError: () => {
+      setKickMutationSuccess(false);
+    }
+  });
+
+  const handleKickTeam = () => {
+    kickFromTeamMutation.mutate({ memberBeingKickedId: userId })
+  }
+
+
+  // const member = {
+  //   name: "John Smith",
+  //   email: "jsmith@sfsu.edu",
+  //   joined: "April 2nd, 5:00pm",
+  //   avatarUrl:
+  //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe-UxhlswN7mS_tqXj0L9a00hL_NHisSSqn4Mm6FW8BuvQI_8wHrLG7pUlkvozlpwASp0&usqp=CAU",
+  //   initials: userId,
+  // };
 
   return (
     <>
+      {/* {!kickMutationSuccess ?} */}
+
       {error ? (
         <Card className={cn(className)}>
           <CardContent>
             <div className="flex gap-4 justify-between">
               <div className="flex gap-4">
                 <Avatar className="opacity-0 w-8 h-8">
-                  <AvatarImage src={member.avatarUrl} />
+                  {/* <AvatarImage src={member.avatarUrl} /> */}
+                  <AvatarFallback>{memberInitials}</AvatarFallback>
                 </Avatar>
 
                 <div className="space-y-1">
@@ -100,8 +155,8 @@ export default function TeamMemberCard({
                   <Skeleton className="size-8 rounded-full" />
                 ) : (
                   <Avatar>
-                    <AvatarImage src={member.avatarUrl} />
-                    <AvatarFallback>{member.initials}</AvatarFallback>
+                    {/* <AvatarImage src={member.avatarUrl} /> */}
+                    <AvatarFallback>{memberInitials}</AvatarFallback>
                   </Avatar>
                 )}
 
@@ -115,12 +170,12 @@ export default function TeamMemberCard({
                   ) : (
                     <>
                       <h3 className="text-sm font-semibold">
-                        {!isMemberUser ? member.name : "You"}
-                        {" - Team Admin"}
+                        {!isMemberLoggedInUser ? firstName + lastName : "You"}
+                        {isTeamAdmin && " - Team Admin"}
                       </h3>
-                      <p className="text-sm">{member.email}</p>
+                      <p className="text-sm">{email}</p>
                       <div className="text-muted-foreground text-xs">
-                        Joined {member.joined}
+                        Joined {joinedTeamDate}
                       </div>
                     </>
                   )}
@@ -132,9 +187,9 @@ export default function TeamMemberCard({
                   <Skeleton className="h-6 w-16 rounded-md" />
                 ) : (
                   <>
-                    <StatusBadge status={"WAITLISTED"} />
-                    {isTeamAdmin &&
-                      !isMemberUser &&
+                    <StatusBadge status={applicationStatus ?? 'PENDING'} />
+                    {isAdminLoggedInUser &&
+                      !isMemberLoggedInUser &&
                       isTeamManagementUnlocked && (
                         <AlertDialog>
                           <Tooltip>
@@ -165,7 +220,7 @@ export default function TeamMemberCard({
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction>Remove</AlertDialogAction>
+                              <AlertDialogAction onClick={handleKickTeam}>Remove</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -174,6 +229,12 @@ export default function TeamMemberCard({
                 )}
               </div>
             </div>
+            {!kickMutationSuccess && (
+              <ErrorStateAlert
+                title={{text: 'Error kicking member'}}
+                description={{text: 'There was an error kicking the member. Please try again or contact the team.'}}
+              />
+            )}
           </CardContent>
         </Card>
       )}
