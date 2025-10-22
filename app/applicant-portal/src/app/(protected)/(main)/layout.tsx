@@ -1,6 +1,5 @@
 "use client";
 import { Separator } from "@/components/shadcn/ui/separator";
-import { EventProfileProtectedProvider } from "@/providers/EventProfile";
 import { NavigationTabOption } from "@/types/NavigationTab";
 import { NavigationBar } from "./components/NavigationBar";
 import MobileNav from "./components/NavigationMobile";
@@ -19,7 +18,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <EventProfileProtectedProvider>
       <div>
         <div>
           <div className="max-w-full flex justify-start md:justify-center py-2 md:py-8">
@@ -35,6 +33,5 @@ export default function RootLayout({
           {children}
         </div>
       </div>
-    </EventProfileProtectedProvider>
   );
 }

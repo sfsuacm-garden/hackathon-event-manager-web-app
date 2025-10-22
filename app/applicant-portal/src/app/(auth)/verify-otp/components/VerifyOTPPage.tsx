@@ -11,24 +11,28 @@ import { useOtpVerification } from "../hooks";
 
 type Props = {
   email: string;
-  authFlow: "login" | "signup" | null;
 };
 
-export function VerifyOtpPage({email, authFlow}:  Props) {
-
+export function VerifyOtpPage({email}:  Props) {
+  //TODO handle resending UI alert.
   const {
     otp,
     setOtp,
-    handleResend,
-    isVerifyOtpPending,
-    isVerifyOtpError,
-    verifyOtpError,
-    isresendOtpPending,
+    showResendAlert,
+    setShowResendAlert,
     handleVerify,
-    onRenavigate,
+    handleResend,
+    isVerifying,
+    isVerifyError,
+    verifyError,
+    isResending,
+    isResendError,
+    resendError,
     messages,
-  } = useOtpVerification(email, authFlow);
+    onRenavigate,
+  } = useOtpVerification(email);
 
+ 
   return (
     <main className="flex justify-center items-center  p-4">
       <Card className="w-full sm:max-w-md">
@@ -59,8 +63,8 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
                   Please enter the one-time password sent to your email or
                   phone.
                 </FieldDescription>
-                {isVerifyOtpError && (
-                  <FieldError errors={[{ message: verifyOtpError?.message ?? ""}]} />
+                {isVerifyError && (
+                  <FieldError errors={[{ message: verifyError?.message ?? ""}]} />
                 )}
               </Field>
             </FieldGroup>
@@ -68,9 +72,9 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
             <Button
               type="submit"
               className="w-full"
-              disabled={isVerifyOtpPending}
+              disabled={isVerifying}
             >
-              {isVerifyOtpPending ? (
+              {isVerifying ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner className="h-4 w-4 animate-spin" />
                   Verifying...
@@ -85,7 +89,7 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
                 type="button"
                 onClick={onRenavigate}
                 className="underline underline-offset-2"
-                disabled={isVerifyOtpPending}
+                disabled={isVerifying}
               >
                 {messages.renavigateText}
               </button>
@@ -94,16 +98,16 @@ export function VerifyOtpPage({email, authFlow}:  Props) {
                 type="button"
                 onClick={handleResend}
                 className="underline underline-offset-2"
-                disabled={isVerifyOtpPending || isresendOtpPending}
+                disabled={isVerifying || isResending}
               >
                 {messages.resendText}
               </button>
             </CardFooter>
 
-            {isVerifyOtpError && (
+            {isVerifyError && (
               <Alert variant="destructive" className="mt-2">
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{verifyOtpError?.message}</AlertDescription>
+                <AlertDescription>{verifyError?.message}</AlertDescription>
               </Alert>
             )}
           </form>

@@ -3,24 +3,6 @@
  *
  * Provide status updates and team actionable items.
  */
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  // AvatarImage,
-} from "@/components/shadcn/ui/avatar";
-import { Badge } from "@/components/shadcn/ui/badge";
-import { BadgeCheckIcon } from "lucide-react";
-import { Button } from "@/components/shadcn/ui/button";
-import { Icons } from "@/lib/icons";
-import { Skeleton } from "@/components/shadcn/ui/skeleton";
-import { cn } from "@/lib/shadcn/utils";
-import StatusBadge from "../../../../components/StatusBadge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shadcn/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +14,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/shadcn/ui/alert-dialog";
+import {
+  Avatar,
+  AvatarFallback,
+} from "@/components/shadcn/ui/avatar";
+import { Badge } from "@/components/shadcn/ui/badge";
+import { Button } from "@/components/shadcn/ui/button";
+import { Skeleton } from "@/components/shadcn/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/ui/tooltip";
+import { Card, CardContent } from "@/components/ui/card";
+import { Icons } from "@/lib/icons";
+import { cn } from "@/lib/shadcn/utils";
 import { trpc } from "@/utils/trpc";
+import { BadgeCheckIcon } from "lucide-react";
 import { useState } from "react";
+import StatusBadge from "../../../../../components/StatusBadge";
 import ErrorStateAlert from "../../components/ErrorStateAlert";
 
 interface TeamMember {

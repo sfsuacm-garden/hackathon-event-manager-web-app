@@ -1,81 +1,66 @@
 "use client";
 
+import { useSendOtpMutation, useVerifyOtp } from "@/hooks/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSendOtp, useVerifyOtp } from "../../../hooks/auth";
 
-
-
-export function useOtpVerification(
-  email: string,
-  authFlow: "signup" | "login" | null
-) {
+export function useOtpVerification(email: string) {
   const [otp, setOtp] = useState("");
-  const router = useRouter();
   const [showResendAlert, setShowResendAlert] = useState(false);
+  const router = useRouter();
 
-  const isSignup = authFlow === "signup";
 
   const messages = {
-    title: isSignup
-      ? "Verify your email to create your account"
-      : "Enter your verification code",
-    description: isSignup
-      ? "We've sent a 6-digit code to your email to complete your registration."
-      : `Enter the 6-digit code sent to ${email} `,
-    buttonText: isSignup ? "Verify & Create Account" : "Verify & Login",
-    resendText: isSignup ? "Didn't receive the code? Resend" : "Resend code",
-    renavigateText: isSignup ? "Back to signup" : "Back to login",
+    title: "Verify your email",
+    description: `Enter the 6-digit code sent to ${email}`,
+    buttonText: "Verify",
+    resendText: "Resend code",
+    renavigateText: "Back",
   };
 
-  const onVerifySuccess: () => void = () => {
-    router.push(`/my-dashboard`);
+  const onVerifySuccess = () => {
+    router.push("/my-dashboard");
   };
 
-  const onResendSuccess: () => void = () => {
+  const onResendSuccess = () => {
     setShowResendAlert(true);
   };
 
+
   const {
-    mutate: verifyOtp, // The function to call the mutation
-    isPending: isVerifyOtpPending, // Boolean: true when the verification is
-    isError: isVerifyOtpError,
-    error: verifyOtpError,
+    mutate: verifyOtp,
+    isPending: isVerifying,
+    isError: isVerifyError,
+    error: verifyError,
   } = useVerifyOtp(email, onVerifySuccess);
 
   const {
     mutate: resendOtp,
-    isPending: isresendOtpPending,
-    isError: isResendOtpError,
-    error: resendOtpError,
-  } = useSendOtp(email, "resend", { onSuccess: onResendSuccess });
+    isPending: isResending,
+    isError: isResendError,
+    error: resendError,
+  } = useSendOtpMutation(() => {setShowResendAlert(true)}, () => {setShowResendAlert(true)});
 
   const handleVerify = (e: React.FormEvent) => {
-    // Trim and validate OTP
+    e.preventDefault();
     const trimmedOtp = otp.trim();
 
-    if (!trimmedOtp) {
-      alert("Please enter the 6-digit code"); // or set an error state
-      return;
-    }
+    if (!trimmedOtp) return alert("Please enter the 6-digit code");
+    if (trimmedOtp.length !== 6 || /\D/.test(trimmedOtp))
+      return alert("OTP must be 6 digits");
 
-    if (trimmedOtp.length !== 6 || /\D/.test(trimmedOtp)) {
-      alert("OTP must be 6 digits");
-      return;
-    }
-
-    e.preventDefault();
-    verifyOtp(otp); // otp is your input state
+    verifyOtp(trimmedOtp);
   };
-
-  const handleResend = (_: React.FormEvent) => {
-    resendOtp();
+  
+  const handleResend = (e: React.FormEvent) => {
+    e.preventDefault();
+    resendOtp(email);
   };
 
   const onRenavigate = () => {
-    const route = isSignup ? `/signup` : `/login`;
-    router.push(route);
+    router.back(); // more generic now that there's no auth flow distinction
   };
+  
 
   return {
     otp,
@@ -83,14 +68,13 @@ export function useOtpVerification(
     showResendAlert,
     setShowResendAlert,
     handleVerify,
-    isVerifyOtpPending,
-    isVerifyOtpError,
-    verifyOtpError,
-    resendOtp,
-    isresendOtpPending,
-    isResendOtpError,
-    resendOtpError,
     handleResend,
+    isVerifying,
+    isVerifyError,
+    verifyError,
+    isResending,
+    isResendError,
+    resendError,
     messages,
     onRenavigate,
   };

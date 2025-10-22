@@ -1,9 +1,7 @@
 import { OtpErrorType } from "@/app/application/types";
 import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
-import { trpc } from "@/utils/trpc";
 import { User } from "@supabase/supabase-js";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { MutationFunctionContext, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 interface SignupData {
@@ -78,8 +76,6 @@ export function useVerifyOtp(
   onVerifySuccess: () => void | Promise<void>
 ) {
   const auth = useSupabaseAuth();
-  const createProfile = trpc.profile.create.useMutation();
-  const { getSignupData, clearSignupData } = useSignupData();
 
   return useMutation<
     User,            
@@ -107,20 +103,6 @@ export function useVerifyOtp(
       if (data.session) {
         await auth.setSession(data.session);
       }
-      
-
-      //TODO The verify step should be moved to a TRPC route
-      // because of the create profile step.
-      const signUpData = getSignupData();
-      if (signUpData) {
-        try {
-          await createProfile.mutateAsync(signUpData);
-          clearSignupData();
-        } catch (err) {
-          console.error("❌ Failed to create profile:", err);
-          throw { type: "PROFILE_FAIL", message: "Failed to set up user profile" };
-        }
-      }
 
       return data.user;
     },
@@ -146,70 +128,33 @@ export function useVerifyOtp(
   });
 }
 
-export function useSendOtp(
-  email: string,
-  mode: "login" | "signup" | "resend" = "login",
-  options: UseSendOtpOptions = {}
-) {
-  const auth = useSupabaseAuth();
-  const router = useRouter();
+export function useSendOtpMutation(onSuccess: ((data: boolean, variables: string, onMutateResult: unknown, context: MutationFunctionContext) => Promise<unknown> | unknown) | undefined, onError:  ((error: Error, variables: string, onMutateResult: unknown, context: MutationFunctionContext) => Promise<unknown> | unknown) | undefined) {
 
-  const { clearSignupData, saveSignupData } = useSignupData();
+  const auth = useSupabaseAuth();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (email: string) => {
       const trimmedEmail = email.trim();
       if (!trimmedEmail) throw new Error("Enter your email");
 
-      const { data: _, error } = await auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: mode === "signup",
-          data:
-            mode === "signup"
-              ? {
-                  first_name: options.signupData?.firstName,
-                  last_name: options.signupData?.lastName,
-                  full_name: `${options.signupData?.firstName} ${options.signupData?.lastName}`,
-                  phone_number: options.signupData?.phoneNumber,
-                  dob: options.signupData?.dob,
-                }
-              : undefined,
-        },
-      });
-
+      const { error } = await auth.signInWithOtp({ email: trimmedEmail });
       if (error) throw new Error(error.message);
-
-      clearSignupData();
-
-      if (options.signupData) {
-        saveSignupData(options.signupData);
-      }
 
       return true;
     },
-    onError: (err) => {
-      console.error(err);
-      return err.message;
-    },
-    onSuccess: () => {
-      if (mode === "resend") {
-        if (options.onSuccess) {
-          options.onSuccess();
-        }
-      } else {
-        router.push(
-          `/verify-otp?email=${encodeURIComponent(email)}&auth=${mode}`
-        );
-      }
-    },
+    onSuccess: onSuccess,
+    onError: onError
   });
 }
 
-export const useUser = () => {
-  const session = useUserSession();
 
-  return session.data?.user ?? null;
+export const useUser = () => {
+  const sessionQuery = useUserSession();
+
+  const user = sessionQuery.data?.user ?? null;
+  const isLoading = sessionQuery.isLoading; // <-- track loading
+
+  return { user, isLoading };
 };
 
 export const useSignOut = () => {
@@ -226,4 +171,23 @@ export const useSignOut = () => {
       queryClient.setQueryData(["user"], null);
     },
   });
+};
+
+
+export const useRefreshProtectedData = () => {
+  const queryClient = useQueryClient();
+
+  const refetchUserProfile = async () => {
+    await queryClient.refetchQueries({
+      queryKey: [['profile', 'me']]
+    });
+  };
+
+  const refetchEventProfile = async () => {
+    await queryClient.refetchQueries({
+      queryKey: [['eventProfile', 'me'], { type: 'query' }]
+    });
+  };
+
+  return { refetchUserProfile, refetchEventProfile };
 };

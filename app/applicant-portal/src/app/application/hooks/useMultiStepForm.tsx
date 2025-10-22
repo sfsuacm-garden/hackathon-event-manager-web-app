@@ -13,6 +13,7 @@ export function useMultiStepForm(
 ) {
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
+  
 
   const { schoolSelection, isLoadingSchool } =
     usePrepopulateSchoolFieldDropwdownSelection();

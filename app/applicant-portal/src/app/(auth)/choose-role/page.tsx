@@ -15,7 +15,7 @@ export default function ChooseRolePage() {
     try {
       localStorage.setItem("pendingRole", role); // fallback
     } catch {}
-    router.push(url ?? `/login?role=${encodeURIComponent(role)}`);
+    router.push(url ?? `/auth`);
   }
 
   return (
@@ -24,9 +24,9 @@ export default function ChooseRolePage() {
         <RoleBlock
           title="Participate as a Hacker!"
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
-          onPrimary={() => handleRoleSelection("hacker", "/signup")}
+          onPrimary={() => handleRoleSelection("hacker", "/auth")}
           primary="Sign up as a hacker"
-          onSecondary={() => router.push("/login")}
+          onSecondary={() => router.push("/auth")}
           secondary="Log into Portal"
         />
 

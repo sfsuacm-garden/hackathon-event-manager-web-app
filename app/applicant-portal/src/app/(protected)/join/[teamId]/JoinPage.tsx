@@ -1,20 +1,20 @@
 "use client";
+import { Alert, AlertDescription } from "@/components/shadcn/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@/components/ui/card";
-import MemberPreview from "./components/MemberPreviewCard";
-import { Separator } from "@radix-ui/react-separator";
-import { Alert, AlertDescription } from "@/components/shadcn/ui/alert";
-import { Icons } from "@/lib/icons";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import ErrorStateAlert from "../../(main)/components/ErrorStateAlert"
+import { Icons } from "@/lib/icons";
 import { trpc } from "@/utils/trpc";
+import { Separator } from "@radix-ui/react-separator";
 import { useRouter } from "next/navigation";
+import ErrorStateAlert from "../../(protected)/(main)/components/ErrorStateAlert";
+import MemberPreview from "./components/MemberPreviewCard";
 //import { useRouter } from "next/router";
 
 export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {

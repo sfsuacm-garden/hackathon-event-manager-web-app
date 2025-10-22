@@ -11,7 +11,6 @@ function useCreateApplication(onVerifySuccess?: () => void, onError?: () => void
   });
 
     const submit = async (form: ApplicationFormValues) => {
-
     const data = await mutation.mutateAsync(form);
     if (!data) throw new Error("No user found.");
     return data}

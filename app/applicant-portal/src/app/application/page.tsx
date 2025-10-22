@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 import { SchoolCombobox } from "./components/ComboBoxSchools";
 
+import { useRefreshProtectedData } from "@/hooks/auth";
 import { useMultiStepForm } from "./hooks/useMultiStepForm";
 import {
   OTHER_OPTION
@@ -34,7 +35,10 @@ import { FormField } from "./types";
 
 export default function ApplyPage() {
   const router = useRouter();
-  const onSubmissionSuccess = () => {
+   const {refetchEventProfile} = useRefreshProtectedData();
+   
+  const onSubmissionSuccess = async () => {
+    await refetchEventProfile();
     router.push("/my-dashboard");
   };
 
