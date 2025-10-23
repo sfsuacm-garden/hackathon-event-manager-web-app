@@ -1,4 +1,4 @@
-import { AuthOnlyProvider, BaseProtectedProvider } from "@/providers/ProtectedProvider";
+import {  AuthOnlyProvider, BaseProtectedProvider } from "@/providers/ProtectedProvider";
 
 export default function RootLayout({
   children,
