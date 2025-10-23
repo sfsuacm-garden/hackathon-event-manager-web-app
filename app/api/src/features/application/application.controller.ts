@@ -53,19 +53,6 @@ export async function createOrUpdateApplication(
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'eventId header is required' });
   }
 
-  const existing = await prisma.application.findUnique({
-    where: { eventId_userId: { eventId, userId } }
-  });
-
-  const application = existing
-    ? await prisma.application.update({
-        where: { id: existing.id },
-        data: buildUpdateData(input)
-      })
-    : await prisma.application.create({
-        data: await buildCreateData(userId, eventId, input)
-      });
-
   //TODO clarify this later on with different roles.
   await prisma.$transaction(async (tx) => {
     const existing = await tx.application.findUnique({
