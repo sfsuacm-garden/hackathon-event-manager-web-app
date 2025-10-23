@@ -26,6 +26,7 @@ import { Controller } from "react-hook-form";
 import { SchoolCombobox } from "./components/ComboBoxSchools";
 
 import { useRefreshProtectedData } from "@/hooks/auth";
+import { useState } from "react";
 import { useMultiStepForm } from "./hooks/useMultiStepForm";
 import {
   OTHER_OPTION
@@ -35,9 +36,11 @@ import { FormField } from "./types";
 
 export default function ApplyPage() {
   const router = useRouter();
-   const {refetchEventProfile} = useRefreshProtectedData();
+  const {refetchEventProfile} = useRefreshProtectedData();
+  const [isRedirecting, setIsRedirecting] = useState(false);
    
   const onSubmissionSuccess = async () => {
+    setIsRedirecting(true)
     await refetchEventProfile();
     router.push("/my-dashboard");
   };
@@ -486,7 +489,7 @@ export default function ApplyPage() {
             <div />
           )}
           <Button onClick={form.handleSubmit(onSubmit)}>
-            {isStepLoading ? (
+            {isStepLoading || isRedirecting ? (
               <Spinner />
             ) : currentStep === steps.length - 1 ? (
               "Submit Application"

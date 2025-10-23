@@ -180,7 +180,7 @@ export const useRefreshProtectedData = () => {
 
   const refetchEventProfile = async () => {
     await queryClient.refetchQueries({
-      queryKey: [['eventProfile', 'me'], { type: 'query' }]
+      queryKey: [['eventProfile', 'me']]
     });
   };
 

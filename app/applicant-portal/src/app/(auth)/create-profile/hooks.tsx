@@ -1,9 +1,8 @@
 "use client";
-import { useRefreshProtectedData, useUser } from "@/hooks/auth";
+import { useRefreshProtectedData } from "@/hooks/auth";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
@@ -36,9 +35,6 @@ export function useCreateProfile() {
   const createProfile = trpc.profile.create.useMutation();
   const router = useRouter();
   const {refetchUserProfile} = useRefreshProtectedData();
-  const { user, isLoading: isLoadingUser } = useUser();
-  const {data, isLoading: isProfileLoading} = trpc.profile.me.useQuery();
-  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileCreationFormSchema),
@@ -66,25 +62,9 @@ export function useCreateProfile() {
     }
     });
 
-  useEffect(() => {
-    if (!isLoadingUser && !user ) {
-        setIsRedirecting(true)
-      router.replace("/choose-role");
-    }
-    if(data && !isProfileLoading) {
-         setIsRedirecting(true)
-        router.replace("/my-dashboard");
-    }
-  }, [user, isLoadingUser, data, isProfileLoading, router]);
-
-
-  const shouldHideUI =
-    isRedirecting || isLoadingUser || isProfileLoading || !user;
-
   return {
     form,
     handleSubmit,
-    shouldHideUI,
     isLoading: createProfile.isPending,
     error: createProfile.error,
   };

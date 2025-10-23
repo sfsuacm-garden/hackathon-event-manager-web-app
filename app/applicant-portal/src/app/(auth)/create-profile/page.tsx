@@ -37,14 +37,9 @@ export default function CreateProfile() {
   const {
     form,
     handleSubmit,
-   shouldHideUI,
     isLoading,
     error
   } = useCreateProfile();
-
-  if (shouldHideUI) {
-    return <Spinner className="flex justify-center p-8" />;
-  }
 
   return (
     <main className="flex justify-center items-center">

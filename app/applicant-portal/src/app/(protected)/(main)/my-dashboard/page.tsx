@@ -7,14 +7,16 @@ import { Skeleton } from "@/components/shadcn/ui/skeleton";
 import { trpc } from "@/utils/trpc";
 import ErrorStateAlert from "../components/ErrorStateAlert";
 import TeamView from "./components/TeamView";
-
 export default function MyDashboardView() {
+  // ✅ All hooks at the top
   const { data, isLoading, error } = trpc.events.getById.useQuery({
     id: process.env.NEXT_PUBLIC_EVENT_ID || "",
   });
 
+  const isTeamManagementUnlocked = data?.isTeamManagementOpen ?? false;
+
+  // ✅ Conditional rendering after all hooks
   if (error) {
-    // Determine error type for better messaging
     const isNotFound = false;
     const isServerError = true;
 
@@ -40,7 +42,6 @@ export default function MyDashboardView() {
       </main>
     );
   }
-  const isTeamManagementUnlocked = data?.isTeamManagementOpen ?? false;
 
   return (
     <main className="min-h-1/2 flex items-center justify-center p-4">

@@ -7,7 +7,7 @@ import { getEventProfileById } from "./eventProfiles.controller";
 export const eventProfileRouter = t.router({
      me: t.procedure.use(requireAuth)
          .use(requireEvent).input(meEventProfileSchema).query(async ({ctx, input}) => {
-        return await getEventProfileById(ctx.event.id, ctx.user?.id ?? "", input.includeUserProfile)
+        return await getEventProfileById(ctx.user?.id ?? "", ctx.event.id, input.includeUserProfile)
       }),
 });
 

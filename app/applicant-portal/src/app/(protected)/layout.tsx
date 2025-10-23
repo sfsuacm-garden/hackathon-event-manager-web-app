@@ -1,4 +1,4 @@
-import { ProtectedProvider } from "@/providers/ProtectedProvider";
+import { AuthOnlyProvider, BaseProtectedProvider, FullyProtectedProvider } from "@/providers/ProtectedProvider";
 
 export default function RootLayout({
   children,
@@ -6,11 +6,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ProtectedProvider>
-      <main className="mx-auto w-full max-w-lg px-6 py-12 space-y-8 ">
+    <AuthOnlyProvider>
+      <BaseProtectedProvider>
+      <FullyProtectedProvider>
+             <main className="mx-auto w-full max-w-lg px-6 py-12 space-y-8 ">
         {children}
       </main>
-    </ProtectedProvider>
-
+      </FullyProtectedProvider>
+      </BaseProtectedProvider>
+    </AuthOnlyProvider>
   );
 }

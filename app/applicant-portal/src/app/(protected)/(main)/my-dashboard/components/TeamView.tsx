@@ -4,24 +4,24 @@
  * Displays the user's team information, including team lock-in time,
  * invite link, team members, and an option to leave the team.
  */
-import React, { useState } from 'react'
-import { Button } from "@/components/shadcn/ui/button";
-import TeamMemberCard from "./MemberCard";
-import { Icons } from "@/lib/icons";
 import {
   Alert,
-  AlertTitle,
   AlertDescription,
+  AlertTitle,
 } from "@/components/shadcn/ui/alert";
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { TEAM_MAX_MEMBERS } from "@/lib/constants";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/ui/tooltip";
+import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import { TEAM_MAX_MEMBERS } from "@/lib/constants";
+import { Icons } from "@/lib/icons";
 import { trpc } from "@/utils/trpc";
+import { useState } from 'react';
 import ErrorStateAlert from "../../components/ErrorStateAlert";
+import TeamMemberCard from "./MemberCard";
 
 export default function TeamView() {
   const utils = trpc.useUtils();
@@ -35,21 +35,7 @@ export default function TeamView() {
 
   const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
 
-  if (error) {
-    return (
-      <Alert variant="default">
-        <Icons.alert />
-        <AlertTitle>
-          Uh oh! there was an unexpected error getting your team information.
-        </AlertTitle>
-        <AlertDescription>
-          Reload the page again or contact the team.{" "}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
+    const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
     onSuccess: ()=> {
       utils.teams.getOwnTeam.invalidate();
     },
@@ -68,6 +54,20 @@ export default function TeamView() {
     const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`;
     console.log(`Team Invite Link: ${teamInviteLink}`);
     navigator.clipboard.writeText(teamInviteLink);
+  }
+  
+  if (error) {
+    return (
+      <Alert variant="default">
+        <Icons.alert />
+        <AlertTitle>
+          Uh oh! there was an unexpected error getting your team information.
+        </AlertTitle>
+        <AlertDescription>
+          Reload the page again or contact the team.{" "}
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
