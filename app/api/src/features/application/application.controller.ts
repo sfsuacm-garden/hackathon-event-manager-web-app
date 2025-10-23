@@ -44,7 +44,11 @@ async function buildCreateData(
   };
 }
 
-export async function createOrUpdateApplication(userId: string, eventId: string, input: CreateApplicationInput) {
+export async function createOrUpdateApplication(
+  userId: string,
+  eventId: string,
+  input: CreateApplicationInput
+) {
   if (!eventId) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'eventId header is required' });
   }
@@ -63,20 +67,35 @@ export async function createOrUpdateApplication(userId: string, eventId: string,
       });
 
   //TODO clarify this later on with different roles.
-  const roleStr = 'hacker';
-  const roleEnum = toParticipationLevel(roleStr);
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.application.findUnique({
+      where: { eventId_userId: { eventId, userId } }
+    });
 
-  await prisma.eventProfile.upsert({
-    where: { profileId_eventId: { profileId: userId, eventId } },
-    update: roleEnum ? { role: roleEnum } : {},
-    create: {
-      profileId: userId,
-      eventId,
-      ...(roleEnum ? { role: roleEnum } : {})
-    }
+    const application = existing
+      ? await tx.application.update({
+          where: { id: existing.id },
+          data: buildUpdateData(input)
+        })
+      : await tx.application.create({
+          data: await buildCreateData(userId, eventId, input)
+        });
+
+    const roleStr = 'hacker';
+    const roleEnum = toParticipationLevel(roleStr);
+
+    const eventProfile = await tx.eventProfile.upsert({
+      where: { profileId_eventId: { profileId: userId, eventId } },
+      update: roleEnum ? { role: roleEnum } : {},
+      create: {
+        profileId: userId,
+        eventId,
+        ...(roleEnum ? { role: roleEnum } : {})
+      }
+    });
+
+    return { application, eventProfile };
   });
-
-  return application;
 }
 
 export async function getMyApplication(ctx: Context) {
