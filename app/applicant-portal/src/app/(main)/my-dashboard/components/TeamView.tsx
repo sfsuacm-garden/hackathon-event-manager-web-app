@@ -65,7 +65,7 @@ export default function TeamView() {
 
   const handleCopyInviteLink = () => {
     //TODO: implement some sort of brief popup or something to indicate that the link was copied
-    const teamInviteLink = `${window.location.origin}/join?teamId=${team?.team.id}`;
+    const teamInviteLink = `${window.location.origin}/join/${team?.team.id}`;
     console.log(`Team Invite Link: ${teamInviteLink}`);
     navigator.clipboard.writeText(teamInviteLink);
   }
