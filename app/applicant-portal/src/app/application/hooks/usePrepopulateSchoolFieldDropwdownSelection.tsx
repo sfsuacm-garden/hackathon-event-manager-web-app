@@ -1,10 +1,10 @@
-import { useUser } from "@/hooks/auth";
-import extractEmailDomain from "@/utils/extractEmailDomain";
-import { trpc } from "@/utils/trpc";
-import { useEffect, useMemo, useState } from "react";
+import { useUser } from '@/hooks/auth';
+import extractEmailDomain from '@/utils/extractEmailDomain';
+import { trpc } from '@/utils/trpc';
+import { useEffect, useMemo, useState } from 'react';
 
 export function usePrepopulateSchoolFieldDropwdownSelection() {
-  const {user, isLoading} = useUser();
+  const { user, isLoading } = useUser();
 
   const [schoolSelection, setSchoolSelection] = useState<{
     value: string;
@@ -12,22 +12,21 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
   } | null>(null);
   // Extract domain from user email
   const userEmailDomain = useMemo(() => {
-
     if (isLoading || !user?.email) return null;
     const domain = extractEmailDomain(user.email);
-    return domain?.endsWith(".edu") ? domain : null;
+    return domain?.endsWith('.edu') ? domain : null;
   }, [user?.email, isLoading]);
 
   // Query school by email domain
   const {
     data: school,
     isLoading: isSchoolLoading,
-    error: schoolError,
+    error: schoolError
   } = trpc.schools.getByEmailDomain.useQuery(
     { domain: userEmailDomain! },
     {
       enabled: Boolean(userEmailDomain),
-      retry: false,
+      retry: false
     }
   );
 
@@ -37,7 +36,7 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
     }
 
     if (schoolError) {
-      console.warn("Could not find school for domain:", userEmailDomain);
+      console.warn('Could not find school for domain:', userEmailDomain);
     }
   }, [school, schoolError, userEmailDomain]);
 
@@ -45,6 +44,6 @@ export function usePrepopulateSchoolFieldDropwdownSelection() {
     schoolSelection,
     isLoadingSchool: isSchoolLoading || isLoading,
     userEmailDomain,
-    schoolError,
+    schoolError
   };
 }

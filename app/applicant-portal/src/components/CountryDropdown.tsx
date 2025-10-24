@@ -1,5 +1,5 @@
-"use client";
-import React, { useCallback, useMemo, useState, forwardRef } from "react";
+'use client';
+import React, { useCallback, useMemo, useState, forwardRef } from 'react';
 
 // shadcn
 import {
@@ -8,23 +8,19 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-} from "@/components/shadcn/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/ui/popover";
+  CommandList
+} from '@/components/shadcn/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/ui/popover';
 
 // utils
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from '@/lib/shadcn/utils';
 
 // assets
-import { ChevronDown, Check as CheckIcon, Globe } from "lucide-react";
-import { CircleFlag } from "react-circle-flags";
+import { ChevronDown, Check as CheckIcon, Globe } from 'lucide-react';
+import { CircleFlag } from 'react-circle-flags';
 
 // data
-import { countries } from "country-data-list";
+import { countries } from 'country-data-list';
 
 export interface Country {
   alpha2: string;
@@ -38,7 +34,7 @@ export interface Country {
   status: string;
 }
 
-type ValueKey = "alpha2" | "alpha3" | "name";
+type ValueKey = 'alpha2' | 'alpha3' | 'name';
 
 interface CountryDropdownProps {
   value?: string;
@@ -54,10 +50,10 @@ interface CountryDropdownProps {
 const RAW_OPTIONS: Country[] = countries.all.filter(
   (c: Country) =>
     Boolean(c.emoji) &&
-    c.status !== "deleted" &&
+    c.status !== 'deleted' &&
     Boolean(c.alpha2) &&
     c.alpha2.length === 2 &&
-    Boolean(c.name),
+    Boolean(c.name)
 );
 
 function dedupeByAlpha2(list: Country[]) {
@@ -75,26 +71,22 @@ const CountryDropdownComponent = (
   {
     value,
     onValueChange,
-    valueKey = "alpha2",
+    valueKey = 'alpha2',
     options = BASE_OPTIONS,
     disabled = false,
-    placeholder = "Select a country",
+    placeholder = 'Select a country',
     slim = false,
-    className,
+    className
   }: CountryDropdownProps,
-  ref: React.ForwardedRef<HTMLButtonElement>,
+  ref: React.ForwardedRef<HTMLButtonElement>
 ) => {
   const [open, setOpen] = useState(false);
 
   const safeOptions = useMemo(() => {
     const cleaned = dedupeByAlpha2(
       (options || []).filter(
-        (c) =>
-          Boolean(c) &&
-          Boolean(c.alpha2) &&
-          c.alpha2.length === 2 &&
-          Boolean(c.name),
-      ),
+        (c) => Boolean(c) && Boolean(c.alpha2) && c.alpha2.length === 2 && Boolean(c.name)
+      )
     );
     return cleaned.sort((a, b) => a.name.localeCompare(b.name));
   }, [options]);
@@ -102,24 +94,22 @@ const CountryDropdownComponent = (
   const selectedCountry = useMemo(() => {
     if (!value) return undefined;
     const target = String(value).toLowerCase();
-    return safeOptions.find(
-      (c) => String(c[valueKey] as string).toLowerCase() === target,
-    );
+    return safeOptions.find((c) => String(c[valueKey] as string).toLowerCase() === target);
   }, [value, valueKey, safeOptions]);
 
   const handleSelect = useCallback(
     (country: Country) => {
-      const nextValue = (country[valueKey] as string) ?? "";
+      const nextValue = (country[valueKey] as string) ?? '';
       onValueChange?.(nextValue, country);
       setOpen(false);
     },
-    [onValueChange, valueKey],
+    [onValueChange, valueKey]
   );
 
   const triggerClasses = cn(
-    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-    slim === true && "w-20",
-    className,
+    'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+    slim === true && 'w-20',
+    className
   );
 
   return (
@@ -136,10 +126,7 @@ const CountryDropdownComponent = (
           {selectedCountry ? (
             <div className="flex items-center flex-grow w-0 gap-2 overflow-hidden">
               <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
-                <CircleFlag
-                  countryCode={selectedCountry.alpha2.toLowerCase()}
-                  height={20}
-                />
+                <CircleFlag countryCode={selectedCountry.alpha2.toLowerCase()} height={20} />
               </div>
               {slim === false && (
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -169,8 +156,7 @@ const CountryDropdownComponent = (
               {safeOptions.map((option) => {
                 const isSelected =
                   selectedCountry &&
-                  (option[valueKey] as string) ===
-                    (selectedCountry[valueKey] as string);
+                  (option[valueKey] as string) === (selectedCountry[valueKey] as string);
 
                 // I use alpha2 for the React key (unique & stable).
                 // If alpha2 is somehow missing, I fall back to name (rare).
@@ -184,10 +170,7 @@ const CountryDropdownComponent = (
                   >
                     <div className="flex flex-grow w-0 space-x-2 overflow-hidden">
                       <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
-                        <CircleFlag
-                          countryCode={option.alpha2.toLowerCase()}
-                          height={20}
-                        />
+                        <CircleFlag countryCode={option.alpha2.toLowerCase()} height={20} />
                       </div>
                       <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                         {option.name}
@@ -195,8 +178,8 @@ const CountryDropdownComponent = (
                     </div>
                     <CheckIcon
                       className={cn(
-                        "ml-auto h-4 w-4 shrink-0",
-                        isSelected ? "opacity-100" : "opacity-0",
+                        'ml-auto h-4 w-4 shrink-0',
+                        isSelected ? 'opacity-100' : 'opacity-0'
                       )}
                     />
                   </CommandItem>
@@ -210,5 +193,5 @@ const CountryDropdownComponent = (
   );
 };
 
-CountryDropdownComponent.displayName = "CountryDropdown";
+CountryDropdownComponent.displayName = 'CountryDropdown';
 export const CountryDropdown = forwardRef(CountryDropdownComponent);

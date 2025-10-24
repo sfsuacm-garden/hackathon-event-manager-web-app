@@ -1,11 +1,7 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/shadcn/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/lib/icons";
-import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Icons } from '@/lib/icons';
+import Link from 'next/link';
 
 interface ErrorStateAlertProps {
   title: {
@@ -16,7 +12,7 @@ interface ErrorStateAlertProps {
     text: string;
     styling?: string;
   };
-  variant?: "default" | "destructive";
+  variant?: 'default' | 'destructive';
   callToAction?: {
     text: string;
     link: string;
@@ -27,17 +23,15 @@ interface ErrorStateAlertProps {
 export default function ErrorStateAlert({
   title,
   description,
-  variant = "destructive",
-  callToAction,
+  variant = 'destructive',
+  callToAction
 }: ErrorStateAlertProps) {
   return (
     <div className="max-w-md w-full space-y-4">
       <Alert variant={variant}>
         <Icons.alert />
         <AlertTitle className={title.styling}>{title.text}</AlertTitle>
-        <AlertDescription className={description.styling}>
-          {description.text}
-        </AlertDescription>
+        <AlertDescription className={description.styling}>{description.text}</AlertDescription>
       </Alert>
 
       {callToAction && (

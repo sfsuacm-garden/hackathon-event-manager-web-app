@@ -1,6 +1,6 @@
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { Suspense } from "react";
-import { VerifyOtpPage } from "./components/VerifyOTPPage";
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { Suspense } from 'react';
+import { VerifyOtpPage } from './components/VerifyOTPPage';
 
 type VerifyOtpPageProps = {
   searchParams: Promise<{
@@ -10,10 +10,16 @@ type VerifyOtpPageProps = {
 
 export default async function VerifyOtp({ searchParams }: VerifyOtpPageProps) {
   const params = await searchParams;
-  const email = params?.email ?? "";
+  const email = params?.email ?? '';
 
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Spinner/></div>}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <Spinner />
+        </div>
+      }
+    >
       <VerifyOtpPage email={email} />
     </Suspense>
   );

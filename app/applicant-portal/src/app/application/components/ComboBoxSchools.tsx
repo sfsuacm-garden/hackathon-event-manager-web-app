@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Command,
@@ -6,25 +6,20 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-} from "@/components/shadcn/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { useDebounce } from "@/hooks/useDebounce";
-import { cn } from "@/lib/shadcn/utils";
-import { trpc } from "@/utils/trpc";
+  CommandList
+} from '@/components/shadcn/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { useDebounce } from '@/hooks/useDebounce';
+import { cn } from '@/lib/shadcn/utils';
+import { trpc } from '@/utils/trpc';
 
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import * as React from "react";
-import { OTHER_OPTION } from "../schemas";
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
+import * as React from 'react';
+import { OTHER_OPTION } from '../schemas';
 
-
-//TODO refer and use the type from the school endpoint. 
+//TODO refer and use the type from the school endpoint.
 interface School {
   id: string;
   name: string;
@@ -36,7 +31,7 @@ export function SchoolCombobox({
   defaultSelectedSchool,
   onValueChange,
   placeholder,
-  isDefaultLoading,
+  isDefaultLoading
 }: {
   defaultSelectedSchool?: string;
   onValueChange: (value: string, school: School) => void;
@@ -44,47 +39,41 @@ export function SchoolCombobox({
   isDefaultLoading: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = React.useState('');
   const debouncedSearch = useDebounce(search, 300);
-  const [selectedSchoolId, setSelectedSchoolId] = React.useState(
-    defaultSelectedSchool
-  );
+  const [selectedSchoolId, setSelectedSchoolId] = React.useState(defaultSelectedSchool);
 
   // Fetch schools matching search
-  const { data: searchResults = [], isLoading } =
-    trpc.schools.getByQuery.useQuery(
-      {
-        where: {
-          name: {
-            contains: debouncedSearch,
-            mode: "insensitive",
-          },
-        },
-        take: 20,
-        orderBy: { name: "asc" },
+  const { data: searchResults = [], isLoading } = trpc.schools.getByQuery.useQuery(
+    {
+      where: {
+        name: {
+          contains: debouncedSearch,
+          mode: 'insensitive'
+        }
       },
-      { enabled: debouncedSearch.length >= 2 }
-    );
+      take: 20,
+      orderBy: { name: 'asc' }
+    },
+    { enabled: debouncedSearch.length >= 2 }
+  );
 
   // Fetch selected school info
   const { data: selectedSchool, isLoading: isSelectedSchoolLoading } =
     trpc.schools.getById.useQuery(
       { id: selectedSchoolId! },
       {
-        enabled: Boolean(selectedSchoolId) && selectedSchoolId !== OTHER_OPTION,
+        enabled: Boolean(selectedSchoolId) && selectedSchoolId !== OTHER_OPTION
       }
     );
 
   // Fetch default school info
-  const { data: defaultSchool, isLoading: isDefaultSchoolLoading } =
-    trpc.schools.getById.useQuery(
-      { id: defaultSelectedSchool! },
-      {
-        enabled:
-          Boolean(defaultSelectedSchool) &&
-          defaultSelectedSchool !== OTHER_OPTION,
-      }
-    );
+  const { data: defaultSchool, isLoading: isDefaultSchoolLoading } = trpc.schools.getById.useQuery(
+    { id: defaultSelectedSchool! },
+    {
+      enabled: Boolean(defaultSelectedSchool) && defaultSelectedSchool !== OTHER_OPTION
+    }
+  );
 
   // Combine default school and selected school, ensure neither is loading
   const combinedSchool = React.useMemo(() => {
@@ -105,12 +94,7 @@ export function SchoolCombobox({
       return selectedSchool;
     }
     return null;
-  }, [
-    defaultSchool,
-    selectedSchool,
-    isDefaultSchoolLoading,
-    isSelectedSchoolLoading,
-  ]);
+  }, [defaultSchool, selectedSchool, isDefaultSchoolLoading, isSelectedSchoolLoading]);
 
   // Combine selected school with search results and add "Other" option
   const schools = React.useMemo(() => {
@@ -133,17 +117,16 @@ export function SchoolCombobox({
 
   // Display name for the button
   const displayName = React.useMemo(() => {
-    if (selectedSchoolId === "Other") {
-      return "Other";
+    if (selectedSchoolId === 'Other') {
+      return 'Other';
     }
     if (selectedSchoolId && combinedSchool) {
       return combinedSchool.name;
     }
-    return placeholder || "Select a school...";
+    return placeholder || 'Select a school...';
   }, [selectedSchoolId, combinedSchool, placeholder]);
 
-  const isAnyLoading =
-    isDefaultLoading || isDefaultSchoolLoading || isSelectedSchoolLoading;
+  const isAnyLoading = isDefaultLoading || isDefaultSchoolLoading || isSelectedSchoolLoading;
 
   return (
     <Popover open={open} onOpenChange={isAnyLoading ? undefined : setOpen}>
@@ -198,17 +181,15 @@ export function SchoolCombobox({
                               setSelectedSchoolId(school.id);
                               onValueChange(school.id, school);
                               setOpen(false);
-                              setSearch("");
+                              setSearch('');
                             }
                       }
                       disabled={isAnyLoading}
                     >
                       <CheckIcon
                         className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedSchoolId === school.id
-                            ? "opacity-100"
-                            : "opacity-0"
+                          'mr-2 h-4 w-4',
+                          selectedSchoolId === school.id ? 'opacity-100' : 'opacity-0'
                         )}
                       />
                       <div className="flex flex-col">
@@ -231,30 +212,26 @@ export function SchoolCombobox({
                       isAnyLoading
                         ? undefined
                         : () => {
-                            setSelectedSchoolId("Other");
-                            onValueChange("Other", {
-                              id: "",
-                              name: "Other",
-                              countryCode: "",
-                              stateProvince: null,
+                            setSelectedSchoolId('Other');
+                            onValueChange('Other', {
+                              id: '',
+                              name: 'Other',
+                              countryCode: '',
+                              stateProvince: null
                             });
                             setOpen(false);
-                            setSearch("");
+                            setSearch('');
                           }
                     }
                     disabled={isAnyLoading}
                   >
                     <CheckIcon
                       className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedSchoolId === "Other"
-                          ? "opacity-100"
-                          : "opacity-0"
+                        'mr-2 h-4 w-4',
+                        selectedSchoolId === 'Other' ? 'opacity-100' : 'opacity-0'
                       )}
                     />
-                    <span className="font-medium italic text-muted-foreground">
-                      Other
-                    </span>
+                    <span className="font-medium italic text-muted-foreground">Other</span>
                   </CommandItem>
                 )}
               </CommandGroup>

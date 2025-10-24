@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function RoleBlock({
   title,
@@ -8,7 +7,7 @@ export function RoleBlock({
   onPrimary,
   primary,
   onSecondary,
-  secondary,
+  secondary
 }: {
   title: string;
   body: string;
