@@ -4,7 +4,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --config src/tests/vitest.config.ts",
     "dev": "tsx watch src/server.ts",
     "start": "npm run build && node dist/server.js",
     "build": "npx prisma generate && npm run lint:check && npx tsup src/server.ts --format esm --out-dir dist --target es2022 --sourcemap --clean --dts",

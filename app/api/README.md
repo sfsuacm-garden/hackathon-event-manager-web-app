@@ -17,6 +17,13 @@ DIRECT_URL
 PORT
 ```
 
+Create another `.env` file in the `app/api` directory called `.env.test` which contains DB credentials for the test DB
+
+```env
+DATABASE_URL
+DIRECT_URL
+```
+
 ## Installation
 
 1. Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed.
