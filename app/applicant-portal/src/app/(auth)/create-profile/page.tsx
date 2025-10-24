@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
+import { Alert, AlertTitle } from '@/components/shadcn/ui/alert';
 import { Button } from '@/components/shadcn/ui/button';
 import { Input } from '@/components/shadcn/ui/input';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
@@ -31,7 +31,7 @@ import { Controller } from 'react-hook-form';
 import { useCreateProfile } from './hooks';
 
 export default function CreateProfile() {
-  const { form, handleSubmit, isLoading, error } = useCreateProfile();
+  const { form, handleSubmit, isLoading } = useCreateProfile();
   const router = useRouter();
 
   const { data: profile, isLoading: profileLoading } = trpc.profile.me.useQuery(undefined, {
@@ -167,10 +167,9 @@ export default function CreateProfile() {
               />
             </FieldGroup>
 
-            {error && (
+            {form.formState.errors.root && (
               <Alert variant="destructive" className="mt-4">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error.message}</AlertDescription>
+                <AlertTitle>{form.formState.errors.root.message}</AlertTitle>
               </Alert>
             )}
           </form>

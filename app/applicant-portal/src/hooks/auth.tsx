@@ -1,8 +1,13 @@
-import { OtpErrorType } from "@/app/application/types";
-import { useSupabaseAuth } from "@/providers/SupabaseAuthProvider";
-import { User } from "@supabase/supabase-js";
-import { MutationFunctionContext, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { OtpErrorType } from '@/app/application/types';
+import { useSupabaseAuth } from '@/providers/SupabaseAuthProvider';
+import { User } from '@supabase/supabase-js';
+import {
+  MutationFunctionContext,
+  useMutation,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 interface SignupData {
   firstName?: string;
@@ -21,17 +26,17 @@ export function useSignupData() {
     dob?: string;
     phoneNumber?: string;
   }): void => {
-    queryClient.setQueryData(["signupData"], data);
+    queryClient.setQueryData(['signupData'], data);
   };
 
   // Read data (will return undefined if not set)
   const getSignupData = () => {
-    return queryClient.getQueryData(["signupData"]) as SignupData | undefined;
+    return queryClient.getQueryData(['signupData']) as SignupData | undefined;
   };
 
   // Optional: clear when done
   const clearSignupData = () => {
-    queryClient.removeQueries({ queryKey: ["signupData"] });
+    queryClient.removeQueries({ queryKey: ['signupData'] });
   };
 
   const hasSignupData = () => {
@@ -48,52 +53,54 @@ export const useUserSession = () => {
 
   useEffect(() => {
     const { data: listener } = auth.onAuthStateChange((_event, session) => {
-      client.setQueryData(["user"], session);
+      client.setQueryData(['user'], session);
     });
 
     return () => listener.subscription.unsubscribe();
   }, [auth, client]);
 
   return useQuery({
-    queryKey: ["user"],
+    queryKey: ['user'],
     queryFn: async () => {
       const {
-        data: { session },
+        data: { session }
       } = await auth.getSession();
       return session;
     },
-    staleTime: Infinity,
+    staleTime: Infinity
   });
 };
 
 export function useVerifyOtp(
   email: string,
-  onVerifySuccess: () => void | Promise<void>
+  onVerifySuccess: () => void | Promise<void>,
+  onError:
+    | ((
+        error: OtpErrorType,
+        variables: string,
+        onMutateResult: unknown,
+        context: MutationFunctionContext
+      ) => Promise<unknown> | unknown)
+    | undefined
 ) {
   const auth = useSupabaseAuth();
 
-  return useMutation<
-    User,            
-    OtpErrorType,    
-    string            
-  >({
+  return useMutation<User, OtpErrorType, string>({
     mutationFn: async (otp: string) => {
-      if (!otp || otp.length < 6)
-        throw { type: "INVALID_OTP", message: "Enter the 6-digit code" };
+      if (!otp || otp.length < 6) throw { type: 'INVALID_OTP', message: 'Enter the 6-digit code' };
 
       const { data, error } = await auth.verifyOtp({
         email,
         token: otp,
-        type: "email",
+        type: 'email'
       });
 
       if (error) {
-        console.error("❌ OTP verification failed:", error);
-        throw { type: "VERIFY_FAIL", message: error.message ?? "OTP verification failed" };
+        console.error('❌ OTP verification failed:', error);
+        throw { type: 'VERIFY_FAIL', message: error.message ?? 'OTP verification failed' };
       }
 
-      if (!data.user)
-        throw { type: "NO_USER", message: "No user found." };
+      if (!data.user) throw { type: 'NO_USER', message: 'No user found.' };
 
       if (data.session) {
         await auth.setSession(data.session);
@@ -106,31 +113,34 @@ export function useVerifyOtp(
       await onVerifySuccess();
     },
 
-    onError: (err) => {
-      // ✅ `err` is now type `OtpErrorType`
-      switch (err.type) {
-        case "INVALID_OTP":
-          console.error("Invalid code:", err.message);
-          break;
-        case "VERIFY_FAIL":
-          console.error("Verification failed:", err.message);
-          break;
-        case "PROFILE_FAIL":
-          console.error("Profile creation failed:", err.message);
-          break;
-      }
-    },
+    onError: onError
   });
 }
 
-export function useSendOtpMutation(onSuccess: ((data: boolean, variables: string, onMutateResult: unknown, context: MutationFunctionContext) => Promise<unknown> | unknown) | undefined, onError:  ((error: Error, variables: string, onMutateResult: unknown, context: MutationFunctionContext) => Promise<unknown> | unknown) | undefined) {
-
+export function useSendOtpMutation(
+  onSuccess:
+    | ((
+        data: boolean,
+        variables: string,
+        onMutateResult: unknown,
+        context: MutationFunctionContext
+      ) => Promise<unknown> | unknown)
+    | undefined,
+  onError:
+    | ((
+        error: Error,
+        variables: string,
+        onMutateResult: unknown,
+        context: MutationFunctionContext
+      ) => Promise<unknown> | unknown)
+    | undefined
+) {
   const auth = useSupabaseAuth();
 
   return useMutation({
     mutationFn: async (email: string) => {
       const trimmedEmail = email.trim();
-      if (!trimmedEmail) throw new Error("Enter your email");
+      if (!trimmedEmail) throw new Error('Enter your email');
 
       const { error } = await auth.signInWithOtp({ email: trimmedEmail });
       if (error) throw new Error(error.message);
@@ -141,7 +151,6 @@ export function useSendOtpMutation(onSuccess: ((data: boolean, variables: string
     onError: onError
   });
 }
-
 
 export const useUser = () => {
   const sessionQuery = useUserSession();
@@ -163,11 +172,10 @@ export const useSignOut = () => {
     },
     onSuccess: () => {
       queryClient.clear();
-      queryClient.setQueryData(["user"], null);
-    },
+      queryClient.setQueryData(['user'], null);
+    }
   });
 };
-
 
 export const useRefreshProtectedData = () => {
   const queryClient = useQueryClient();
