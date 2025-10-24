@@ -118,6 +118,19 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
       }
 
+      const isBlacklisted = await tx.teamsBlacklist.findUnique({
+        where: {
+          teamId: teamId,
+          userId: profileId
+        }
+      });
+      if(isBlacklisted) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: `User with id ${profileId} is blacklisted from team ${teamId}`
+        });
+      }
+
       console.log(`is prev team user admin: ${prevTeamUserInfo.isAdmin}`);
 
       if (prevTeamUserInfo.teamId === teamId) {
@@ -275,6 +288,20 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
         throw new TRPCError({
           code: 'CONFLICT',
           message: `Team admin with ID ${memberKickingId} cannot kick themselves`
+        });
+      }
+
+      //add member to blacklist
+      const blacklist = await tx.teamsBlacklist.create({
+        data: {
+          teamId: teamId,
+          userId: kickedMemberId
+        }
+      });
+      if(!blacklist) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `There was an issue adding kicked member ${kickedMemberId} to blacklist`
         });
       }
 
