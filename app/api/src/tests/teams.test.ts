@@ -172,6 +172,7 @@ async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
   // new team shall be created with kicked member apart of it
   // kicked member should be admin of new team
   // kicked member shall no longer be on old team
+  // kicked member shall be on blacklist for this team
 
   expect(testInfo.teams, 'teams list cannot be empty').not.toBeNull();
 
@@ -196,7 +197,20 @@ async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
     }
   });
 
-  expect(kickedTeamMemberDb?.isAdmin, 'kicked team member should now be admin').toBe(true); 
+  expect(kickedTeamMemberDb?.isAdmin, 'kicked team member should now be admin').toBe(true);
+  
+  const teamBlacklist = await prisma.teamsBlacklist.findUnique({
+    where: {
+      teamId_userId: {
+        teamId: origTeam?.team.id!,
+        userId: origTeam?.teamMembers[1]?.userId!
+      }
+    }
+  });
+
+  //check if joining a team throws an error 
+  expect(teamBlacklist).not.toBeNull()
+  await expect(joinTeam(origTeam?.team.id!, origTeam?.teamMembers[1]?.userId!, testInfo.event.id)).rejects.toThrow('blacklisted')
 }
 
 async function leaveTeamNormalCase(testInfo: TeamTestSetupInfo) {

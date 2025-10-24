@@ -120,8 +120,10 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
 
       const isBlacklisted = await tx.teamsBlacklist.findUnique({
         where: {
-          teamId: teamId,
-          userId: profileId
+          teamId_userId: {
+            teamId: teamId,
+            userId: profileId
+          }
         }
       });
       if(isBlacklisted) {
