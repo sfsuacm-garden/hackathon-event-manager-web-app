@@ -19,6 +19,7 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { toast } from 'sonner';
 import { useOtpVerification } from '../hooks';
 
 type Props = {
@@ -26,7 +27,6 @@ type Props = {
 };
 
 export function VerifyOtpPage({ email }: Props) {
-  //TODO handle resending UI alert.
   const {
     otp,
     setOtp,
@@ -40,8 +40,21 @@ export function VerifyOtpPage({ email }: Props) {
     onRenavigate
   } = useOtpVerification(email);
 
+  const onResendClick = async (e: React.FormEvent) => {
+    try {
+      handleResend(e);
+      toast.success('Verification code sent!', {
+        description: `A new code has been sent to ${email}`
+      });
+    } catch (error) {
+      toast.error('Failed to resend code', {
+        description: error instanceof Error ? error.message : 'Please try again in a moment.'
+      });
+    }
+  };
+
   return (
-    <main className="flex justify-center items-center  p-4">
+    <main className="flex justify-center items-center p-4">
       <Card className="w-full sm:max-w-md">
         <CardHeader>
           <CardTitle>Verify Account</CardTitle>
@@ -65,7 +78,7 @@ export function VerifyOtpPage({ email }: Props) {
                   </InputOTPGroup>
                 </InputOTP>
                 <FieldDescription>
-                  Please enter the one-time password sent to your email or phone.
+                  Please enter the one-time password sent to your email.
                 </FieldDescription>
                 {isVerifyError && <FieldError errors={[{ message: verifyError?.message ?? '' }]} />}
               </Field>
@@ -94,11 +107,11 @@ export function VerifyOtpPage({ email }: Props) {
 
               <button
                 type="button"
-                onClick={handleResend}
+                onClick={onResendClick}
                 className="underline underline-offset-2"
                 disabled={isVerifying || isResending}
               >
-                {messages.resendText}
+                {isResending ? 'Sending...' : messages.resendText}
               </button>
             </CardFooter>
 
