@@ -1,12 +1,13 @@
-import dotenv from 'dotenv';
-import express, { type Application, type Request, type Response } from 'express';
-import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './swagger';
-import helmet from 'helmet';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import express, { type Application } from 'express';
+import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { trpcRouter } from './core/_app';
-import { createContext } from './core/context';
 import apiRouter from './core/apiApps';
+import { createContext } from './core/context';
+import { swaggerSpec } from './swagger';
 
 dotenv.config();
 
@@ -14,6 +15,13 @@ const app: Application = express();
 
 app.use(express.json());
 app.use(helmet());
+
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true // if you're sending cookies or auth headers
+  })
+);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

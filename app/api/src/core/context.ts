@@ -1,26 +1,28 @@
-import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
-import { supabase } from '../config/supabase';
 import type { User } from '@supabase/supabase-js';
+import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import prisma from '../config/prismaClient';
-import type { Event as PrismaEvent } from '@prisma/client';
+import { supabase } from '../config/supabase';
 
 export async function createContext({ req, res }: CreateExpressContextOptions) {
   const authHeader = req.headers.authorization;
+
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   let user: User | null = null;
+
   if (token) {
-    const { data } = await supabase.auth.getUser(token);
-    user = data?.user ?? null;
+    try {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    } catch (err) {
+      console.warn('Supabase auth error:', err);
+    }
   }
 
   const eventId = req.headers['x-event-id'] as string | undefined;
-  let event: PrismaEvent | null = null;
-  if (eventId) {
-    event = await prisma.event.findUnique({
-      where: { id: eventId }
-    });
-  }
+  const event = eventId ? await prisma.event.findUnique({ where: { id: eventId } }) : null;
 
   return {
     req,

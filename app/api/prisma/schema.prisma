@@ -21,7 +21,7 @@ model Application {
   school                    String?
   graduationYear            Int?                @map("graduation_year")
   experienceLevel           String?             @map("experience_level")
-  submissionData            Json?               @map("submission_data")
+  submissionData            String?             @map("submission_data")
   createdAt                 DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
   publicStatus              application_status? @map("public_status")
   internalStatus            application_status? @map("internal_status")
@@ -46,7 +46,7 @@ model Application {
   educationLevel            String?             @map("education_level")
   tshirtSize                t_shirt_size?       @map("tshirt_size")
   majorFieldOfStudy         String?             @map("major_field_of_study")
-  schoolEmail              String?              @map("school_email")
+  schoolEmail               String?             @map("school_email")
   event                     Event               @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   profile                   UserProfile         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -157,7 +157,7 @@ model UserProfile {
   firstName     String?             @map("first_name")
   lastName      String?             @map("last_name")
   dob           String?
-  phone_number  String?
+  phoneNumber   String?             @map("phone_number")
   applications  Application[]
   eventProfiles EventProfile[]
   mailingLists  MailingListMember[]

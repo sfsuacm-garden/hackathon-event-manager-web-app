@@ -1,7 +1,7 @@
 import z from 'zod';
-import {t} from '../../core/trpc';
-import { teamProcedure, protectedProcedure } from '../../common/common.middleware';
+import { protectedProcedure, teamProcedure } from '../../common/common.middleware';
 import { idParamsSchema } from '../../common/common.schema';
+import { t } from '../../core/trpc';
 import { getTeamById, joinTeam, kickTeamMember, leaveTeam } from './teams.controller';
 
 export const teamsRouter = t.router({
