@@ -21,7 +21,7 @@ export function useSendOtp(initialEmail: string = '') {
     },
     (err) => {
       console.error('Failed to send OTP:', err);
-      let errorMessage =
+      const errorMessage =
         'Unable to send verification code. Please check your email address and try again.';
       form.setError('email', {
         message: getErrorMessage(err, errorMessage)

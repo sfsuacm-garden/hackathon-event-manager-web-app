@@ -21,7 +21,7 @@ export function useOtpVerification(email: string) {
   const onVerifySuccess = () => {
     router.push('/my-dashboard');
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onVerifyError = (err: any) => {
     console.error('Failed to verify OTP:', err);
 
@@ -42,6 +42,7 @@ export function useOtpVerification(email: string) {
     setShowResendAlert(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onResendError = (err: any) => {
     console.error('Failed to resend OTP:', err);
 

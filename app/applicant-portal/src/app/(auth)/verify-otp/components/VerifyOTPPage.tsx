@@ -40,7 +40,7 @@ export function VerifyOtpPage({ email }: Props) {
     onRenavigate
   } = useOtpVerification(email);
 
-  const onResendClick = async (e: React.FormEvent) => {
+  const onResendClick = (e: React.FormEvent) => {
     try {
       handleResend(e);
       toast.success('Verification code sent!', {
