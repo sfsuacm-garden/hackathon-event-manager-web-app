@@ -80,6 +80,10 @@ export const requireTeam = requireAuth.unstable_pipe(async ({ ctx, next }) => {
     throw new TRPCError({ code: 'NOT_FOUND', message: 'User is not part of any team for this event' });
   }
 
+  if(!teamAndMember.team) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: `team ${teamAndMember.teamId} associated with user could not be found` });
+  }
+
   return next({
     ctx: {
       ...ctx,

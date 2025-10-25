@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
 import { Prisma, PrismaClient } from '@prisma/client/extension';
 import { MAX_TEAM_SIZE } from '../../common/constants';
+import { joinTeamTokensScalarWhereWithAggregatesInputObjectSchema } from '../../zod/schemas/objects/joinTeamTokensScalarWhereWithAggregatesInput.schema';
 
 type PrismaClientOrTx = PrismaClient | Prisma.TransactionClient;
 
@@ -332,9 +333,57 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
   } 
 }
 
+export async function getOrCreateJoinTeamToken(teamId : string) {
+  const token = await prisma.$transaction(async (tx) => {
+    //middleware verifies that team exists
+    let tokenObj = await tx.joinTeamTokens.findUnique({
+      where: {
+        teamId: teamId
+      }
+    });
+    
+    if(!tokenObj) {
+      //create token for teamId. Team id is all that is required, other fields taken care of by database
+      tokenObj = await tx.joinTeamTokens.create({
+        data: {
+          teamId: teamId
+        }  
+      });
+
+      return tokenObj.token;
+    }
+
+    const currDateTime = new Date();
+    if(tokenObj.expiresAt <= currDateTime) {
+      await tx.joinTeamTokens.delete({
+        where: {
+          teamId: teamId
+        }
+      });
+      tokenObj = await tx.joinTeamTokens.create({
+        data:{
+          teamId: teamId
+        }
+      });
+
+      return tokenObj.token;
+    }
+
+    return tokenObj.token
+  });
+
+  return token;
+}
+
+
+
 // HELPER FUNCTIONS
 // helper functions have a prisma client passed in because they can either be ran inside of a transaction
 // or outside of a transaction and I could not think of a better way to control that dual behavior.
+async function checkJoinTeamTokenExpired(teamId : string) {
+
+}
+
 async function fetchTeamMemberByTeam(tx: PrismaClientOrTx, memberId: string, teamId: string) {
   const teamMember = await tx.teamMember.findUnique({
     where: {
