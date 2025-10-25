@@ -209,8 +209,8 @@ async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
   });
 
   //check if joining a team throws an error 
-  expect(teamBlacklist).not.toBeNull()
-  await expect(joinTeam(origTeam?.team.id!, origTeam?.teamMembers[1]?.userId!, testInfo.event.id)).rejects.toThrow('blacklisted')
+  expect(teamBlacklist).not.toBeNull();
+  await expect(joinTeam(origTeam?.team.id!, origTeam?.teamMembers[1]?.userId!, testInfo.event.id)).rejects.toThrow('blacklisted');
 }
 
 async function leaveTeamNormalCase(testInfo: TeamTestSetupInfo) {
