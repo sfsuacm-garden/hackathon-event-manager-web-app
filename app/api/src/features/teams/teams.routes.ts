@@ -2,7 +2,7 @@ import z from 'zod';
 import { protectedProcedure, teamProcedure } from '../../common/common.middleware';
 import { idParamsSchema } from '../../common/common.schema';
 import { t } from '../../core/trpc';
-import { getTeamById, joinTeam, kickTeamMember, leaveTeam, getOrCreateJoinTeamToken } from './teams.controller';
+import { getTeamById, joinTeam, kickTeamMember, leaveTeam, getOrCreateJoinTeamToken, getTeamFromTeamToken } from './teams.controller';
 
 export const teamsRouter = t.router({
   getTeamById: protectedProcedure
@@ -26,9 +26,10 @@ export const teamsRouter = t.router({
     }),
 
   joinTeamById: teamProcedure
-    .input(z.object({teamId: z.uuid()}))
+    .input(z.object({teamToken: z.string()}))
     .mutation(async ({ ctx, input }) => {
-      return await joinTeam(input.teamId, ctx.user.id, ctx.event?.id!);
+      const teamId = await getTeamFromTeamToken(input.teamToken);
+      return await joinTeam(teamId, ctx.user.id, ctx.event?.id!);
     }),
 
   leaveTeam: teamProcedure

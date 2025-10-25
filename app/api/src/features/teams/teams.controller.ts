@@ -334,56 +334,106 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
 }
 
 export async function getOrCreateJoinTeamToken(teamId : string) {
-  const token = await prisma.$transaction(async (tx) => {
-    //middleware verifies that team exists
-    let tokenObj = await tx.joinTeamTokens.findUnique({
-      where: {
-        teamId: teamId
-      }
-    });
-    
-    if(!tokenObj) {
-      //create token for teamId. Team id is all that is required, other fields taken care of by database
-      tokenObj = await tx.joinTeamTokens.create({
-        data: {
-          teamId: teamId
-        }  
-      });
-
-      return tokenObj.token;
-    }
-
-    const currDateTime = new Date();
-    if(tokenObj.expiresAt <= currDateTime) {
-      await tx.joinTeamTokens.delete({
+  try {
+    const token = await prisma.$transaction(async (tx) => {
+      //middleware verifies that team exists
+      let tokenObj = await tx.joinTeamTokens.findUnique({
         where: {
           teamId: teamId
         }
       });
-      tokenObj = await tx.joinTeamTokens.create({
-        data:{
-          teamId: teamId
-        }
-      });
+      
+      if(!tokenObj) {
+        //create token for teamId. Team id is all that is required, other fields taken care of by database
+        tokenObj = await tx.joinTeamTokens.create({
+          data: {
+            teamId: teamId
+          }  
+        });
 
-      return tokenObj.token;
-    }
+        return tokenObj.token;
+      }
 
-    return tokenObj.token
-  });
+      const currDateTime = new Date();
+      if(tokenObj.expiresAt <= currDateTime) {
+        await tx.joinTeamTokens.delete({
+          where: {
+            teamId: teamId
+          }
+        });
+        tokenObj = await tx.joinTeamTokens.create({
+          data:{
+            teamId: teamId
+          }
+        });
 
-  return token;
+        return tokenObj.token;
+      }
+
+      return tokenObj.token
+    });
+
+    return token;
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
+
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to get or create join team token',
+      cause: error
+    });    
+  }
 }
 
+export async function getTeamFromTeamToken(token: string) {
+  try {
+    const tokenAndTeam = await prisma.joinTeamTokens.findUnique({
+      where: {
+        token: token
+      },
+      include: {
+        teams: true
+      }
+    });
+
+    if(!tokenAndTeam) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Join team token could not be found'
+      })
+    }
+
+    const currDateTime = new Date();
+    if(tokenAndTeam?.expiresAt! <= currDateTime) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message:`Join team token has expired. Ask team admin to regenerate link`
+      });
+    }
+
+    if(!tokenAndTeam.teams) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: `Team associated with token could not be found`
+      });
+    }
+
+    return tokenAndTeam.teams.id; 
+
+  } catch(error) {
+    if (error instanceof TRPCError) throw error;
+
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Could not fetch team from team token',
+    });    
+  }
+}
 
 
 // HELPER FUNCTIONS
 // helper functions have a prisma client passed in because they can either be ran inside of a transaction
 // or outside of a transaction and I could not think of a better way to control that dual behavior.
-async function checkJoinTeamTokenExpired(teamId : string) {
-
-}
-
 async function fetchTeamMemberByTeam(tx: PrismaClientOrTx, memberId: string, teamId: string) {
   const teamMember = await tx.teamMember.findUnique({
     where: {
