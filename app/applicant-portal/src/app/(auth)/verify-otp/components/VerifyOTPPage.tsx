@@ -1,6 +1,5 @@
 'use client';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
 import { Button } from '@/components/shadcn/ui/button';
 import {
   Field,
@@ -114,13 +113,13 @@ export function VerifyOtpPage({ email }: Props) {
                 {isResending ? 'Sending...' : messages.resendText}
               </button>
             </CardFooter>
-
-            {isVerifyError && (
+            {/* TODO Discuss how to handle error messaging UI. Currently opted this to be handled by toast due to how clean its appearence is but I am open for suggestions. */}
+            {/* {isVerifyError && (
               <Alert variant="destructive" className="mt-2">
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{verifyError?.message}</AlertDescription>
               </Alert>
-            )}
+            )} */}
           </form>
         </CardContent>
       </Card>
