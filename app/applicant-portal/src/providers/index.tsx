@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SupabaseAuthProvider } from "./SupabaseAuthProvider";
-import { TRPCProvider } from "./trpcProvider";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SupabaseAuthProvider } from './SupabaseAuthProvider';
+import { TRPCProvider } from './trpcProvider';
 
 const queryClient = new QueryClient();
 

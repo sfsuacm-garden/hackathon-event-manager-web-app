@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useUserSession } from "@/hooks/auth";
-import { trpc } from "@/utils/trpc";
-import { QueryClient } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import { useMemo } from "react";
+import { useUserSession } from '@/hooks/auth';
+import { trpc } from '@/utils/trpc';
+import { QueryClient } from '@tanstack/react-query';
+import { httpBatchLink } from '@trpc/client';
+import { useMemo } from 'react';
 
 export const TRPCProvider = ({
   children,
-  queryClient,
+  queryClient
 }: {
   children: React.ReactNode;
   queryClient: QueryClient;
@@ -24,12 +24,12 @@ export const TRPCProvider = ({
             headers() {
               const token = session.data?.access_token;
               return {
-                ...(eventId ? { "x-event-id": eventId } : {}),
-                ...(token ? { authorization: `Bearer ${token}` } : {}),
+                ...(eventId ? { 'x-event-id': eventId } : {}),
+                ...(token ? { authorization: `Bearer ${token}` } : {})
               };
-            },
-          }),
-        ],
+            }
+          })
+        ]
       }),
     [session.data?.access_token, eventId] // recreate only if these change
   );

@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 
-import { RoleBlock } from "./components/RoleBlockCard";
+import { RoleBlock } from './components/RoleBlockCard';
 
-
-// TODO Currently roles are not being used. Would be good for future functionality. 
-export type Role = "hacker" | "judge" | "mentor";
+// TODO Currently roles are not being used. Would be good for future functionality.
+export type Role = 'hacker' | 'judge' | 'mentor';
 
 export default function ChooseRolePage() {
   const router = useRouter();
 
-  function handleRoleSelection(role: Role, url = "") {
+  function handleRoleSelection(role: Role, url = '') {
     try {
-      localStorage.setItem("pendingRole", role); // fallback
+      localStorage.setItem('pendingRole', role); // fallback
     } catch {}
     router.push(url ?? `/auth`);
   }
@@ -24,9 +23,9 @@ export default function ChooseRolePage() {
         <RoleBlock
           title="Participate as a Hacker!"
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
-          onPrimary={() => handleRoleSelection("hacker", "/auth")}
+          onPrimary={() => handleRoleSelection('hacker', '/auth')}
           primary="Sign up as a hacker"
-          onSecondary={() => router.push("/auth")}
+          onSecondary={() => router.push('/auth')}
           secondary="Log into Portal"
         />
 
@@ -35,7 +34,7 @@ export default function ChooseRolePage() {
           body="Judges at SF Hacks evaluate each team's project based on specific criteria set by the organizers, assessing factors such as creativity, technical implementation, and user experience design to determine the winning projects."
           onPrimary={() =>
             //TODO: Add proper role selection link.
-            handleRoleSelection("judge", "https://docs.google.com/forms/u/0/")
+            handleRoleSelection('judge', 'https://docs.google.com/forms/u/0/')
           }
           primary="Sign up for Judging"
         />
@@ -44,9 +43,7 @@ export default function ChooseRolePage() {
           title="Participate as a Mentor"
           body="Mentors at SF Hacks support teams by providing guidance on design, architecture, debugging, and product thinking so hackers can move faster and learn more."
           //TODO: Add proper role selection link.
-          onPrimary={() =>
-            handleRoleSelection("mentor", "https://docs.google.com/forms/u/0/")
-          }
+          onPrimary={() => handleRoleSelection('mentor', 'https://docs.google.com/forms/u/0/')}
           primary="Sign up as a Mentor"
         />
       </div>

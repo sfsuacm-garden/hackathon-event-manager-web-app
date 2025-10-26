@@ -1,30 +1,23 @@
-"use client";
+'use client';
 
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { useUser } from "@/hooks/auth";
-import { trpc } from "@/utils/trpc";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { useUser } from '@/hooks/auth';
+import { trpc } from '@/utils/trpc';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export const UserProfileProtectedProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const UserProfileProtectedProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
   const eventId = process.env.NEXT_PUBLIC_EVENT_ID;
-  
-  const { 
-    data: profile, 
-    isPending: profilePending, 
-    error 
-  } = trpc.profile.me.useQuery(
-    undefined, 
-    { 
-      enabled: Boolean(user) && Boolean(eventId),
-    }
-  );
+
+  const {
+    data: profile,
+    isPending: profilePending,
+    error
+  } = trpc.profile.me.useQuery(undefined, {
+    enabled: Boolean(user) && Boolean(eventId)
+  });
 
   const isLoading = userLoading || profilePending;
 
@@ -34,13 +27,13 @@ export const UserProfileProtectedProvider = ({
 
     // No user - redirect to authentication
     if (!user) {
-      router.replace("/choose-role");
+      router.replace('/choose-role');
       return;
     }
 
     // Error fetching profile - redirect to role selection
     if (error) {
-      router.replace("/choose-role");
+      router.replace('/choose-role');
       return;
     }
   }, [user, profile, isLoading, error, router]);

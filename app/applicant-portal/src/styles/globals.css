@@ -187,7 +187,7 @@
 }
 
 #nprogress .bar {
-  background: var(--primary) !important;
+  background: var(--accent) !important;
 }
 #nprogress .spinner {
   display: none !important; /* hide spinner circle */

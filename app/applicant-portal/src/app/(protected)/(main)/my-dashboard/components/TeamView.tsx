@@ -4,30 +4,22 @@
  * Displays the user's team information, including team lock-in time,
  * invite link, team members, and an option to leave the team.
  */
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/shadcn/ui/alert";
-import { Button } from "@/components/shadcn/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shadcn/ui/tooltip";
-import { Spinner } from "@/components/ui/shadcn-io/spinner";
-import { TEAM_MAX_MEMBERS } from "@/lib/constants";
-import { Icons } from "@/lib/icons";
-import { trpc } from "@/utils/trpc";
+import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
+import { Button } from '@/components/shadcn/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { TEAM_MAX_MEMBERS } from '@/lib/constants';
+import { Icons } from '@/lib/icons';
+import { trpc } from '@/utils/trpc';
 import { useState } from 'react';
-import ErrorStateAlert from "../../components/ErrorStateAlert";
-import TeamMemberCard from "./MemberCard";
+import ErrorStateAlert from '../../components/ErrorStateAlert';
+import TeamMemberCard from './MemberCard';
 
 export default function TeamView() {
   const utils = trpc.useUtils();
-  const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao 
+  const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao
 
-  const {data: team, isLoading: loading, error} = trpc.teams.getOwnTeam.useQuery();
+  const { data: team, isLoading: loading, error } = trpc.teams.getOwnTeam.useQuery();
   const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
   const isTeamFull = teamCount > 3;
@@ -35,8 +27,8 @@ export default function TeamView() {
 
   const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
 
-    const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
-    onSuccess: ()=> {
+  const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
+    onSuccess: () => {
       utils.teams.getOwnTeam.invalidate();
     },
     onError: () => {
@@ -44,28 +36,24 @@ export default function TeamView() {
     }
   });
 
-  const handleLeaveTeam = ()=> {
+  const handleLeaveTeam = () => {
     //TODO: need to add a component for ARE YOU SURE dialogues
     leaveTeamMutation.mutate();
-  }
+  };
 
   const handleCopyInviteLink = () => {
     //TODO: implement some sort of brief popup or something to indicate that the link was copied
     const teamInviteLink = `${window.location.origin}/join/${team?.team.id}`;
     console.log(`Team Invite Link: ${teamInviteLink}`);
     navigator.clipboard.writeText(teamInviteLink);
-  }
-  
+  };
+
   if (error) {
     return (
       <Alert variant="default">
         <Icons.alert />
-        <AlertTitle>
-          Uh oh! there was an unexpected error getting your team information.
-        </AlertTitle>
-        <AlertDescription>
-          Reload the page again or contact the team.{" "}
-        </AlertDescription>
+        <AlertTitle>Uh oh! there was an unexpected error getting your team information.</AlertTitle>
+        <AlertDescription>Reload the page again or contact the team. </AlertDescription>
       </Alert>
     );
   }
@@ -100,16 +88,15 @@ export default function TeamView() {
 
           {isTeamFull && (
             <TooltipContent>
-              <span>{isTeamFull ? "Team is full" : "Copy invite link"}</span>
+              <span>{isTeamFull ? 'Team is full' : 'Copy invite link'}</span>
             </TooltipContent>
           )}
         </Tooltip>
       </div>
       {!loading ? (
         <div className="flex flex-col w-full gap-2">
-          
-          {team?.team.members.map((member, idx) => ( 
-            <TeamMemberCard 
+          {team?.team.members.map((member, idx) => (
+            <TeamMemberCard
               key={idx}
               teamMemberInfo={member}
               isMemberLoggedInUser={member.userId === team.requestorUserId}
@@ -117,7 +104,6 @@ export default function TeamView() {
               isTeamAdmin={member.isAdmin ?? false}
             />
           ))}
-
         </div>
       ) : (
         <div className="h-56 flex items-center justify-center w-full mx-auto">
@@ -132,9 +118,11 @@ export default function TeamView() {
       )}
 
       {showLeaveTeamMutationFailError && (
-        <ErrorStateAlert 
-          title={{text: 'Error leaving team'}}
-          description={{text: 'There was an error leaving the team. Please try again or contact the team.'}}
+        <ErrorStateAlert
+          title={{ text: 'Error leaving team' }}
+          description={{
+            text: 'There was an error leaving the team. Please try again or contact the team.'
+          }}
         />
       )}
     </div>

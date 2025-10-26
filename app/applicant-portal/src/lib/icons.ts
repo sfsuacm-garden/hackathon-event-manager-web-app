@@ -13,8 +13,8 @@ import {
   Menu,
   BadgeCheckIcon,
   BadgeX,
-  X,
-} from "lucide-react";
+  X
+} from 'lucide-react';
 
 export const Icons = {
   home: Home,
@@ -30,5 +30,5 @@ export const Icons = {
   menu: Menu,
   badgeCheck: BadgeCheckIcon,
   badgeX: BadgeX,
-  x: X,
+  x: X
 };

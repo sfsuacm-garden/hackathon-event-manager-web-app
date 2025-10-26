@@ -1,32 +1,30 @@
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/shadcn/ui/alert-dialog";
-import {
-  navigationMenuTriggerStyle,
-} from "@/components/shadcn/ui/navigation-menu";
-import { useSignOut } from "@/hooks/auth";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner"
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/shadcn/ui/alert-dialog';
+import { navigationMenuTriggerStyle } from '@/components/shadcn/ui/navigation-menu';
+import { useSignOut } from '@/hooks/auth';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function SignOutBtn() {
-  const { mutate: signOutMutation } = useSignOut()
+  const { mutate: signOutMutation } = useSignOut();
   const router = useRouter();
 
   const handleSignout = () => {
     signOutMutation(undefined, {
       onSuccess: () => {
-        toast("You have successfully signed out...")
-        router.push("/");
+        toast('You have successfully signed out...');
+        router.push('/');
       }
-    })
+    });
   };
 
   return (
@@ -43,9 +41,7 @@ export default function SignOutBtn() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="hover:cursor-pointer">Cancel</AlertDialogCancel>
-          <AlertDialogAction className="hover:cursor-pointer"
-            onClick={handleSignout}
-          >
+          <AlertDialogAction className="hover:cursor-pointer" onClick={handleSignout}>
             Sign out
           </AlertDialogAction>
         </AlertDialogFooter>
