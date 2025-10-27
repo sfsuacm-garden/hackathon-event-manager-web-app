@@ -17,7 +17,7 @@ import TeamMemberCard from './MemberCard';
 
 export default function TeamView() {
   const utils = trpc.useUtils();
-  const isTeamManagementUnlocked = false; // how are we going to handle this globally or should this become a middleware lmao
+  const isTeamManagementUnlocked = true; // how are we going to handle this globally or should this become a middleware lmao
 
   const { data: team, isLoading: loading, error } = trpc.teams.getOwnTeam.useQuery();
   const teamCount = team?.team.members.length ?? 0;
@@ -111,7 +111,7 @@ export default function TeamView() {
         </div>
       )}
 
-      {isTeam && !loading && !isTeamManagementUnlocked && (
+      {isTeam && !loading && isTeamManagementUnlocked && (
         <Button variant="outline" size="lg" onClick={handleLeaveTeam}>
           <Icons.logOut /> Leave Team
         </Button>
