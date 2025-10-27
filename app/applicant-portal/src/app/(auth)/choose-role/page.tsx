@@ -32,7 +32,7 @@ export default function ChooseRolePage() {
           secondary="Log into Portal"
           Icon={Icons.code}
         />
-
+        {/* FOR FUTURE Launch
         <RoleBlock
           title="Participate as a Judge"
           body="Judges at SF Hacks evaluate each team's project based on specific criteria set by the organizers, assessing factors such as creativity, technical implementation, and user experience design to determine the winning projects."
@@ -51,7 +51,7 @@ export default function ChooseRolePage() {
           onPrimary={() => handleRoleSelection('mentor', 'https://docs.google.com/forms/u/0/')}
           primary="Sign up as a Mentor"
           Icon={Icons.help}
-        />
+        /> */}
       </div>
     </main>
   );
