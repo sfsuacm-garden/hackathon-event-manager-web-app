@@ -95,9 +95,7 @@ export async function createOrUpdateApplication(
           name: `New Team #${numTeamsInEvent}`
         },
         select: {
-          id: true,
-          eventId: true,
-          createdAt: true
+          id: true
         }
       });
 
@@ -105,7 +103,8 @@ export async function createOrUpdateApplication(
         data: {
           teamId: newOrExistingTeam.id,
           userId: userId,
-          event_id: eventId
+          event_id: eventId,
+          isAdmin: true
         }
       });
     }
