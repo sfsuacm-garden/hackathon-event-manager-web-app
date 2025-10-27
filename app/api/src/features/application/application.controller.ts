@@ -81,6 +81,35 @@ export async function createOrUpdateApplication(
       }
     });
 
+    //create team for new user and new user only not for updates
+    if(!existing) {
+      const numTeamsInEvent = await tx.team.count({
+        where: {
+          eventId: eventId
+        }
+      });
+      
+      const newOrExistingTeam = await tx.team.create({
+        data: {
+          eventId: eventId,
+          name: `New Team #${numTeamsInEvent}`
+        },
+        select: {
+          id: true,
+          eventId: true,
+          createdAt: true
+        }
+      });
+
+      await tx.teamMember.create({
+        data: {
+          teamId: newOrExistingTeam.id,
+          userId: userId,
+          event_id: eventId
+        }
+      });
+    }
+
     return { application, eventProfile };
   });
 }

@@ -169,7 +169,7 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         include: {
           members: true
         }
-      })
+      });
       return newTeamAndMembersInfo;
     });
 
