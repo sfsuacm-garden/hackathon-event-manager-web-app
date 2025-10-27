@@ -8,7 +8,9 @@ export const applicationRouter = t.router({
     .use(requireAuth)
     .use(requireEvent)
     .input(applicationCreateSchema)
-    .mutation(({ ctx, input }) => createOrUpdateApplication(ctx.user?.id || "", ctx.event.id, input)),
+    .mutation(({ ctx, input }) =>
+      createOrUpdateApplication(ctx.user?.id || '', ctx.event.id, input)
+    ),
 
   me: t.procedure.use(requireEventAccess).query(({ ctx }) => getMyApplication(ctx))
 });

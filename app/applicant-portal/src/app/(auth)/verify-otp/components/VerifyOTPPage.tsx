@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import { Button } from '@/components/shadcn/ui/button';
 import {
@@ -18,6 +19,7 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { useOtpVerification } from '../hooks';
 
@@ -55,6 +57,15 @@ export function VerifyOtpPage({ email }: Props) {
   return (
     <main className="flex justify-center items-center p-4">
       <Card className="w-full sm:max-w-md">
+        <div className="flex justify-center pt-6">
+          <Image
+            src="/logo_white.png"
+            alt="App Logo"
+            className="h-16 w-auto object-contain"
+            width={500}
+            height={500}
+          />
+        </div>
         <CardHeader>
           <CardTitle>Verify Account</CardTitle>
           <CardDescription>{messages.description}</CardDescription>

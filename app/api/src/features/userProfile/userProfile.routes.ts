@@ -16,14 +16,10 @@ export const userProfileRouter = t.router({
 
       return await createUserProfile(profileData);
     }),
-   // New getById procedure
-  me: t.procedure
-    .use(requireAuth)
-    .query(async ({ ctx }) => {
-     return await getUserProfileById(ctx.user.id)
-    }),
+  // New getById procedure
+  me: t.procedure.use(requireAuth).query(async ({ ctx }) => {
+    return await getUserProfileById(ctx.user.id);
+  })
 });
-
-
 
 export type UserProfileRouter = typeof userProfileRouter;

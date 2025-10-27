@@ -77,7 +77,10 @@ export const requireTeam = requireAuth.unstable_pipe(async ({ ctx, next }) => {
   });
 
   if (!teamAndMember) {
-    throw new TRPCError({ code: 'NOT_FOUND', message: 'User is not part of any team for this event' });
+    throw new TRPCError({
+      code: 'NOT_FOUND',
+      message: 'User is not part of any team for this event'
+    });
   }
 
   return next({

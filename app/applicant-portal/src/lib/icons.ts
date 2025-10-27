@@ -1,18 +1,21 @@
 // lib/icons.ts
 import {
-  Home,
-  User,
-  Settings,
-  Plus,
-  Trash,
-  Edit,
-  Copy,
-  EllipsisVertical,
-  LogOut,
   AlertCircle,
-  Menu,
   BadgeCheckIcon,
   BadgeX,
+  CodeIcon,
+  Copy,
+  Edit,
+  EllipsisVertical,
+  Gavel,
+  HelpCircleIcon,
+  Home,
+  LogOut,
+  Menu,
+  Plus,
+  Settings,
+  Trash,
+  User,
   X
 } from 'lucide-react';
 
@@ -30,5 +33,8 @@ export const Icons = {
   menu: Menu,
   badgeCheck: BadgeCheckIcon,
   badgeX: BadgeX,
-  x: X
+  x: X,
+  code: CodeIcon,
+  gavel: Gavel,
+  help: HelpCircleIcon
 };
