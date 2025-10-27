@@ -17,7 +17,7 @@ export const teamsRouter = t.router({
         team: await getTeamById(ctx.teamId),
         isTeamAdmin: ctx.isTeamAdmin,
         requestorUserId: ctx.user.id
-      }
+      };
     }),
 
   getTeamInviteToken: teamProcedure
