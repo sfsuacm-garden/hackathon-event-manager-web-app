@@ -2,12 +2,10 @@ import type z from 'zod';
 import prisma from '../../config/prismaClient';
 import type { UserProfileCreateInputObjectSchema } from '../../zod/schemas';
 
-export async function createUserProfile(
-  input: z.infer<typeof UserProfileCreateInputObjectSchema>
-) {
+export async function createUserProfile(input: z.infer<typeof UserProfileCreateInputObjectSchema>) {
   try {
     const existingProfile = await prisma.userProfile.findUnique({
-      where: { id: input.id },
+      where: { id: input.id }
     });
 
     if (existingProfile) {
@@ -15,7 +13,7 @@ export async function createUserProfile(
     }
 
     const profile = await prisma.userProfile.create({
-      data: { ...input },
+      data: { ...input }
     });
 
     return profile;
@@ -25,13 +23,11 @@ export async function createUserProfile(
   }
 }
 
-
 export async function getUserProfileById(id: string) {
-
   try {
-     const profile = await prisma.userProfile.findUnique({
-        where: { id: id },
-      });
+    const profile = await prisma.userProfile.findUnique({
+      where: { id: id }
+    });
     return profile;
   } catch (error: any) {
     console.error('❌ Error getting user profile:', error);

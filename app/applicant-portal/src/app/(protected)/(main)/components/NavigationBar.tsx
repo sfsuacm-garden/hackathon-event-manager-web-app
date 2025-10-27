@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Link from "next/link";
+import * as React from 'react';
+import Link from 'next/link';
 
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/shadcn/ui/navigation-menu";
-import { NavigationTabOption } from "@/types/NavigationTab";
-import SignOutBtn from "./SignOutBtn"
+  navigationMenuTriggerStyle
+} from '@/components/shadcn/ui/navigation-menu';
+import { NavigationTabOption } from '@/types/NavigationTab';
+import SignOutBtn from './SignOutBtn';
 
 interface NavigationMenuProps {
   navigationOptions: NavigationTabOption[];
@@ -23,16 +23,12 @@ export function NavigationBar({ navigationOptions }: NavigationMenuProps) {
       <NavigationMenuList>
         <NavigationMenuItem>
           {navigationOptions.map((option) => (
-            <NavigationMenuLink
-              key={option.href}
-              asChild
-              className={navigationMenuTriggerStyle()}
-            >
-              {
-                option.label === "Sign out"
-                ? <SignOutBtn />
-                : <Link href={option.href}>{option.label}</Link>
-              }
+            <NavigationMenuLink key={option.href} asChild className={navigationMenuTriggerStyle()}>
+              {option.label === 'Sign out' ? (
+                <SignOutBtn />
+              ) : (
+                <Link href={option.href}>{option.label}</Link>
+              )}
             </NavigationMenuLink>
           ))}
         </NavigationMenuItem>

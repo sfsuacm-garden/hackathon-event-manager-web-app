@@ -1,66 +1,53 @@
 /* eslint-disable no-use-before-define */
-import * as React from "react";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import * as RPNInput from "react-phone-number-input";
-import flags from "react-phone-number-input/flags";
+import * as React from 'react';
+import { CheckIcon, ChevronsUpDown } from 'lucide-react';
+import * as RPNInput from 'react-phone-number-input';
+import flags from 'react-phone-number-input/flags';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-} from "@/components/shadcn/ui/command";
-import { Input } from "@/components/shadcn/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/ui/popover";
-import { ScrollArea } from "@/components/shadcn/ui/scroll-area";
-import { cn } from "@/lib/shadcn/utils";
+  CommandList
+} from '@/components/shadcn/ui/command';
+import { Input } from '@/components/shadcn/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/ui/popover';
+import { ScrollArea } from '@/components/shadcn/ui/scroll-area';
+import { cn } from '@/lib/shadcn/utils';
 
-type PhoneInputProps = Omit<
-  React.ComponentProps<"input">,
-  "onChange" | "value" | "ref"
-> &
-  Omit<RPNInput.Props<typeof RPNInput.default>, "onChange"> & {
+type PhoneInputProps = Omit<React.ComponentProps<'input'>, 'onChange' | 'value' | 'ref'> &
+  Omit<RPNInput.Props<typeof RPNInput.default>, 'onChange'> & {
     onChange?: (value: RPNInput.Value) => void;
   };
 
-const PhoneInput = React.forwardRef<
-  React.ElementRef<typeof RPNInput.default>,
-  PhoneInputProps
->(({ className, onChange, value, ...props }, ref) => {
-  return (
-    <RPNInput.default
-      ref={ref}
-      className={cn("flex", className)}
-      flagComponent={FlagComponent}
-      countrySelectComponent={CountrySelect}
-      inputComponent={InputComponent}
-      smartCaret={false}
-      value={value || undefined}
-      onChange={(v) => onChange?.(v || ("" as RPNInput.Value))}
-      {...props}
-    />
-  );
-});
-PhoneInput.displayName = "PhoneInput";
+const PhoneInput = React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
+  ({ className, onChange, value, ...props }, ref) => {
+    return (
+      <RPNInput.default
+        ref={ref}
+        className={cn('flex', className)}
+        flagComponent={FlagComponent}
+        countrySelectComponent={CountrySelect}
+        inputComponent={InputComponent}
+        smartCaret={false}
+        value={value || undefined}
+        onChange={(v) => onChange?.(v || ('' as RPNInput.Value))}
+        {...props}
+      />
+    );
+  }
+);
+PhoneInput.displayName = 'PhoneInput';
 
-const InputComponent = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<"input">
->(({ className, ...props }, ref) => (
-  <Input
-    className={cn("rounded-e-lg rounded-s-none", className)}
-    {...props}
-    ref={ref}
-  />
-));
-InputComponent.displayName = "InputComponent";
+const InputComponent = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
+  ({ className, ...props }, ref) => (
+    <Input className={cn('rounded-e-lg rounded-s-none', className)} {...props} ref={ref} />
+  )
+);
+InputComponent.displayName = 'InputComponent';
 
 type CountryEntry = { label: string; value: RPNInput.Country | undefined };
 
@@ -75,10 +62,10 @@ const CountrySelect = ({
   disabled,
   value: selectedCountry,
   options: countryList,
-  onChange,
+  onChange
 }: CountrySelectProps) => {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-  const [searchValue, setSearchValue] = React.useState("");
+  const [searchValue, setSearchValue] = React.useState('');
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -88,7 +75,7 @@ const CountrySelect = ({
       onOpenChange={(open) => {
         setIsOpen(open);
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        open && setSearchValue("");
+        open && setSearchValue('');
       }}
     >
       <PopoverTrigger asChild>
@@ -98,15 +85,9 @@ const CountrySelect = ({
           className="flex gap-1 rounded-e-none rounded-s-lg border-r-0 px-3 focus:z-10"
           disabled={disabled}
         >
-          <FlagComponent
-            country={selectedCountry}
-            countryName={selectedCountry}
-          />
+          <FlagComponent country={selectedCountry} countryName={selectedCountry} />
           <ChevronsUpDown
-            className={cn(
-              "-mr-2 size-4 opacity-50",
-              disabled ? "hidden" : "opacity-100",
-            )}
+            className={cn('-mr-2 size-4 opacity-50', disabled ? 'hidden' : 'opacity-100')}
           />
         </Button>
       </PopoverTrigger>
@@ -119,7 +100,7 @@ const CountrySelect = ({
               setTimeout(() => {
                 if (scrollAreaRef.current) {
                   const viewportElement = scrollAreaRef.current.querySelector(
-                    "[data-radix-scroll-area-viewport]",
+                    '[data-radix-scroll-area-viewport]'
                   );
                   if (viewportElement) {
                     viewportElement.scrollTop = 0;
@@ -143,7 +124,7 @@ const CountrySelect = ({
                       onChange={onChange}
                       onSelectComplete={() => setIsOpen(false)}
                     />
-                  ) : null,
+                  ) : null
                 )}
               </CommandGroup>
             </ScrollArea>
@@ -165,7 +146,7 @@ const CountrySelectOption = ({
   countryName,
   selectedCountry,
   onChange,
-  onSelectComplete,
+  onSelectComplete
 }: CountrySelectOptionProps) => {
   const handleSelect = () => {
     onChange(country);
@@ -178,7 +159,7 @@ const CountrySelectOption = ({
       <span className="flex-1 text-sm">{countryName}</span>
       <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
       <CheckIcon
-        className={`ml-auto size-4 ${country === selectedCountry ? "opacity-100" : "opacity-0"}`}
+        className={`ml-auto size-4 ${country === selectedCountry ? 'opacity-100' : 'opacity-0'}`}
       />
     </CommandItem>
   );

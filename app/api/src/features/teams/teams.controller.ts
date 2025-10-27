@@ -12,11 +12,11 @@ export async function getTeamById(id: string) {
       where: {
         id: id
       },
-      select: {eventId: true}
+      select: { eventId: true }
     });
 
     let iHateFknPrismaQueries = await prisma.team.findUnique({
-      where: {id: id},
+      where: { id: id },
       include: {
         members: {
           include: {
@@ -26,13 +26,13 @@ export async function getTeamById(id: string) {
                 lastName: true,
                 applications: {
                   // turned off TS error for this because findUniqueOrThrow should type prevent this from being null/undefined
-                  where: {eventId: eventId!}, 
-                  select: { 
-                    schoolEmail: true, 
+                  where: { eventId: eventId! },
+                  select: {
+                    schoolEmail: true,
                     status: true,
                     createdAt: true
                   },
-                  orderBy: {createdAt: 'desc'},
+                  orderBy: { createdAt: 'desc' },
                   take: 1
                 }
               }
@@ -42,7 +42,7 @@ export async function getTeamById(id: string) {
       }
     });
     // const team = await prisma.team.findUnique({
-    //   where: { 
+    //   where: {
     //     id: id
     //   },
     //   include: {
@@ -57,7 +57,6 @@ export async function getTeamById(id: string) {
     }
 
     return iHateFknPrismaQueries;
-
   } catch (error) {
     if (error instanceof TRPCError) throw error;
     throw new TRPCError({
@@ -72,7 +71,6 @@ export async function getTeamById(id: string) {
 //   if(!isRequestorTeamAdmin) {
 //     throw new TRPCError({code: 'FORBIDDEN', message:'in order to generate invite link, user must be a team admin'});
 //   }
-
 
 // }
 
@@ -96,7 +94,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
       }
 
-      if (requestedTeam.members.length >= MAX_TEAM_SIZE) { //make an enum or some shit somewhere config or some shit
+      if (requestedTeam.members.length >= MAX_TEAM_SIZE) {
+        //make an enum or some shit somewhere config or some shit
         throw new TRPCError({
           code: 'CONFLICT',
           message: `Team with ID ${teamId} is full`,
@@ -104,9 +103,9 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         });
       }
 
-      // We use find first here because prism throws a fit with findUnique. 
+      // We use find first here because prism throws a fit with findUnique.
       // Theoretically, should only be one team member entry per event per user
-      const prevTeamUserInfo = await tx.teamMember.findFirst({ 
+      const prevTeamUserInfo = await tx.teamMember.findFirst({
         where: {
           userId: profileId,
           event_id: eventId
@@ -164,7 +163,8 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
       });
 
       //delete the team if previous team member count is 0
-      if (newTeamUserInfo && prevTeamNumMembers < 1) { // refactor into a leave team function helper
+      if (newTeamUserInfo && prevTeamNumMembers < 1) {
+        // refactor into a leave team function helper
         const deletedTeam = await tx.team.delete({
           where: {
             id: prevTeamUserInfo.teamId
@@ -185,13 +185,12 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
         include: {
           members: true
         }
-      })
+      });
       return newTeamAndMembersInfo;
     });
 
     console.log(`[SUCCESS] Added ${profileId} to team ${teamId}`);
     return newTeamInfo;
-
   } catch (error) {
     if (error instanceof TRPCError) throw error;
 
@@ -206,7 +205,6 @@ export async function joinTeam(teamId: string, profileId: string, eventId: strin
 export async function leaveTeam(teamId: string, userId: string) {
   try {
     await prisma.$transaction(async (tx) => {
-
       const prevTeamMemberAndTeamInfo = await tx.teamMember.findUnique({
         where: {
           teamId_userId: {
@@ -261,7 +259,6 @@ export async function leaveTeam(teamId: string, userId: string) {
       } else if (prevTeamMemberAndTeamInfo.isAdmin) {
         await reassignAdminToEarliestJoiningMember(tx, teamId);
       }
-
     });
   } catch (error) {
     if (error instanceof TRPCError) throw error;
@@ -274,20 +271,25 @@ export async function leaveTeam(teamId: string, userId: string) {
   }
 }
 
-export async function kickTeamMember(memberKickingId: string, kickedMemberId: string, teamId: string) {
+export async function kickTeamMember(
+  memberKickingId: string,
+  kickedMemberId: string,
+  teamId: string
+) {
   try {
     await prisma.$transaction(async (tx) => {
       const memberKickingInfo = await fetchTeamMemberByTeam(tx, memberKickingId, teamId);
       const kickedMemberInfo = await fetchTeamMemberByTeam(tx, kickedMemberId, teamId);
 
-      if(!memberKickingInfo.isAdmin) {
+      if (!memberKickingInfo.isAdmin) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: `Member with id ${memberKickingId} does not have permissions to kick ${kickedMemberId}}`
         });
       }
 
-      if (memberKickingId === kickedMemberId) { //if team admin somehow finds a way to try to kick themselves insted of leaving team, they are dumbass.
+      if (memberKickingId === kickedMemberId) {
+        //if team admin somehow finds a way to try to kick themselves insted of leaving team, they are dumbass.
         throw new TRPCError({
           code: 'CONFLICT',
           message: `Team admin with ID ${memberKickingId} cannot kick themselves`
@@ -322,7 +324,7 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
         }
       });
     });
-  } catch(error) {
+  } catch (error) {
     if (error instanceof TRPCError) throw error;
 
     throw new TRPCError({
@@ -330,7 +332,7 @@ export async function kickTeamMember(memberKickingId: string, kickedMemberId: st
       message: 'Failed to fetch event',
       cause: error
     });
-  } 
+  }
 }
 
 export async function getOrCreateJoinTeamToken(teamId : string) {

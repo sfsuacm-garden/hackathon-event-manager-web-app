@@ -1,12 +1,11 @@
-import { joinTeam, kickTeamMember, leaveTeam  } from '../features/teams/teams.controller';
+import { joinTeam, kickTeamMember, leaveTeam } from '../features/teams/teams.controller';
 import prisma from '../config/prismaClient';
 import type { TeamMember } from '@prisma/client';
 import { describe, beforeEach, afterEach, expect, test } from 'vitest';
 import { cleanTeamsTestUp, setTeamsTestUp, type TeamTestSetupInfo } from './teamsTestSetupTearDown';
 
-describe('Teams Tests', ()=>{
-  
-  describe('Team tests where there are 2 teams with one member on each team', ()=> {
+describe('Teams Tests', () => {
+  describe('Team tests where there are 2 teams with one member on each team', () => {
     let teamSetupInfo: TeamTestSetupInfo;
     beforeEach(async () => {
       teamSetupInfo = await setTeamsTestUp([1, 1]);
@@ -16,12 +15,12 @@ describe('Teams Tests', ()=>{
       await cleanTeamsTestUp(teamSetupInfo);
     });
 
-    test('join team test', async ()=>{
+    test('join team test', async () => {
       await testJoinTeamOneMemPerTeam(teamSetupInfo);
     });
   });
 
-  describe('Team tests where there is only one team with multiple members', ()=> {
+  describe('Team tests where there is only one team with multiple members', () => {
     let teamSetupInfo: TeamTestSetupInfo;
     beforeEach(async () => {
       teamSetupInfo = await setTeamsTestUp([2]);
@@ -31,7 +30,7 @@ describe('Teams Tests', ()=>{
       await cleanTeamsTestUp(teamSetupInfo);
     });
 
-    test('kick member team test normal case', async ()=>{
+    test('kick member team test normal case', async () => {
       await testKickFromTeamMainCase(teamSetupInfo);
     });
 
@@ -39,12 +38,12 @@ describe('Teams Tests', ()=>{
       await leaveTeamNormalCase(teamSetupInfo);
     });
 
-    test('leave team admin leaves case', async ()=> {
+    test('leave team admin leaves case', async () => {
       await leaveTeamAdminLeaves(teamSetupInfo);
     });
   });
 
-  describe('Team tests where there are multiple teams with at least one team having >1 member', ()=> {
+  describe('Team tests where there are multiple teams with at least one team having >1 member', () => {
     let teamSetupInfo: TeamTestSetupInfo;
     beforeEach(async () => {
       teamSetupInfo = await setTeamsTestUp([1, 3]);
@@ -57,15 +56,13 @@ describe('Teams Tests', ()=>{
     test('join team but original team has >1 player', async () => {
       await testJoinTeamAdminAccepts(teamSetupInfo);
     });
-    
   });
 });
 
 async function testJoinTeamOneMemPerTeam(testInfo: TeamTestSetupInfo) {
-  
   const teamToJoin = testInfo.teams?.[0];
   expect(teamToJoin).toBeDefined();
-    
+
   const teamBeingLeft = testInfo.teams?.[1];
   expect(teamBeingLeft).toBeDefined();
 
@@ -87,7 +84,7 @@ async function testJoinTeamOneMemPerTeam(testInfo: TeamTestSetupInfo) {
   expect(teamJoinedDb?.members).not.toBeNull();
 
   let newMemberDb: TeamMember | undefined = undefined;
-  for(const member of teamJoinedDb!.members) {
+  for (const member of teamJoinedDb!.members) {
     if (member.userId === memberLeaving?.userId) {
       newMemberDb = member;
     }
@@ -104,14 +101,17 @@ async function testJoinTeamOneMemPerTeam(testInfo: TeamTestSetupInfo) {
       members: true
     }
   });
-  
-  expect(oldTeamDb, 'old team should be deleted because there was only one member who joined a new team.').toBeNull();
+
+  expect(
+    oldTeamDb,
+    'old team should be deleted because there was only one member who joined a new team.'
+  ).toBeNull();
 }
 
 async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
   const teamToJoin = testInfo.teams?.[0];
   expect(teamToJoin).toBeDefined();
-    
+
   const teamBeingLeft = testInfo.teams?.[1];
   expect(teamBeingLeft).toBeDefined();
 
@@ -121,7 +121,7 @@ async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
   expect(memberLeaving?.isAdmin, 'leaving team member should be admin').toBe(true);
 
   await joinTeam(teamToJoin?.team.id!, teamBeingLeft?.teamMembers[0]?.userId!, testInfo.event.id);
-  
+
   const teamJoinedDb = await prisma.team.findUnique({
     where: {
       id: teamToJoin!.team.id
@@ -134,12 +134,12 @@ async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
   expect(teamJoinedDb?.members).not.toBeNull();
 
   let newMemberDb: TeamMember | undefined = undefined;
-  for(const member of teamJoinedDb!.members) {
+  for (const member of teamJoinedDb!.members) {
     if (member.userId === memberLeaving?.userId) {
       newMemberDb = member;
     }
   }
-  
+
   expect(newMemberDb, 'there was no new member of team').toBeDefined();
   expect(newMemberDb?.isAdmin, 'joining member cannot be admin').toBe(false);
 
@@ -161,7 +161,6 @@ async function testJoinTeamAdminAccepts(testInfo: TeamTestSetupInfo) {
     take: 1
   });
 
-
   expect(oldTeamMembersDb, 'old team should still have members').not.toBeNull();
   expect(teamAdmin[0]?.userId).toBe(teamBeingLeft?.teamMembers[1]?.userId);
 }
@@ -180,7 +179,11 @@ async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
   expect(origTeam?.teamMembers).not.toBeNull();
   expect(origTeam?.teamMembers.length).greaterThan(1);
 
-  await kickTeamMember(origTeam?.teamMembers[0]?.userId!, origTeam?.teamMembers[1]?.userId!, origTeam?.team.id!);
+  await kickTeamMember(
+    origTeam?.teamMembers[0]?.userId!,
+    origTeam?.teamMembers[1]?.userId!,
+    origTeam?.team.id!
+  );
 
   const origTeamMembersDb = await prisma.teamMember.findMany({
     where: {
@@ -188,12 +191,15 @@ async function testKickFromTeamMainCase(testInfo: TeamTestSetupInfo) {
     }
   });
 
-  expect(origTeamMembersDb, 'kicking member should not result in no team members existing on original team').not.toBeNull();
+  expect(
+    origTeamMembersDb,
+    'kicking member should not result in no team members existing on original team'
+  ).not.toBeNull();
   expect(origTeamMembersDb[0]?.isAdmin, 'remaining member should be admin').toBe(true);
 
   const kickedTeamMemberDb = await prisma.teamMember.findFirst({
     where: {
-      userId: origTeam?.teamMembers[1]?.userId! 
+      userId: origTeam?.teamMembers[1]?.userId!
     }
   });
 
@@ -230,11 +236,14 @@ async function leaveTeamNormalCase(testInfo: TeamTestSetupInfo) {
     }
   });
 
-  expect(origTeamMembersDb, 'Member leaving team should not result in team having no members').not.toBeNull();
-  
+  expect(
+    origTeamMembersDb,
+    'Member leaving team should not result in team having no members'
+  ).not.toBeNull();
+
   const kickedTeamMemberDb = await prisma.teamMember.findFirst({
     where: {
-      userId: origTeam?.teamMembers[1]?.userId! 
+      userId: origTeam?.teamMembers[1]?.userId!
     }
   });
   expect(kickedTeamMemberDb?.isAdmin, 'kicked team member should now be admin').toBe(true);
@@ -267,18 +276,23 @@ async function leaveTeamAdminLeaves(testInfo: TeamTestSetupInfo) {
     }
   });
 
-  expect(origTeamMembersDb, 'Member leaving team should not result in team having no members').not.toBeNull();
-  expect(origTeamMembersDb[0]?.isAdmin, 'oldest team member remaining on original team should be admin').toBe(true);
+  expect(
+    origTeamMembersDb,
+    'Member leaving team should not result in team having no members'
+  ).not.toBeNull();
+  expect(
+    origTeamMembersDb[0]?.isAdmin,
+    'oldest team member remaining on original team should be admin'
+  ).toBe(true);
 
   console.log(`Who should be admin after leaving ${origTeam?.teamMembers[1]?.userId}`);
   console.log(`who is the new admin ${teamAdmin?.userId}`);
   console.log(`Who we are comparing against ${origTeamMembersDb[0]?.userId}`);
   console.log(origTeamMembersDb[0]?.isAdmin);
 
-
   const leavingMemberDb = await prisma.teamMember.findFirst({
     where: {
-      userId: origTeam?.teamMembers[0]?.userId! 
+      userId: origTeam?.teamMembers[0]?.userId!
     }
   });
 

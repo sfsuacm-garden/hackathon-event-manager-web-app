@@ -69,11 +69,11 @@
 :root {
   --background: oklch(0.1649 0.0352 281.8285);
   --foreground: oklch(0.9513 0.0074 260.7315);
-  --card: oklch(0.2542 0.0611 281.1423);
+  --card: #1e1e3f;
   --card-foreground: oklch(0.9513 0.0074 260.7315);
   --popover: oklch(0.2542 0.0611 281.1423);
   --popover-foreground: oklch(0.9513 0.0074 260.7315);
-  --primary: oklch(0.6726 0.2904 341.4084);
+  --primary: #ff00c8;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.2542 0.0611 281.1423);
   --secondary-foreground: oklch(0.9513 0.0074 260.7315);
@@ -187,7 +187,7 @@
 }
 
 #nprogress .bar {
-  background: var(--primary) !important;
+  background: var(--accent) !important;
 }
 #nprogress .spinner {
   display: none !important; /* hide spinner circle */
