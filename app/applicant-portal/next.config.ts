@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/trpc/:path",
-        destination: `http://127.0.0.1:${process.env.PORT}/trpc/:path*`
+        destination: `http://127.0.0.1:${process.env.BACKEND_PORT}/trpc/:path*`
       }
     ]
   }
