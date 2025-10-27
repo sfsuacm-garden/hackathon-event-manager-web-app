@@ -2,7 +2,6 @@ import { TRPCError } from '@trpc/server';
 import prisma from '../../config/prismaClient';
 import { Prisma, PrismaClient } from '@prisma/client/extension';
 import { MAX_TEAM_SIZE } from '../../common/constants';
-import { joinTeamTokensScalarWhereWithAggregatesInputObjectSchema } from '../../zod/schemas/objects/joinTeamTokensScalarWhereWithAggregatesInput.schema';
 
 type PrismaClientOrTx = PrismaClient | Prisma.TransactionClient;
 
@@ -15,7 +14,7 @@ export async function getTeamById(id: string) {
       select: { eventId: true }
     });
 
-    let iHateFknPrismaQueries = await prisma.team.findUnique({
+    const iHateFknPrismaQueries = await prisma.team.findUnique({
       where: { id: id },
       include: {
         members: {
@@ -41,14 +40,7 @@ export async function getTeamById(id: string) {
         }
       }
     });
-    // const team = await prisma.team.findUnique({
-    //   where: {
-    //     id: id
-    //   },
-    //   include: {
-    //     members: true
-    //   }
-    // });
+
     if (!iHateFknPrismaQueries) {
       throw new TRPCError({
         code: 'NOT_FOUND',
@@ -67,12 +59,71 @@ export async function getTeamById(id: string) {
   }
 }
 
-// export async function generateInviteLink(teamId: string, isRequestorTeamAdmin: boolean) {
-//   if(!isRequestorTeamAdmin) {
-//     throw new TRPCError({code: 'FORBIDDEN', message:'in order to generate invite link, user must be a team admin'});
-//   }
+export async function getTeamPreviewByInviteToken(token: string) {
+  try {
+    const team = await prisma.joinTeamTokens.findUnique({
+      where: {
+        token: token
+      },
+      select: {
+        teams: {
+          select: {
+            eventId: true
+          }
+        }
+      }
+    });
 
-// }
+    const eventId = team?.teams.eventId;
+
+    const iHateFknPrismaQueries = await prisma.team.findFirst({
+      where: { 
+        joinTeamTokens: {
+          token: token
+        } 
+      },
+      include: {
+        members: {
+          include: {
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                applications: {
+                  // turned off TS error for this because findUniqueOrThrow should type prevent this from being null/undefined
+                  where: { eventId: eventId! },
+                  select: {
+                    schoolEmail: true,
+                    status: true,
+                    createdAt: true
+                  },
+                  orderBy: { createdAt: 'desc' },
+                  take: 1
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!iHateFknPrismaQueries) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: `No team with associated token ${token} could be found`
+      });
+    }
+
+    return iHateFknPrismaQueries;
+  } catch (error) {
+    if (error instanceof TRPCError) throw error;
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to fetch team by token',
+      cause: error
+    });
+  }
+}
 
 export async function joinTeam(teamId: string, profileId: string, eventId: string) {
   try {
@@ -364,7 +415,7 @@ export async function getOrCreateJoinTeamToken(teamId : string) {
           }
         });
         tokenObj = await tx.joinTeamTokens.create({
-          data:{
+          data: {
             teamId: teamId
           }
         });
@@ -372,7 +423,7 @@ export async function getOrCreateJoinTeamToken(teamId : string) {
         return tokenObj.token;
       }
 
-      return tokenObj.token
+      return tokenObj.token;
     });
 
     return token;
@@ -402,21 +453,21 @@ export async function getTeamFromTeamToken(token: string) {
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'Join team token could not be found'
-      })
-    }
-
-    const currDateTime = new Date();
-    if(tokenAndTeam?.expiresAt! <= currDateTime) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message:`Join team token has expired. Ask team admin to regenerate link`
       });
     }
 
-    if(!tokenAndTeam.teams) {
+    const currDateTime = new Date();
+    if (tokenAndTeam?.expiresAt! <= currDateTime) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Join team token has expired. Ask team admin to regenerate link'
+      });
+    }
+
+    if (!tokenAndTeam.teams) {
       throw new TRPCError({
         code: 'NOT_FOUND',
-        message: `Team associated with token could not be found`
+        message: 'Team associated with token could not be found'
       });
     }
 
@@ -427,7 +478,7 @@ export async function getTeamFromTeamToken(token: string) {
 
     throw new TRPCError({
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'Could not fetch team from team token',
+      message: 'Could not fetch team from team token'
     });    
   }
 }
