@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 const OTPSendRequestFormSchema = z.object({
-  email: z.string().email('Please enter a valid email address.')
+  email: z.email('Please enter a valid email address.')
 });
 
 export function useSendOtp(initialEmail: string = '') {

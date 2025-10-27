@@ -55,6 +55,9 @@ export function VerifyOtpPage({ email }: Props) {
   return (
     <main className="flex justify-center items-center p-4">
       <Card className="w-full sm:max-w-md">
+        <div className="flex justify-center pt-6">
+          <img src="/logo_white.png" alt="App Logo" className="h-16 w-auto object-contain" />
+        </div>
         <CardHeader>
           <CardTitle>Verify Account</CardTitle>
           <CardDescription>{messages.description}</CardDescription>

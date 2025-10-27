@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 
+import EventHeader from '@/components/ui/event-header';
+import { Icons } from '@/lib/icons';
 import { RoleBlock } from './components/RoleBlockCard';
 
 // TODO Currently roles are not being used. Would be good for future functionality.
@@ -19,14 +21,16 @@ export default function ChooseRolePage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 ">
-      <div className="mt-8 space-y-10">
+      <EventHeader />
+      <div className="mt-8 space-y-4">
         <RoleBlock
           title="Participate as a Hacker!"
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
-          onPrimary={() => handleRoleSelection('hacker', '/auth')}
+          onPrimary={() => handleRoleSelection('hacker', '/authenticate')}
           primary="Sign up as a hacker"
-          onSecondary={() => router.push('/auth')}
+          onSecondary={() => router.push('/authenticate')}
           secondary="Log into Portal"
+          Icon={Icons.code}
         />
 
         <RoleBlock
@@ -37,6 +41,7 @@ export default function ChooseRolePage() {
             handleRoleSelection('judge', 'https://docs.google.com/forms/u/0/')
           }
           primary="Sign up for Judging"
+          Icon={Icons.gavel}
         />
 
         <RoleBlock
@@ -45,6 +50,7 @@ export default function ChooseRolePage() {
           //TODO: Add proper role selection link.
           onPrimary={() => handleRoleSelection('mentor', 'https://docs.google.com/forms/u/0/')}
           primary="Sign up as a Mentor"
+          Icon={Icons.help}
         />
       </div>
     </main>
