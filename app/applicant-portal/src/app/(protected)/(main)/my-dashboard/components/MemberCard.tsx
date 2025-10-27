@@ -74,7 +74,7 @@ export default function TeamMemberCard({
   const firstInitial = teamMemberInfo.profile.firstName?.[0] ?? '?';
   const lastInitial = teamMemberInfo.profile.lastName?.[0] ?? '?';
   const memberInitials = firstInitial + lastInitial;
-  const email = teamMemberInfo?.profile?.applications?.[0].schoolEmail ?? 'Unknown email';
+  // const email = teamMemberInfo?.profile?.applications?.[0].schoolEmail ?? 'Unknown email';
   const joinedTeamDate = teamMemberInfo?.joinedAt ?? 'Unknown';
   const userId = teamMemberInfo.userId;
 
@@ -161,7 +161,7 @@ export default function TeamMemberCard({
                         {!isMemberLoggedInUser ? firstName + ' ' + lastName : 'You'}
                         {isTeamAdmin && ' - Team Admin'}
                       </h3>
-                      <p className="text-sm">{email}</p>
+                      {/* <p className="text-sm">{email}</p> */}
                       <div className="text-muted-foreground text-xs">Joined {joinedTeamDate}</div>
                     </>
                   )}
