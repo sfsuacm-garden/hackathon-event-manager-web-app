@@ -28,8 +28,6 @@ export default function ChooseRolePage() {
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
           onPrimary={() => handleRoleSelection('hacker', '/authenticate')}
           primary="Sign up as a hacker"
-          onSecondary={() => router.push('/authenticate')}
-          secondary="Log into Portal"
           Icon={Icons.code}
         />
         {/* FOR FUTURE Launch

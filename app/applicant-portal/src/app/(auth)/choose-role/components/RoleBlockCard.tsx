@@ -7,9 +7,6 @@ export function RoleBlock({
   title,
   body,
   onPrimary,
-  primary,
-  onSecondary,
-  secondary,
   selected,
   Icon
 }: {
@@ -17,8 +14,6 @@ export function RoleBlock({
   body: string;
   onPrimary: () => void;
   primary: string;
-  onSecondary?: () => void;
-  secondary?: string;
   selected?: boolean;
   Icon?: LucideIcon; // optional icon prop
 }) {
