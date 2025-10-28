@@ -20,7 +20,7 @@ export const TRPCProvider = ({
       trpc.createClient({
         links: [
           httpBatchLink({
-            url: "/trpc",
+            url: '/trpc',
             headers() {
               const token = session.data?.access_token;
               return {

@@ -29,7 +29,7 @@ export default function TeamView() {
   const [isCooling, setIsCooling] = useState(false);
   const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
   const [showTeamTokenError, setTeamTokenError] = useState(false);
-  
+
   const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
     onSuccess: () => {
       utils.teams.getOwnTeam.invalidate();
@@ -39,13 +39,8 @@ export default function TeamView() {
     }
   });
 
-  const {
-    refetch: fetchInviteToken,
-    isFetching: isFetchingToken
-  } = trpc.teams.getTeamInviteToken.useQuery(
-    undefined,
-    { enabled: false }
-  )
+  const { refetch: fetchInviteToken, isFetching: isFetchingToken } =
+    trpc.teams.getTeamInviteToken.useQuery(undefined, { enabled: false });
 
   const handleLeaveTeam = () => {
     //TODO: need to add a component for ARE YOU SURE dialogues
@@ -55,24 +50,23 @@ export default function TeamView() {
   const handleCopyInviteLink = async () => {
     //TODO: implement some sort of brief popup or something to indicate that the link was copied
 
-    if(isFetchingToken || isCooling) return;
+    if (isFetchingToken || isCooling) return;
     try {
       setIsCooling(true);
       setLeaveTeamMutationFailError(false);
 
-      const { data : token } = await fetchInviteToken();
-      if(!token) throw new Error("No token returned");
+      const { data: token } = await fetchInviteToken();
+      if (!token) throw new Error('No token returned');
       const teamInviteLink = `${window.location.origin}/join/${token}`;
 
       console.log(`Team Invite Link: ${teamInviteLink}`);
       navigator.clipboard.writeText(teamInviteLink);
     } catch (e) {
       console.error(e);
-      setTeamTokenError(true);      
+      setTeamTokenError(true);
     } finally {
-      setTimeout(()=> setIsCooling(false), INVITE_LINK_COOLDOWN_MS);
+      setTimeout(() => setIsCooling(false), INVITE_LINK_COOLDOWN_MS);
     }
-    
   };
 
   if (error) {
@@ -95,14 +89,14 @@ export default function TeamView() {
           </code>
         </div>
 
-    {showTeamTokenError && (
-      <ErrorStateAlert
-          title={{ text: 'Error Fetching Team Invite Token' }}
-          description={{
-            text: 'There was an error fetching team invite token. Please try again or contact the team.'
-          }}
-        />
-    )}
+        {showTeamTokenError && (
+          <ErrorStateAlert
+            title={{ text: 'Error Fetching Team Invite Token' }}
+            description={{
+              text: 'There was an error fetching team invite token. Please try again or contact the team.'
+            }}
+          />
+        )}
 
         {/* TODO Currently, the tooltip does not appear when the button is
         disabled. The tooltip should appear on hover when the button is
@@ -119,7 +113,7 @@ export default function TeamView() {
               >
                 {isFetchingToken ? (
                   <>
-                    <Spinner className='mr-2 h-4 w-4' />
+                    <Spinner className="mr-2 h-4 w-4" />
                     Generating...
                   </>
                 ) : (
