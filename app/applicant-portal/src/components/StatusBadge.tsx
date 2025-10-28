@@ -1,29 +1,29 @@
-import { Badge } from "@/components/shadcn/ui/badge";
-import { Icons } from "@/lib/icons";
-import { JSX } from "react";
+import { Badge } from '@/components/shadcn/ui/badge';
+import { Icons } from '@/lib/icons';
+import { JSX } from 'react';
 
 interface StatusBadgeProps {
-  status: "PENDING" | "REJECTED" | "ACCEPTED" | "WAITLISTED";
+  status: 'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED';
 }
 export default function StatusBadge({ status }: StatusBadgeProps) {
   interface StatusConfigInterface {
     label: string;
     icon: JSX.Element | null;
-    variant: "default" | "secondary" | "destructive" | "outline";
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
   }
 
   const statusConfig: Record<
-    "PENDING" | "REJECTED" | "ACCEPTED" | "WAITLISTED",
+    'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED',
     StatusConfigInterface
   > = {
-    PENDING: { label: "Pending", icon: null, variant: "secondary" },
-    REJECTED: { label: "Rejected", icon: null, variant: "outline" },
+    PENDING: { label: 'Pending', icon: null, variant: 'secondary' },
+    REJECTED: { label: 'Rejected', icon: null, variant: 'outline' },
     ACCEPTED: {
-      label: "Accepted",
+      label: 'Accepted',
       icon: <Icons.badgeCheck />,
-      variant: "default",
+      variant: 'default'
     },
-    WAITLISTED: { label: "Waitlisted", icon: null, variant: "secondary" },
+    WAITLISTED: { label: 'Waitlisted', icon: null, variant: 'secondary' }
   };
 
   const { label, icon, variant } = statusConfig[status];

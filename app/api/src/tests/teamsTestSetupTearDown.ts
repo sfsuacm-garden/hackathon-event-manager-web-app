@@ -19,7 +19,12 @@ export async function setTeamsTestUp(teamMemberCounts: number[]) {
       const teamsInfo: TeamInfo[] = [];
       for (let i = 0; i < teamMemberCounts.length; i++) {
         const memberCount = teamMemberCounts[i];
-        if (typeof memberCount !== 'number' || memberCount === null || isNaN(memberCount) || memberCount < 0) {
+        if (
+          typeof memberCount !== 'number' ||
+          memberCount === null ||
+          isNaN(memberCount) ||
+          memberCount < 0
+        ) {
           throw new Error(`Invalid team member count at index ${i}: ${memberCount}`);
         }
         const tempTeam = await createTeam(tx, testEvent.id);
@@ -60,12 +65,11 @@ export async function setTeamsTestUp(teamMemberCounts: number[]) {
     });
 
     return teamsInfo;
-
   } catch (error) {
     console.error('fatal error setting up teams tests', error);
     throw error;
   }
-}// Prisma does not support nested transactions so unless the functions we test start to take a transaction, we cannot simply rollback to reverse setup.
+} // Prisma does not support nested transactions so unless the functions we test start to take a transaction, we cannot simply rollback to reverse setup.
 export async function cleanTeamsTestUp(setUpInfo: TeamTestSetupInfo) {
   //IN THEORY DELETING THE EVENT SHOULD DELETE THE RELATED TEST TEAMS AND TEAM MEMEBERS VIA DATABASE CASCADES BUT PROFILES WILL REMAIN, WE CLEAN THOSE MANUALLY
   try {
@@ -105,4 +109,3 @@ export interface TeamTestSetupInfo {
   event: Event;
   teams: TeamInfo[];
 }
-

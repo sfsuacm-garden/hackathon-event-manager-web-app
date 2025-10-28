@@ -3,12 +3,12 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
-} from "@/components/shadcn/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { NavigationTabOption } from "@/types/NavigationTab";
-import { Menu } from "lucide-react";
-import Link from "next/link";
+  SheetTrigger
+} from '@/components/shadcn/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { NavigationTabOption } from '@/types/NavigationTab';
+import { Menu } from 'lucide-react';
+import Link from 'next/link';
 
 interface NavigationMenuProps {
   navigationOptions: NavigationTabOption[];
