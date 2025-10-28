@@ -1,10 +1,10 @@
+// Enforce 18+ by this event date
+import { EVENT_CUTOFF_YMD } from "@/lib/constants";
+
 export function parseYMDToUTCDate(ymd: string): Date {
   const [y, m, d] = ymd.split('-').map(Number);
   return new Date(Date.UTC(y, (m ?? 1) - 1, d ?? 1));
 }
-
-// Enforce 18+ by this event date
-const EVENT_CUTOFF_YMD = '2026-02-14';
 
 export function is18By(dobYMD: string, cutoffYMD = EVENT_CUTOFF_YMD): boolean {
   const dob = parseYMDToUTCDate(dobYMD);
