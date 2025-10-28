@@ -1,5 +1,5 @@
 // Enforce 18+ by this event date
-import { EVENT_CUTOFF_YMD } from "@/lib/constants";
+import { EVENT_CUTOFF_YMD } from '@/lib/constants';
 
 export function parseYMDToUTCDate(ymd: string): Date {
   const [y, m, d] = ymd.split('-').map(Number);
