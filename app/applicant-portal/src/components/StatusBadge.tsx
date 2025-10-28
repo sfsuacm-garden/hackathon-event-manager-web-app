@@ -2,9 +2,12 @@ import { Badge } from '@/components/shadcn/ui/badge';
 import { Icons } from '@/lib/icons';
 import { JSX } from 'react';
 
+type ApplicationStatus = 'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED'
+
 interface StatusBadgeProps {
-  status: 'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED';
+  status: ApplicationStatus;
 }
+
 export default function StatusBadge({ status }: StatusBadgeProps) {
   interface StatusConfigInterface {
     label: string;
@@ -13,7 +16,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
   }
 
   const statusConfig: Record<
-    'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED',
+    ApplicationStatus,
     StatusConfigInterface
   > = {
     PENDING: { label: 'Pending', icon: null, variant: 'secondary' },
