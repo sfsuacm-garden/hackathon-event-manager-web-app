@@ -83,6 +83,10 @@ export const requireTeam = requireAuth.unstable_pipe(async ({ ctx, next }) => {
     });
   }
 
+  if(!teamAndMember.team) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: `team ${teamAndMember.teamId} associated with user could not be found` });
+  }
+
   return next({
     ctx: {
       ...ctx,

@@ -11,15 +11,15 @@ import ErrorStateAlert from '../../(main)/components/ErrorStateAlert';
 import MemberPreview from './components/MemberPreviewCard';
 //import { useRouter } from "next/router";
 
-export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {
+export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const isUserOnTeam = true; // user is always on a team
 
   const utils = trpc.useUtils();
   const router = useRouter();
 
-  const { data: team, isPending: loading } = trpc.teams.getTeamById.useQuery(
-    { id: teamIdToJoin as string },
-    { enabled: Boolean(teamIdToJoin) }
+  const { data: team, isPending: loading } = trpc.teams.getTeamPreviewByInviteToken.useQuery(
+    { teamToken: joinTeamToken as string },
+    { enabled: Boolean(joinTeamToken) }
   );
 
   const teamMemberCount = team?.members.length ?? 4;
@@ -33,7 +33,7 @@ export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {
   });
 
   const handleJoinTeam = () => {
-    joinTeamMutation.mutate({ teamId: teamIdToJoin });
+    joinTeamMutation.mutate({ teamToken: joinTeamToken });
   };
 
   //TODO enhance loading experience
@@ -54,8 +54,9 @@ export default function JoinPage({ teamIdToJoin }: { teamIdToJoin: string }) {
     // Determine error type for better messaging
     let isInvalidLink = false;
     let isServerError = false;
+    const isKickedMember = joinTeamMutation.error?.message.toLowerCase().includes('blacklisted') ?? false;
 
-    if (!team) {
+    if (!team || isKickedMember) {
       isInvalidLink = true;
     } else {
       isServerError = true;

@@ -1,7 +1,5 @@
 'use client';
 
-"use client";
-
 import RequiredStar from '@/components/form/RequiredStar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
 import { Button } from '@/components/shadcn/ui/button';

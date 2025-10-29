@@ -2,7 +2,7 @@ import z from 'zod';
 import { protectedProcedure, teamProcedure } from '../../common/common.middleware';
 import { idParamsSchema } from '../../common/common.schema';
 import { t } from '../../core/trpc';
-import { getTeamById, joinTeam, kickTeamMember, leaveTeam } from './teams.controller';
+import { getTeamById, joinTeam, kickTeamMember, leaveTeam, getOrCreateJoinTeamToken, getTeamFromTeamToken, getTeamPreviewByInviteToken } from './teams.controller';
 
 export const teamsRouter = t.router({
   getTeamById: protectedProcedure.input(idParamsSchema).query(async ({ input }) => {
@@ -17,15 +17,22 @@ export const teamsRouter = t.router({
     };
   }),
 
-  // generateInviteLink: teamProcedure
-  //   .mutation(async({ ctx }) => {
-  //     return
-  //   }),
+  getTeamInviteToken: teamProcedure
+    .query(async ({ ctx }) => {
+      return await getOrCreateJoinTeamToken(ctx.teamId);
+    }),
+
+  getTeamPreviewByInviteToken: protectedProcedure
+    .input(z.object({ teamToken: z.string() }))
+    .query(async ({ input }) => {
+      return await getTeamPreviewByInviteToken(input.teamToken);
+    }),
 
   joinTeamById: teamProcedure
-    .input(z.object({ teamId: z.uuid() }))
+    .input(z.object({ teamToken: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return await joinTeam(input.teamId, ctx.user.id, ctx.event?.id!);
+      const teamId = await getTeamFromTeamToken(input.teamToken);
+      return await joinTeam(teamId, ctx.user.id, ctx.event?.id!);
     }),
 
   leaveTeam: teamProcedure.mutation(async ({ ctx }) => {

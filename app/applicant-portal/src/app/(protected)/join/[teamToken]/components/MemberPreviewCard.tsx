@@ -10,7 +10,7 @@ interface MemberPreviewProps {
 export default function MemberPreview(props: MemberPreviewProps) {
   const firstName = props.firstName ?? 'Unknown';
   const lastName = props.lastName ?? 'Unknown';
-  const fullName = firstName + lastName;
+  const fullName = firstName + ' ' + lastName;
   // const email = props.email ?? 'Unknown';
   const status = props.status?.toUpperCase() as 'PENDING' | 'REJECTED' | 'ACCEPTED' | 'WAITLISTED';
 
