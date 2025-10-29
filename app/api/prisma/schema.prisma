@@ -21,7 +21,7 @@ model Application {
   school                    String?
   graduationYear            Int?                @map("graduation_year")
   experienceLevel           String?             @map("experience_level")
-  submissionData            Json?               @map("submission_data")
+  submissionData            String?               @map("submission_data")
   createdAt                 DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
   publicStatus              application_status? @map("public_status")
   internalStatus            application_status? @map("internal_status")
