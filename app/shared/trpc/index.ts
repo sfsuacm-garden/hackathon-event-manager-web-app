@@ -1,0 +1,1 @@
+export type { AppRouter } from '../../api/src/core/_app';
