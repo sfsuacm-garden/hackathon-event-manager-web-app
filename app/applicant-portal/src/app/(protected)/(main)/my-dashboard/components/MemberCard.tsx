@@ -23,6 +23,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/shadcn/utils';
 import { trpc } from '@/utils/trpc';
+import { formatDateDifference} from '@/utils/formatDate';
 import { BadgeCheckIcon } from 'lucide-react';
 import { useState } from 'react';
 import StatusBadge from '../../../../../components/StatusBadge';
@@ -162,7 +163,7 @@ export default function TeamMemberCard({
                         {isTeamAdmin && ' - Team Admin'}
                       </h3>
                       {/* <p className="text-sm">{email}</p> */}
-                      <div className="text-muted-foreground text-xs">Joined {joinedTeamDate}</div>
+                      <div className="text-muted-foreground text-xs">Joined {formatDateDifference(joinedTeamDate)}</div>
                     </>
                   )}
                 </div>
