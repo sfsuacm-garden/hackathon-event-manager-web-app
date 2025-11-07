@@ -81,7 +81,7 @@ export default function ApplyPage() {
   }, [eventProfile, isCheckingProfile, router]);
 
   const onSubmissionSuccess = async () => {
-    toast.success('Your application was successfully submitted!');
+    toast.success('Your application was successfully submitted! Redirecting...');
     setIsRedirecting(true);
     await refetchEventProfile();
     router.push('/my-dashboard');
