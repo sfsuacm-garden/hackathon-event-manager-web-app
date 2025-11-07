@@ -147,9 +147,10 @@ export default function TeamMemberCard({
                     {/* <AvatarImage src={member.avatarUrl} /> */}
                     <AvatarFallback>{memberInitials}</AvatarFallback>
                   </Avatar>
-                )}
+                )}                
+              </div>
 
-                <div className="space-y-1">
+              <div className="space-y-1">
                   {loading ? (
                     <>
                       <Skeleton className="h-[14px] w-24" />
@@ -167,7 +168,6 @@ export default function TeamMemberCard({
                     </>
                   )}
                 </div>
-              </div>
 
               <div className="flex gap-4 justify-end items-center">
                 {loading ? (
