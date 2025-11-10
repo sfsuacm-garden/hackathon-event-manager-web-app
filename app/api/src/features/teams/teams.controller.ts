@@ -59,22 +59,34 @@ export async function getTeamById(id: string) {
   }
 }
 
-export async function getTeamPreviewByInviteToken(token: string) {
+export async function getTeamPreviewByInviteToken(token: string, requestingUserId?: string) {
   try {
-    const team = await prisma.joinTeamTokens.findUnique({
-      where: {
-        token: token
-      },
-      select: {
-        teams: {
-          select: {
-            eventId: true
-          }
-        }
-      }
+    // fetch token entry and associated team so we can verify blacklist status before returning preview
+    const tokenEntry = await prisma.joinTeamTokens.findUnique({
+      where: { token },
+      include: { teams: true }
     });
 
-    const eventId = team?.teams.eventId;
+    const eventId = tokenEntry?.teams?.eventId;
+
+    // if we have a requesting user, check if they're blacklisted from the team
+    if (requestingUserId && tokenEntry?.teams?.id) {
+      const blacklisted = await prisma.teamsBlacklist.findUnique({
+        where: {
+          teamId_userId: {
+            teamId: tokenEntry.teams.id,
+            userId: requestingUserId
+          }
+        }
+      });
+
+      if (blacklisted) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User is blacklisted from this team (blacklisted)'
+        });
+      }
+    }
 
     const iHateFknPrismaQueries = await prisma.team.findFirst({
       where: { 
