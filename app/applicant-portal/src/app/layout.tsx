@@ -73,7 +73,7 @@ export default function RootLayout({
               ACM @ SFSU
             </Link>
             <Link
-              href="#"
+              href="https://sfsu-acm.notion.site/2a898c2605148063975ad95c0cf933a8?pvs=105"
               target="_blank"
               rel="noopener noreferrer"
               className="absolute right-4 underline-offset-2 hover:underline transition-colors hover:text-foreground"
