@@ -61,11 +61,27 @@ export async function getTeamById(id: string) {
 
 export async function getTeamPreviewByInviteToken(token: string, requestingUserId?: string) {
   try {
-    // fetch token entry and associated team so we can verify blacklist status before returning preview
+    // fetch token entry and associated team so we can verify blacklist status and expiry before returning preview
     const tokenEntry = await prisma.joinTeamTokens.findUnique({
       where: { token },
       include: { teams: true }
     });
+
+    if (!tokenEntry) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Join team token could not be found'
+      });
+    }
+
+    // check if token has expired
+    const currDateTime = new Date();
+    if (tokenEntry.expiresAt <= currDateTime) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Join team token has expired. Ask team admin to regenerate link (expired)'
+      });
+    }
 
     const eventId = tokenEntry?.teams?.eventId;
 
