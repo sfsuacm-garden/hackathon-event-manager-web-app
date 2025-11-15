@@ -1,0 +1,181 @@
+import { useState } from 'react'
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
+import { Input } from '@/components/shadcn/ui/input'
+import { Dialog, DialogContent } from '@/components/shadcn/ui/dialog'
+import { SectionFrame } from '../components/SectionFrame'
+
+import { mockTeams } from '@/dispositions/mockTeams'
+
+interface Participant {
+    id: string
+    name: string
+    email: string
+    phone: string
+    isAdmin: boolean
+    joinedDate: string
+}
+
+export interface Team {
+    id: string
+    name: string
+    createdDate: string
+    participants: Participant[]
+}
+
+export function TeamsSection() {
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
+
+    // calculate participant statistics
+    const totalParticipantsInTeams = mockTeams.reduce((sum, team) => sum + team.participants.length, 0)
+
+    // for demo/example, lets say there are 10 individual participants not yet in teams
+    const individualParticipants = 10
+    const totalParticipants = totalParticipantsInTeams + individualParticipants
+
+    const participantsInTeamsPercentage = (totalParticipantsInTeams / totalParticipants) * 100
+    const individualParticipantsPercentage = (individualParticipants / totalParticipants) * 100
+
+    const handleTeamClick = (team: Team) => {
+        setSelectedTeam(team)
+        setDialogOpen(true)
+    }
+
+    return (
+        <SectionFrame title="Teams Management" description="View and manage hackathon teams and their members.">
+
+            <div className="flex flex-col overflow-auto gap-y-4 p-6">
+
+                {/* participant distribution bar */}
+                <div className="flex flex-col gap-2">
+
+                    {/* main */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-sm">Participant Distribution</h3>
+                            <p className="text-xs text-muted-foreground">
+                                {totalParticipants} total participants
+                            </p>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                            {totalParticipantsInTeams} in teams, {individualParticipants} individual
+                        </div>
+                    </div>
+
+                    <div className="flex h-4 w-full overflow-hidden">
+                        <div
+                            className="bg-purple-500"
+                            style={{ width: `${participantsInTeamsPercentage}%` }}
+                            title={`In Teams: ${totalParticipantsInTeams}`}
+                        />
+                        <div
+                            className="bg-blue-500"
+                            style={{ width: `${individualParticipantsPercentage}%` }}
+                            title={`Individual: ${individualParticipants}`}
+                        />
+                    </div>
+
+                    {/* counters */}
+                    <div className="flex items-center text-xs gap-4">
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-purple-500" />
+                            <span className="text-muted-foreground">In Teams ({totalParticipantsInTeams})</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-blue-500" />
+                            <span className="text-muted-foreground">Individual ({individualParticipants})</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* searchbar */}
+                <div className="relative w-full">
+                    <Input
+                        type="text"
+                        placeholder="Search teams by [team name, individual participant name]"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                {/* main table */}
+                <Card>
+
+                    <CardHeader>
+                        <CardTitle>All Teams</CardTitle>
+                        <CardDescription>
+                            Click on a team to view detailed participant information
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                        <Table>
+
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>Team Name</TableHead>
+                                    <TableHead>Members</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+                                {mockTeams.map((team) => (
+                                    <TableRow
+                                        key={team.id}
+                                        className="cursor-pointer hover:bg-muted/50"
+                                        onClick={() => handleTeamClick(team)}
+                                    >
+                                        <TableCell>
+                                            <p className="text-sm text-muted-foreground font-mono">
+                                                {team.id}
+                                            </p>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            {/* NOTE: might consider putting creation date on own col */}
+                                            <div>
+                                                <div>{team.name}</div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    birthed on {new Date(team.createdDate).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {team.participants.map((participant, index) => (
+                                                    <p key={participant.id} className="text-sm">
+                                                        {participant.name}{index < team.participants.length - 1 ? ' |' : ''}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell className="text-right">
+                                            -
+                                        </TableCell>
+
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="overflow-auto">
+                    team details including participants, admin-related tools like kick, create invite/add members directly
+                </DialogContent>
+            </Dialog>
+
+        </SectionFrame>
+    )
+}
