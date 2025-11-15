@@ -5,9 +5,9 @@ import { mockParticipants } from '@/dispositions/mockParticipants'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
 import { Input } from '@/components/shadcn/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select'
 
-import { Search, Mail, Phone, GraduationCap, CheckCircle } from 'lucide-react'
+import { Mail, Phone, GraduationCap, CheckCircle } from 'lucide-react'
+import { SectionFrame } from '../components/SectionFrame'
 
 // TODO: should instead move to shared types/interfaces folder
 export interface Participant {
@@ -34,141 +34,66 @@ export function ParticipantsSection() {
     const notCheckedInPercentage = (notCheckedInCount / totalParticipants) * 100
 
     return (
-        <div className="flex flex-col w-full h-full gap-4">
-            
-            {/* —————————————————————————————————————————————————————————————————————————————— */}
-            {/* header */}
-            <div className="">
-                <div className="flex flex-col gap-4">
-
-                    <div>
-                        <h1 className="mb-1">Participants Management</h1>
-                        <p className="text-muted-foreground">
-                            View and manage all registered hackathon participants
-                        </p>
-                    </div>
-
-                    {/* search/filters bar */}
-                    <div className="flex flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                // NOTE: should change to onabort only if no pagination in future
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        <Select
-                            value={checkInFilter}
-                            onValueChange={(value) => {
-                                console.log(value)
-                                setCheckInFilter(value)
-                            }}
-                        >
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Check-In Status">
-                                    {checkInFilter === 'all' ? 'All' : checkInFilter === 'checked-in' ? 'Checked In' : 'Not Checked In'}
-                                </SelectValue>
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                <SelectItem value="all">All</SelectItem>
-                                <SelectItem value="checked-in">Checked In</SelectItem>
-                                <SelectItem value="not-checked-in">Not Checked In</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            </div>
-
-
+        <SectionFrame title="Participants Management" description="View and manage all confirmed-attending event participants.">
 
             {/* —————————————————————————————————————————————————————————————————————————————— */}
             {/* top summary section */}
-            <div>
+            <div className="flex flex-col overflow-auto gap-y-4 p-6">
                 
-                <div className="mb-6">
-                    <div className="flex items-center justify-between mb-2">
+                {/* participant distribution bar */}
+                <div className="flex flex-col gap-2">
+
+                    {/* main */}
+                    <div className="flex items-center justify-between">
                         <div>
-                            <h3 className="text-sm">Event Check-In Status</h3>
+                            <h3 className="font-semibold text-sm">Participant Distribution</h3>
                             <p className="text-xs text-muted-foreground">
-                                {totalParticipants} registered participants
+                                {totalParticipants} total participants
                             </p>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                            {checkedInCount} checked in, {notCheckedInCount} not checked in
+                            {totalParticipants} checked in, {totalParticipants} not
                         </div>
                     </div>
-                    <div className="flex h-3 w-full overflow-hidden rounded-full">
+
+                    <div className="flex h-4 w-full overflow-hidden">
                         <div
-                            className="bg-green-500 transition-all"
+                            className="bg-green-500"
                             style={{ width: `${checkedInPercentage}%` }}
                         />
                         <div
-                            className="bg-orange-500 transition-all"
+                            className="bg-orange-500"
                             style={{ width: `${notCheckedInPercentage}%` }}
                         />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 text-xs">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                                <div className="h-2 w-2 rounded-full bg-green-500"/>
-                                <span className="text-muted-foreground">Checked In ({checkedInCount})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <div className="h-2 w-2 rounded-full bg-orange-500"/>
-                                <span className="text-muted-foreground">Not Checked In ({notCheckedInCount})</span>
-                            </div>
+                    {/* counters */}
+                    <div className="flex items-center text-xs gap-4">
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-green-500" />
+                            <span className="text-muted-foreground">Checked In ({totalParticipants})</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-orange-500" />
+                            <span className="text-muted-foreground">Not Checked In ({totalParticipants})</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm text-muted-foreground">Checked In</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span className="text-2xl">{checkedInCount}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm text-muted-foreground">-</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span className="text-2xl">-</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm text-muted-foreground">-</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span className="text-2xl">-</span>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* —————————————————————————————————————————————————————————————————————————————— */}
+                {/* main table view */}
+
+                {/* searchbar */}
+                <div className="relative w-full">
+                    <Input
+                        type="text"
+                        placeholder="Search participants by [id, name, email, team]"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
 
-            </div>
-
-
-
-            {/* —————————————————————————————————————————————————————————————————————————————— */}
-            {/* main table view */}
-            <div className="flex-1">
                 <Card>
                     <CardHeader>
                         <CardTitle>All Participants</CardTitle>
@@ -191,7 +116,7 @@ export function ParticipantsSection() {
 
                             <TableBody>
                                 {mockParticipants.map((participant) => (
-                                    <TableRow key={participant.id} className="hover:cursor-pointer">
+                                    <TableRow className="hover:cursor-pointer" key={participant.id}>
 
                                         <TableCell>
                                             <span className="text-sm text-muted-foreground font-mono">
@@ -238,7 +163,12 @@ export function ParticipantsSection() {
                     </CardContent>
 
                 </Card>
+
             </div>
-        </div>
+
+
+
+            
+        </SectionFrame>
     )
 }
