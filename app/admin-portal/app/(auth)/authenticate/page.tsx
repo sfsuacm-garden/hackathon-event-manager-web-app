@@ -96,7 +96,7 @@ export default function SendOTPPage() {
                 Sending Code...
               </span>
             ) : (
-              'Send Login Code'
+              'Send Login Code (PRESS HERE TO SKIP)'
             )}
           </Button>
         </CardFooter>
