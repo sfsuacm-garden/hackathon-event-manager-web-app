@@ -1,26 +1,35 @@
-import { Team } from "@/dashboard/sections/Teams"
+import { Team } from '@/types/Team'
 
 export const mockTeams: Team[] = [
   {
-    id: '1',
+    id: 't1',
     name: 'Tech Innovators',
-    createdDate: '2024-01-15',
+    createdDate: '2026-01-15',
     participants: [
-      { id: 'p1', name: 'Sarah Johnson', email: 'sarah.j@example.com', phone: '(555) 123-4567', isAdmin: false, joinedDate: '2024-01-15' },
-      { id: 'p2', name: 'Michael Chen', email: 'michael.c@example.com', phone: '(555) 234-5678', isAdmin: false, joinedDate: '2024-01-20' },
-      { id: 'p3', name: 'Emily Rodriguez', email: 'emily.r@example.com', phone: '(555) 345-6789', isAdmin: false, joinedDate: '2024-02-01' },
-      { id: 'p4', name: 'David Park', email: 'david.p@example.com', phone: '(555) 456-7890', isAdmin: false, joinedDate: '2024-02-15' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Tech Innovators #2',
-    createdDate: '2024-01-15',
-    participants: [
-      { id: 'p1', name: 'Sarah Johnson', email: 'sarah.j@example.com', phone: '(555) 123-4567', isAdmin: 'Team Leader', joinedDate: '2024-01-15' },
-      { id: 'p2', name: 'Michael Chen', email: 'michael.c@example.com', phone: '(555) 234-5678', isAdmin: false, joinedDate: '2024-01-20' },
-      { id: 'p3', name: 'Emily Rodriguez', email: 'emily.r@example.com', phone: '(555) 345-6789', isAdmin: false, joinedDate: '2024-02-01' },
-      { id: 'p4', name: 'David Park', email: 'david.p@example.com', phone: '(555) 456-7890', isAdmin: false, joinedDate: '2024-02-15' },
+      {
+        id: 'p1',
+        name: 'John Doe',
+        email: 'john.d@example.com',
+        phone: '(555) 123-4567',
+        school: 'Beijing University',
+    
+        isAdmin: false,
+        joinedDate: '2026-01-15',
+        teamName: 'Tech Innovators',
+        checkedIn: true
+      },
+      {
+        id: 'p3',
+        name: 'Jone Doe',
+        email: 'jone.d@example.com',
+        phone: '(555) 123-4567',
+        school: 'San Franscisco State University',
+    
+        isAdmin: false,
+        joinedDate: '2026-01-15',
+        teamName: 'Tech Innovators',
+        checkedIn: false
+      },
     ],
   },
 ]
