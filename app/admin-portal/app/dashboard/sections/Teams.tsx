@@ -8,21 +8,7 @@ import { SectionFrame } from '../components/SectionFrame'
 
 import { mockTeams } from '@/dispositions/mockTeams'
 
-interface Participant {
-    id: string
-    name: string
-    email: string
-    phone: string
-    isAdmin: boolean
-    joinedDate: string
-}
-
-export interface Team {
-    id: string
-    name: string
-    createdDate: string
-    participants: Participant[]
-}
+import { Team } from '@/types/Team'
 
 export function TeamsSection() {
     const [searchQuery, setSearchQuery] = useState('')

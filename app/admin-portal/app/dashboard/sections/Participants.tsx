@@ -9,18 +9,6 @@ import { Input } from '@/components/shadcn/ui/input'
 import { Mail, Phone, GraduationCap, CheckCircle } from 'lucide-react'
 import { SectionFrame } from '../components/SectionFrame'
 
-// TODO: should instead move to shared types/interfaces folder
-export interface Participant {
-    id: string
-    name: string
-    email: string
-    phone: string
-    school: string
-    teamName?: string
-    joinedDate: string
-    checkedIn: boolean
-}
-
 export function ParticipantsSection() {
     const [searchQuery, setSearchQuery] = useState('')
     const [checkInFilter, setCheckInFilter] = useState<string>('all')
