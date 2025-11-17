@@ -4,15 +4,18 @@
 
 'use client'
 
-import { useState } from "react"
+import { useState } from 'react'
+import Image from 'next/image'
 
-import { SidebarProvider, SidebarInset } from "@/components/shadcn/ui/sidebar"
+import { SidebarProvider, SidebarInset } from '@/components/shadcn/ui/sidebar'
 
-import { OverviewSection } from "./sections/Overview"
+import { OverviewSection } from './sections/Overview'
 
-import { IntroWarning } from "./components/IntroWarning"
-import { DashboardSidebar } from "./components/DashboardSidebar"
-import { ParticipantsSection } from "./sections/Participants"
+import { IntroWarning } from './components/IntroWarning'
+import { DashboardSidebar } from './components/DashboardSidebar'
+import { ParticipantsSection } from './sections/Participants'
+import { TeamsSection } from './sections/Teams'
+import { ApplicationsSection } from './sections/Applications'
 
 // TODO: should move to shared types file at some point
 // should match with DashboardSidebar comp
@@ -33,10 +36,18 @@ export default function Dashboard() {
   return (
     <SidebarProvider>
       <DashboardSidebar currentSection={currentSection} onNavigate={handleNavigate} />
-      <SidebarInset>
+      <SidebarInset className="bg-transparent">
         <div className="flex min-h-screen items-center justify-center px-[10%] py-[5%]">
+
           { currentSection == "overview" && <OverviewSection /> }
+          { currentSection == "teams" && <TeamsSection /> }
+          { currentSection == "applications" && <ApplicationsSection /> }
           { currentSection == "participants" && <ParticipantsSection /> }
+
+          {/* decorative backdrop underlay */}
+          <Image className="-z-10 fixed top-0 w-full h-screen object-cover opacity-5" src="/bits/background.svg" alt="" width={1000} height={1000} />
+
+          <p className="fixed bottom-0 right-8 opacity-30">this is a development build</p>
         </div>
       </SidebarInset>
     </SidebarProvider>
