@@ -22,7 +22,7 @@ export function IntroWarning({onConfirm}: {onConfirm: Dispatch<SetStateAction<bo
                 <h2 className="text-xl">This site contains <span className="italic">confidential information.</span></h2>
                 <h2 className="text-xl">Exercise caution in public spaces—this interface should be for your eyes only!</h2>
             </div>
-            <Button className="active:scale-95" onDoubleClick={() => { onConfirm(true) }}>Double Click to Continue</Button>
+            <Button className="active:opacity-80" onDoubleClick={() => { onConfirm(true) }}>Double Click to Continue</Button>
         </div>
     )
 }
