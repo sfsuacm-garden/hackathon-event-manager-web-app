@@ -12,7 +12,6 @@ import { TEAM_MAX_MEMBERS } from '@/lib/constants';
 import { Icons } from '@/lib/icons';
 import { trpc } from '@/utils/trpc';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
 import TeamMemberCard from './MemberCard';
 import ShareTeamButton from './ShareTeamButton';
@@ -20,7 +19,6 @@ import ShareTeamButton from './ShareTeamButton';
 export default function TeamView() {
   const utils = trpc.useUtils();
   const isTeamManagementUnlocked = true; // how are we going to handle this globally or should this become a middleware lmao
-  const INVITE_LINK_COOLDOWN_MS = 2000;
 
   const { data: team, isLoading: loading, error } = trpc.teams.getOwnTeam.useQuery();
   const teamCount = team?.team.members.length ?? 0;
@@ -28,9 +26,7 @@ export default function TeamView() {
   const isTeamFull = teamCount > 3;
   const isLoggedInAdmin = team?.isTeamAdmin ?? false;
 
-  const [isCooling, setIsCooling] = useState(false);
   const [showLeaveTeamMutationFailError, setLeaveTeamMutationFailError] = useState(false);
-  const [showTeamTokenError, setTeamTokenError] = useState(false);
 
   const leaveTeamMutation = trpc.teams.leaveTeam.useMutation({
     onSuccess: () => {
@@ -41,36 +37,9 @@ export default function TeamView() {
     }
   });
 
-  const { refetch: fetchInviteToken, isFetching: isFetchingToken } =
-    trpc.teams.getTeamInviteToken.useQuery(undefined, { enabled: false });
-
   const handleLeaveTeam = () => {
     //TODO: need to add a component for ARE YOU SURE dialogues
     leaveTeamMutation.mutate();
-  };
-
-  const handleCopyInviteLink = async () => {
-    //TODO: implement some sort of brief popup or something to indicate that the link was copied
-
-    if (isFetchingToken || isCooling) return;
-    try {
-      setIsCooling(true);
-      setLeaveTeamMutationFailError(false);
-
-      const { data: token } = await fetchInviteToken();
-      if (!token) throw new Error('No token returned');
-      const teamInviteLink = `${window.location.origin}/join/${token}`;
-
-      toast.success('Team invite link copied to clipboard.');
-      console.log(`Team Invite Link: ${teamInviteLink}`);
-
-      navigator.clipboard.writeText(teamInviteLink);
-    } catch (e) {
-      console.error(e);
-      setTeamTokenError(true);
-    } finally {
-      setTimeout(() => setIsCooling(false), INVITE_LINK_COOLDOWN_MS);
-    }
   };
 
   if (error) {
@@ -92,15 +61,6 @@ export default function TeamView() {
             {teamCount}/{TEAM_MAX_MEMBERS}
           </code>
         </div>
-
-        {showTeamTokenError && (
-          <ErrorStateAlert
-            title={{ text: 'Error Fetching Team Invite Token' }}
-            description={{
-              text: 'There was an error fetching team invite token. Please try again or contact the team.'
-            }}
-          />
-        )}
 
         {/* TODO Currently, the tooltip does not appear when the button is
         disabled. The tooltip should appear on hover when the button is

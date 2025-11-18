@@ -28,7 +28,6 @@ export default function ShareTeamButton({
   isTeamFull: boolean;
   isTeamManagementUnlocked: boolean;
 }) {
-  const utils = trpc.useUtils();
   const { refetch: fetchInviteToken, isFetching: isFetchingToken } =
     trpc.teams.getTeamInviteToken.useQuery(undefined, { enabled: false });
 
