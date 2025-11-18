@@ -1,4 +1,5 @@
 import { Badge } from '@/components/shadcn/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
 import { Icons } from '@/lib/icons';
 import { JSX } from 'react';
 
@@ -32,9 +33,16 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
   const { label, icon, variant } = statusConfig[status];
 
   return (
-    <Badge variant={variant} className={`h-6 px-2 flex items-center gap-1`}>
-      {icon}
-      {label}
-    </Badge>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className={`h-6 px-2 flex items-center gap-1`}>
+          {icon}
+          {label}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>This represents the status of your application</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
