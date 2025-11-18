@@ -7,7 +7,7 @@ export interface Application {
     email: string
     submittedDate: string
     lastUpdated: string
-    status: 'pending' | 'approved' | 'rejected' | 'waitlisted'
+    status: 'pending' | 'admitted' | 'rejected' | 'waitlisted'
     // add whatever else missing here
 
     school: string
