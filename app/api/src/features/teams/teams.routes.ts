@@ -24,8 +24,9 @@ export const teamsRouter = t.router({
 
   getTeamPreviewByInviteToken: protectedProcedure
     .input(z.object({ teamToken: z.string() }))
-    .query(async ({ input }) => {
-      return await getTeamPreviewByInviteToken(input.teamToken);
+    .query(async ({ ctx, input }) => {
+      // pass current user id so controller can check blacklist and return an error
+      return await getTeamPreviewByInviteToken(input.teamToken, ctx.user.id);
     }),
 
   joinTeamById: teamProcedure
