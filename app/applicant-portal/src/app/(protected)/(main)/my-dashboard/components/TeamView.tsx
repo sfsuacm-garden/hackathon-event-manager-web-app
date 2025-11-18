@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
 import TeamMemberCard from './MemberCard';
+import ShareTeamButton from './ShareTeamButton';
 
 export default function TeamView() {
   const utils = trpc.useUtils();
@@ -107,24 +108,10 @@ export default function TeamView() {
         <Tooltip>
           <TooltipTrigger asChild>
             {(isTeamManagementUnlocked || !loading) && (
-              <Button
-                variant="secondary"
-                size="lg"
-                className="w-full md:w-auto"
-                onClick={handleCopyInviteLink}
-                disabled={isTeamFull || isFetchingToken || isCooling}
-              >
-                {isFetchingToken ? (
-                  <>
-                    <Spinner className="mr-2 h-4 w-4" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Icons.copy /> Copy Invite Link
-                  </>
-                )}
-              </Button>
+              <ShareTeamButton
+                isTeamFull={isTeamFull}
+                isTeamManagementUnlocked={isTeamManagementUnlocked}
+              />
             )}
           </TooltipTrigger>
 
