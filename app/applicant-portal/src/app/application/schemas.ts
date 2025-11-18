@@ -3,7 +3,7 @@ export const OTHER_OPTION = 'Other';
 
 export const StepBasics = z
   .object({
-    school: z.string().nonempty('Please enter your school name to continue.'),
+    school: z.string().nonempty('Please select or enter your school.'),
     levelOfStudy: z.string().nonempty('Please select your current level of study.'),
     countryOfResidence: z.string().nonempty('Please select your country of residence.'),
     linkedinUrl: z

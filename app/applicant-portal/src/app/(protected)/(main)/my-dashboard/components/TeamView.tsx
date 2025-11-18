@@ -12,6 +12,7 @@ import { TEAM_MAX_MEMBERS } from '@/lib/constants';
 import { Icons } from '@/lib/icons';
 import { trpc } from '@/utils/trpc';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
 import TeamMemberCard from './MemberCard';
 
@@ -59,7 +60,9 @@ export default function TeamView() {
       if (!token) throw new Error('No token returned');
       const teamInviteLink = `${window.location.origin}/join/${token}`;
 
+      toast.success('Team invite link copied to clipboard.');
       console.log(`Team Invite Link: ${teamInviteLink}`);
+
       navigator.clipboard.writeText(teamInviteLink);
     } catch (e) {
       console.error(e);
