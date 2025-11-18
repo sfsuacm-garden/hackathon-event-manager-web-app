@@ -17,10 +17,10 @@ import { formatDateTime } from '@/lib/formatDateTime'
 import { Application } from '@/types/Application'
 
 const statusBadges = {
-    'approved': (
-        <Badge className="bg-green-500">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Approved
+    'pending': (
+        <Badge className="bg-neutral-500">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
         </Badge>
     ),
     'waitlisted': (
@@ -29,16 +29,17 @@ const statusBadges = {
             Waitlisted
         </Badge>
     ),
-    'rejected': (
-        <Badge variant="destructive">
-            <XCircle className="h-3 w-3 mr-1" />
-            Rejected
+    'approved': (
+        <Badge className="bg-green-500">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Approved
         </Badge>
     ),
-    'pending': (
-        <Badge variant="outline">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
+    
+    'rejected': (
+        <Badge className="bg-red-500">
+            <XCircle className="h-3 w-3 mr-1" />
+            Rejected
         </Badge>
     )
 }
@@ -47,6 +48,17 @@ export function ApplicationsSection() {
     const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [reviewNotes, setReviewNotes] = useState('')
+
+    const totalApplicants = mockApplications.length
+    const amountPending = mockApplications.filter((application) => { return application.status == 'pending' }).length
+    const amountAdmitted = mockApplications.filter((application) => { return application.status == 'admitted' }).length
+    const amountRejected = mockApplications.filter((application) => { return application.status == 'rejected' }).length
+    const amountWaitlisted = mockApplications.filter((application) => { return application.status == 'waitlisted' }).length
+    const percentagePending = (amountPending / totalApplicants) * 100
+    const percentageAdmitted =  (amountAdmitted / totalApplicants) * 100
+    const percentageRejected =  (amountRejected / totalApplicants) * 100
+    const percentageWaitlisted =  (amountWaitlisted / totalApplicants) * 100
+    // console.log(percentageAdmitted, percentagePending, percentageRejected, percentageWaitlisted)
 
     function navigateApplications(direction: 'next' | 'prev') {
         if (!selectedApplication) return
@@ -87,6 +99,65 @@ export function ApplicationsSection() {
         <SectionFrame title="Application Management" description="Review and manage individual hackathon applications.">
 
             <div className="flex flex-col gap-6 p-6 border-b">
+
+                {/* participant distribution bar */}
+                <div className="flex flex-col gap-2">
+
+                    {/* main */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-sm">Application Distribution</h3>
+                            <p className="text-xs text-muted-foreground">
+                                {totalApplicants} total applicants
+                            </p>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                            {amountPending} pending, {amountWaitlisted} waitlisted, {amountAdmitted} admitted, {amountRejected} rejected
+                        </div>
+                    </div>
+
+                    <div className="flex h-4 w-full overflow-hidden">
+                        <div
+                            className="bg-neutral-500"
+                            style={{ width: `${percentagePending}%` }}
+                        />
+                        <div
+                            className="bg-blue-500"
+                            style={{ width: `${percentageWaitlisted}%` }}
+                        />
+                        <div
+                            className="bg-green-500"
+                            style={{ width: `${percentageAdmitted}%` }}
+                        />
+                        <div
+                            className="bg-red-500"
+                            style={{ width: `${percentageRejected}%` }}
+                        />
+                    </div>
+
+                    {/* counters */}
+                    <div className="flex items-center text-xs gap-4">
+                    <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-neutral-500" />
+                            <span className="text-muted-foreground">Pending ({amountPending})</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-blue-500" />
+                            <span className="text-muted-foreground">Waitlisted ({amountWaitlisted})</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-green-500" />
+                            <span className="text-muted-foreground">Admitted ({amountAdmitted})</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <div className="h-2 w-2 rounded-full bg-red-500" />
+                            <span className="text-muted-foreground">Rejected ({amountRejected})</span>
+                        </div>
+                    </div>
+                </div>
 
                 {/* temp visual */}
                 {selectedApplication && (
