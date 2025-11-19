@@ -15,5 +15,3 @@ export function formatDateDifference(startDate: string): string | null {
 
     return humanizedTime + " ago";
 }
-
-export default {formatDate, formatDateDifference};

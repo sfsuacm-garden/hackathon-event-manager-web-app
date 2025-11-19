@@ -59,7 +59,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <GlobalProgressBar />
-
         <Providers>
           <main className="flex-1">{children}</main>
           <footer className="relative py-6 text-center text-sm text-muted-foreground">
