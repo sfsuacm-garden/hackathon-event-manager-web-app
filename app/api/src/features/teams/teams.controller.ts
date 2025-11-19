@@ -59,22 +59,50 @@ export async function getTeamById(id: string) {
   }
 }
 
-export async function getTeamPreviewByInviteToken(token: string) {
+export async function getTeamPreviewByInviteToken(token: string, requestingUserId?: string) {
   try {
-    const team = await prisma.joinTeamTokens.findUnique({
-      where: {
-        token: token
-      },
-      select: {
-        teams: {
-          select: {
-            eventId: true
-          }
-        }
-      }
+    // fetch token entry and associated team so we can verify blacklist status and expiry before returning preview
+    const tokenEntry = await prisma.joinTeamTokens.findUnique({
+      where: { token },
+      include: { teams: true }
     });
 
-    const eventId = team?.teams.eventId;
+    if (!tokenEntry) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Join team token could not be found'
+      });
+    }
+
+    // check if token has expired
+    const currDateTime = new Date();
+    if (tokenEntry.expiresAt <= currDateTime) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Join team token has expired. Ask team admin to regenerate link (expired)'
+      });
+    }
+
+    const eventId = tokenEntry?.teams?.eventId;
+
+    // if we have a requesting user, check if they're blacklisted from the team
+    if (requestingUserId && tokenEntry?.teams?.id) {
+      const blacklisted = await prisma.teamsBlacklist.findUnique({
+        where: {
+          teamId_userId: {
+            teamId: tokenEntry.teams.id,
+            userId: requestingUserId
+          }
+        }
+      });
+
+      if (blacklisted) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User is blacklisted from this team (blacklisted)'
+        });
+      }
+    }
 
     const iHateFknPrismaQueries = await prisma.team.findFirst({
       where: { 

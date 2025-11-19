@@ -66,7 +66,7 @@ export const steps: StepConfig<any>[] = [
         label: 'LinkedIn URL',
         fillerText: 'https://linkedin.com/in/yourprofile',
         helperText:
-          'Provide your LinkedIn URL so we can help connect you with partners after the event for potential job opportunities.'
+          'In accordance with MLH registration requirements, please provide a URL to your LinkedIn profile. Aside from registration, we may use this information to help connect you with partners after the event for potential job opportunities.'
       }
     }
   },

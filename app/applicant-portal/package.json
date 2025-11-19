@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "country-data-list": "^1.5.5",
+    "humanize-duration": "^3.33.1",
     "input-otp": "^1.4.2",
     "libphonenumber-js": "^1.12.23",
     "lucide-react": "^0.539.0",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/humanize-duration": "^3.27.4",
     "@types/node": "^20",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19",

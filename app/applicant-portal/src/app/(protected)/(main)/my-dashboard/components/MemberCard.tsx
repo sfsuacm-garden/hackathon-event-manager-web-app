@@ -18,11 +18,12 @@ import { Avatar, AvatarFallback } from '@/components/shadcn/ui/avatar';
 import { Badge } from '@/components/shadcn/ui/badge';
 import { Button } from '@/components/shadcn/ui/button';
 import { Skeleton } from '@/components/shadcn/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/shadcn/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/shadcn/utils';
 import { trpc } from '@/utils/trpc';
+import { formatDateDifference} from '@/utils/formatDate';
 import { BadgeCheckIcon } from 'lucide-react';
 import { useState } from 'react';
 import StatusBadge from '../../../../../components/StatusBadge';
@@ -108,116 +109,114 @@ export default function TeamMemberCard({
     <>
       {/* {!kickMutationSuccess ?} */}
 
-      {error ? (
-        <Card className={cn(className)}>
-          <CardContent>
-            <div className="flex gap-4 justify-between">
-              <div className="flex gap-4">
-                <Avatar className="opacity-0 w-8 h-8">
-                  {/* <AvatarImage src={member.avatarUrl} /> */}
-                  <AvatarFallback>{memberInitials}</AvatarFallback>
-                </Avatar>
-
-                <div className="space-y-1">
-                  <h3 className="text-sm font-semibold">Uh oh something went wrong.</h3>
-                  <p className="text-sm">Refresh the page to reload.</p>
-                  <div className="text-muted-foreground text-xs">Joined -- --- ---</div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 justify-end items-center">
-                <Badge variant="default" className="h-6 px-2 flex items-center gap-1">
-                  <BadgeCheckIcon className="w-4 h-4" />
-                  Owner
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className={cn(className)}>
-          <CardContent>
-            <div className="flex gap-4 justify-between">
-              <div className="flex gap-4">
-                {loading ? (
-                  <Skeleton className="size-8 rounded-full" />
-                ) : (
-                  <Avatar>
+      <TooltipProvider>
+        {error ? (
+          <Card className={cn(className)}>
+            <CardContent>
+              <div className="flex gap-4 justify-between">
+                <div className="flex gap-4">
+                  <Avatar className="opacity-0 w-8 h-8">
                     {/* <AvatarImage src={member.avatarUrl} /> */}
                     <AvatarFallback>{memberInitials}</AvatarFallback>
                   </Avatar>
-                )}
-
-                <div className="space-y-1">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold">Uh oh something went wrong.</h3>
+                    <p className="text-sm">Refresh the page to reload.</p>
+                    <div className="text-muted-foreground text-xs">Joined -- --- ---</div>
+                  </div>
+                </div>
+                <div className="flex gap-4 justify-end items-center">
+                  <Badge variant="default" className="h-6 px-2 flex items-center gap-1">
+                    <BadgeCheckIcon className="w-4 h-4" />
+                    Owner
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className={cn(className)}>
+            <CardContent>
+              <div className="flex gap-4 justify-between">
+                <div className="flex gap-4">
                   {loading ? (
-                    <>
-                      <Skeleton className="h-[14px] w-24" />
-                      <Skeleton className="h-[14px] w-36" />
-                      <Skeleton className="h-[12px] w-20" />
-                    </>
+                    <Skeleton className="size-8 rounded-full" />
+                  ) : (
+                    <Avatar>
+                      {/* <AvatarImage src={member.avatarUrl} /> */}
+                      <AvatarFallback>{memberInitials}</AvatarFallback>
+                    </Avatar>
+                  )}                
+              </div>
+                <div className="space-y-1">
+                    {loading ? (
+                      <>
+                        <Skeleton className="h-[14px] w-24" />
+                        <Skeleton className="h-[14px] w-36" />
+                        <Skeleton className="h-[12px] w-20" />
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-sm font-semibold">
+                          {!isMemberLoggedInUser ? firstName + ' ' + lastName : 'You'}
+                          {isTeamAdmin && ' - Team Admin'}
+                        </h3>
+                        {/* <p className="text-sm">{email}</p> */}
+                        <div className="text-muted-foreground text-xs">Joined {formatDateDifference(joinedTeamDate)}</div>
+                      </>
+                    )}
+                    </div>
+                <div className="flex gap-4 justify-end items-center">
+                  {loading ? (
+                    <Skeleton className="h-6 w-16 rounded-md" />
                   ) : (
                     <>
-                      <h3 className="text-sm font-semibold">
-                        {!isMemberLoggedInUser ? firstName + ' ' + lastName : 'You'}
-                        {isTeamAdmin && ' - Team Admin'}
-                      </h3>
-                      {/* <p className="text-sm">{email}</p> */}
-                      <div className="text-muted-foreground text-xs">Joined {joinedTeamDate}</div>
+                      <StatusBadge status={applicationStatus ?? 'PENDING'} />
+                      {isAdminLoggedInUser && !isMemberLoggedInUser && isTeamManagementUnlocked && (
+                        <AlertDialog>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="icon" className="size-8">
+                                  <Icons.x />
+                                </Button>
+                              </AlertDialogTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span>Remove member</span>
+                            </TooltipContent>
+                          </Tooltip>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove member?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove this member from your team? This
+                                action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleKickTeam}>Remove</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </>
                   )}
                 </div>
               </div>
-
-              <div className="flex gap-4 justify-end items-center">
-                {loading ? (
-                  <Skeleton className="h-6 w-16 rounded-md" />
-                ) : (
-                  <>
-                    <StatusBadge status={applicationStatus ?? 'PENDING'} />
-                    {isAdminLoggedInUser && !isMemberLoggedInUser && isTeamManagementUnlocked && (
-                      <AlertDialog>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="icon" className="size-8">
-                                <Icons.x />
-                              </Button>
-                            </AlertDialogTrigger>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <span>Remove member</span>
-                          </TooltipContent>
-                        </Tooltip>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove member?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to remove this member from your team? This
-                              action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleKickTeam}>Remove</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-            {!kickMutationSuccess && (
-              <ErrorStateAlert
-                title={{ text: 'Error kicking member' }}
-                description={{
-                  text: 'There was an error kicking the member. Please try again or contact the team.'
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {!kickMutationSuccess && (
+                <ErrorStateAlert
+                  title={{ text: 'Error kicking member' }}
+                  description={{
+                    text: 'There was an error kicking the member. Please try again or contact the team.'
+                  }}
+                />
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </TooltipProvider>
     </>
   );
 }

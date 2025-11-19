@@ -18,6 +18,7 @@ import EventHeader from '@/components/ui/event-header';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { useRouter } from 'next/navigation';
 import NProgress from 'nprogress';
+import { toast } from 'sonner';
 import { Controller } from 'react-hook-form';
 import { SchoolCombobox } from './components/ComboBoxSchools';
 
@@ -29,6 +30,7 @@ import { useMultiStepForm } from './hooks/useMultiStepForm';
 import { OTHER_OPTION } from './schemas';
 import { steps } from './stepConfig';
 import { FormField } from './types';
+
 
 export default function ApplyPage() {
   const router = useRouter();
@@ -79,12 +81,15 @@ export default function ApplyPage() {
   }, [eventProfile, isCheckingProfile, router]);
 
   const onSubmissionSuccess = async () => {
+    toast.success('Your application was successfully submitted! Redirecting...');
     setIsRedirecting(true);
     await refetchEventProfile();
     router.push('/my-dashboard');
   };
 
   const onSubmissionError = () => {
+    // should clarify/display trpc error code in future
+    toast.error('There was an error submitting your application.');
     console.error('Error submitting application');
   };
 

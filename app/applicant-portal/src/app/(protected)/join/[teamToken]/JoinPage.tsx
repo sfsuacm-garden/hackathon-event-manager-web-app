@@ -17,7 +17,11 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const utils = trpc.useUtils();
   const router = useRouter();
 
-  const { data: team, isPending: loading } = trpc.teams.getTeamPreviewByInviteToken.useQuery(
+  const {
+    data: team,
+    isPending: loading,
+    error: previewError
+  } = trpc.teams.getTeamPreviewByInviteToken.useQuery(
     { teamToken: joinTeamToken as string },
     { enabled: Boolean(joinTeamToken) }
   );
@@ -50,13 +54,21 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   }
 
   //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
-  if (joinTeamMutation.error || !team) {
+  if (previewError || joinTeamMutation.error || !team) {
     // Determine error type for better messaging
     let isInvalidLink = false;
     let isServerError = false;
-    const isKickedMember = joinTeamMutation.error?.message.toLowerCase().includes('blacklisted') ?? false;
+    let isExpiredToken = false;
 
-    if (!team || isKickedMember) {
+    // check preview query error first (this tells us about invalid link, blacklist, or expired)
+    const previewErrMessage = previewError?.message?.toLowerCase() ?? '';
+    const joinErrMessage = joinTeamMutation.error?.message?.toLowerCase() ?? '';
+    const isKickedMember = previewErrMessage.includes('blacklist') || joinErrMessage.includes('blacklist');
+    const tokenExpired = previewErrMessage.includes('expired') || joinErrMessage.includes('expired');
+
+    if (tokenExpired) {
+      isExpiredToken = true;
+    } else if (previewError || isKickedMember || !team) {
       isInvalidLink = true;
     } else {
       isServerError = true;
@@ -66,14 +78,22 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
       <main className="min-h-screen flex items-center justify-center p-4">
         <ErrorStateAlert
           title={{
-            text: isInvalidLink ? 'Invalid Team Invitation' : 'Unable to Process Invitation'
+            text: isExpiredToken
+              ? 'Invitation Link Expired'
+              : isInvalidLink
+                ? 'Invalid Team Invitation'
+                : 'Unable to Process Invitation'
           }}
           description={{
-            text: isInvalidLink
-              ? 'This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.'
-              : isServerError
-                ? "We're experiencing technical difficulties. Please try again later."
-                : 'Something went wrong while processing this team invitation. Please try again later.'
+            text: isExpiredToken
+              ? 'This invitation link has expired. Please ask your team leader to send you a new invitation.'
+              : isInvalidLink
+                ? isKickedMember
+                  ? 'Invalid Team Invitation'
+                  : 'This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.'
+                : isServerError
+                  ? "We're experiencing technical difficulties. Please try again later."
+                  : 'Something went wrong while processing this team invitation. Please try again later.'
           }}
           callToAction={{
             text: 'Back to Dashboard',

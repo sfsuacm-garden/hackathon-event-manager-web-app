@@ -11,6 +11,7 @@ import {
   HelpCircleIcon,
   Home,
   LogOut,
+  MailIcon,
   Menu,
   Plus,
   Settings,
@@ -36,5 +37,6 @@ export const Icons = {
   x: X,
   code: CodeIcon,
   gavel: Gavel,
-  help: HelpCircleIcon
+  help: HelpCircleIcon,
+  mail: MailIcon
 };

@@ -59,10 +59,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <GlobalProgressBar />
-
         <Providers>
           <main className="flex-1">{children}</main>
-          <footer className="py-6 text-center text-sm text-muted-foreground">
+          <footer className="relative py-6 text-center text-sm text-muted-foreground">
             Made by{' '}
             <Link
               href="https://bento.me/acm-sfsu"
@@ -71,6 +70,14 @@ export default function RootLayout({
               className="underline-offset-2 hover:underline transition-colors hover:text-foreground"
             >
               ACM @ SFSU
+            </Link>
+            <Link
+              href="https://sfsu-acm.notion.site/2a898c2605148063975ad95c0cf933a8?pvs=105"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute right-4 underline-offset-2 hover:underline transition-colors hover:text-foreground"
+            >
+                Report a Bug
             </Link>
           </footer>
           <Toaster />
