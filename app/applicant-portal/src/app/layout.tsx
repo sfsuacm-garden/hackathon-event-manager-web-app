@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin']
 });
 
-const baseUrl = process.env.NODE_ENV === 'production' ? 'https://app.sfhacks.io/' : 'http://localhost:3000';
+const baseUrl = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_PROD_URL! : process.env.NEXT_PUBLIC_DEV_URL!;
 
 export const metadata: Metadata = {
   title: 'SF Hacks 2026 Application Signup',
