@@ -27,6 +27,7 @@ Create a `.env` file in the `app/applicant-portal` directory with the following 
 ```env
 NEXT_PUBLIC_API_URL
 NEXT_PUBLIC_EVENT_ID
+NEXT_PUBLIC_BASE_URL
 ```
 
 ## Learn More
