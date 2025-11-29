@@ -30,18 +30,18 @@ export default function ChooseRolePage() {
           primary="Sign up as a hacker"
           Icon={Icons.code}
         />
-        {/* FOR FUTURE Launch
         <RoleBlock
           title="Participate as a Judge"
           body="Judges at SF Hacks evaluate each team's project based on specific criteria set by the organizers, assessing factors such as creativity, technical implementation, and user experience design to determine the winning projects."
           onPrimary={() =>
             //TODO: Add proper role selection link.
-            handleRoleSelection('judge', 'https://docs.google.com/forms/u/0/')
+            handleRoleSelection('judge', 'https://tally.so/r/GxxKpL')
           }
           primary="Sign up for Judging"
           Icon={Icons.gavel}
-        />
+          />
 
+        {/* FOR FUTURE Launch
         <RoleBlock
           title="Participate as a Mentor"
           body="Mentors at SF Hacks support teams by providing guidance on design, architecture, debugging, and product thinking so hackers can move faster and learn more."
