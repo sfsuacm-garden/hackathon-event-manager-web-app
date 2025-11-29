@@ -9,7 +9,7 @@ import { Separator } from '@radix-ui/react-separator';
 import { useRouter } from 'next/navigation';
 import ErrorStateAlert from '../../(main)/components/ErrorStateAlert';
 import MemberPreview from './components/MemberPreviewCard';
-//import { useRouter } from "next/router";
+import { toast } from 'sonner';
 
 export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const isUserOnTeam = true; // user is always on a team
@@ -39,6 +39,11 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const handleJoinTeam = () => {
     joinTeamMutation.mutate({ teamToken: joinTeamToken });
   };
+
+  const handleDeclineInvite = () => {
+    toast.info('You have declined the team invitation.');
+    router.push('/my-dashboard');
+  }
 
   //TODO enhance loading experience
   if (loading || joinTeamMutation.isPending) {
@@ -104,6 +109,7 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
       </main>
     );
   }
+
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
@@ -180,7 +186,7 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
               <Button onClick={handleJoinTeam} disabled={joinTeamMutation.isPending}>
                 Join New Team
               </Button>
-              <Button variant={'secondary'} onClick={() => router.push('/my-dashboard')}>
+              <Button variant={'secondary'} onClick={handleDeclineInvite}>
                 Decline
               </Button>
             </div>
