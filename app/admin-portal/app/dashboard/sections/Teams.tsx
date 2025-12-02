@@ -12,7 +12,7 @@ import { Team } from '@/types/Team'
 
 export function TeamsSection() {
     const [searchQuery, setSearchQuery] = useState('')
-    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
+    const [selectedTeam, setSelectedTeam] = useState<Team | undefined>(undefined)
     const [dialogOpen, setDialogOpen] = useState(false)
 
     // calculate participant statistics
@@ -25,6 +25,17 @@ export function TeamsSection() {
     const participantsInTeamsPercentage = (totalParticipantsInTeams / totalParticipants) * 100
     const individualParticipantsPercentage = (individualParticipants / totalParticipants) * 100
 
+    const filteredTeams = mockTeams.filter(team => {
+        const matchesSearch =
+            team.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            team.participants.filter(participant => {
+                return participant.name.toLowerCase().includes(searchQuery.toLowerCase())
+            }).length > 0
+
+        return matchesSearch
+    })
+
     const handleTeamClick = (team: Team) => {
         setSelectedTeam(team)
         setDialogOpen(true)
@@ -33,7 +44,7 @@ export function TeamsSection() {
     return (
         <SectionFrame title="Teams Management" description="View and manage hackathon teams and their members.">
 
-            <div className="flex flex-col overflow-auto gap-y-4 p-6">
+            <div className="flex flex-col overflow-auto gap-4 p-6">
 
                 {/* participant distribution bar */}
                 <div className="flex flex-col gap-2">
@@ -82,7 +93,7 @@ export function TeamsSection() {
                 <div className="relative w-full">
                     <Input
                         type="text"
-                        placeholder="Search teams by [team name, individual participant name]"
+                        placeholder="Search teams by [id, name, team member name]"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -111,7 +122,7 @@ export function TeamsSection() {
                             </TableHeader>
 
                             <TableBody>
-                                {mockTeams.map((team) => (
+                                {filteredTeams.map((team) => (
                                     <TableRow
                                         key={team.id}
                                         className="cursor-pointer hover:bg-muted/50"
