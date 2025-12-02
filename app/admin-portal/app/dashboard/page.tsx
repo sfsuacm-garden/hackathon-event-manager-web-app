@@ -37,7 +37,7 @@ export default function Dashboard() {
     <SidebarProvider>
       <DashboardSidebar currentSection={currentSection} onNavigate={handleNavigate} />
       <SidebarInset className="bg-transparent">
-        <div className="flex min-h-screen items-center justify-center px-[10%] py-[5%]">
+        <div className="flex min-h-screen items-center justify-center lg:px-[10%] py-[5%]">
 
           { currentSection == "overview" && <OverviewSection /> }
           { currentSection == "teams" && <TeamsSection /> }
@@ -47,7 +47,8 @@ export default function Dashboard() {
           {/* decorative backdrop underlay */}
           <Image className="-z-10 fixed top-0 w-full h-screen object-cover opacity-5" src="/bits/background.svg" alt="" width={1000} height={1000} />
 
-          <p className="fixed bottom-0 right-8 opacity-30">this is a development build</p>
+          <p className="fixed bottom-0 right-4 opacity-30">this is a development build</p>
+          <p className="fixed bottom-0 left-4 opacity-30">ctrl/cmd + b to toggle sidebar</p>
         </div>
       </SidebarInset>
     </SidebarProvider>
