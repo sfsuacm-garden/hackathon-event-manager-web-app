@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { CheckCircle, XCircle, Clock, User, GraduationCap, ExternalLink, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, User, GraduationCap, ExternalLink, ChevronLeft, ChevronRight, X, Search } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
@@ -11,33 +11,37 @@ import { Label } from '@/components/shadcn/ui/label'
 import { Separator } from '@/components/shadcn/ui/separator'
 import { SectionFrame } from '../components/SectionFrame'
 
+import { Input } from '@/components/shadcn/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select'
+
 import { mockApplications } from '@/dispositions/mockApplications'
 
 import { formatDateTime } from '@/lib/formatDateTime'
 import { Application } from '@/types/Application'
+import { Checkbox } from '@/components/shadcn/ui/checkbox'
 
 const statusBadges = {
     'pending': (
-        <Badge className="bg-neutral-500">
+        <Badge className="bg-neutral-600">
             <Clock className="h-3 w-3 mr-1" />
             Pending
         </Badge>
     ),
     'waitlisted': (
-        <Badge className="bg-blue-500">
+        <Badge className="bg-sky-600">
             <Clock className="h-3 w-3 mr-1" />
             Waitlisted
         </Badge>
     ),
-    'approved': (
-        <Badge className="bg-green-500">
+    'admitted': (
+        <Badge className="bg-green-600">
             <CheckCircle className="h-3 w-3 mr-1" />
-            Approved
+            Admitted
         </Badge>
     ),
     
     'rejected': (
-        <Badge className="bg-red-500">
+        <Badge className="bg-red-600">
             <XCircle className="h-3 w-3 mr-1" />
             Rejected
         </Badge>
@@ -45,9 +49,18 @@ const statusBadges = {
 }
 
 export function ApplicationsSection() {
-    const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
-    const [selectedIndex, setSelectedIndex] = useState(0)
+    // searchbar states
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState<string>('all')
+    const [sortBy, setSortBy] = useState<string>('id')
+
+    // section states
+    const [currentApplication, setCurrentApplication] = useState<Application | null>(null)
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [reviewNotes, setReviewNotes] = useState('')
+
+    // multi-select
+    const [selectedApplications, setSelectedApplications] = useState<Application[]>([])
 
     const totalApplicants = mockApplications.length
     const amountPending = mockApplications.filter((application) => { return application.status == 'pending' }).length
@@ -60,25 +73,65 @@ export function ApplicationsSection() {
     const percentageWaitlisted =  (amountWaitlisted / totalApplicants) * 100
     // console.log(percentageAdmitted, percentagePending, percentageRejected, percentageWaitlisted)
 
+    const filteredApplications = mockApplications.filter(application => {
+        const matchesSearch =
+            application.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            application.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            application.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            application.school.toLowerCase().includes(searchQuery.toLowerCase())
+        
+        const matchesStatus = statusFilter === 'all' || application.status === statusFilter || (statusFilter === 'selected' && selectedApplications.find(app => app.id == application.id) ? true : false)
+
+        return matchesSearch && matchesStatus
+    })
+
+    filteredApplications.sort((app, otherApp) => {
+        if (sortBy == 'id') {
+            if (app.id < otherApp.id) return -1
+            if (app.id > otherApp.id) return 1
+        }
+        else if (sortBy == 'timeSubmitted') {
+            const parsedAppDate = Date.parse(app.submittedDate)
+            const parsedOtherAppDate = Date.parse(otherApp.submittedDate)
+            if (parsedAppDate < parsedOtherAppDate) return -1
+            if (parsedAppDate > parsedOtherAppDate) return 1
+        }
+        else if (sortBy == 'status') {
+            if (app.status < otherApp.status) return -1
+            if (app.status > otherApp.status) return 1
+        }
+        return 0
+    })
+
+    selectedApplications.sort((app, otherApp) => {
+        if (app.id < otherApp.id) return -1
+        if (app.id > otherApp.id) return 1
+        return 0
+    })
+
     function navigateApplications(direction: 'next' | 'prev') {
-        if (!selectedApplication) return
+        if (!currentApplication) return
 
         let newIndex: number
 
         if (direction == 'next') {
-            newIndex = selectedIndex + 1
+            newIndex = currentIndex + 1
             if (newIndex >= mockApplications.length) newIndex = 0
         } else {
-            newIndex = selectedIndex - 1
+            newIndex = currentIndex - 1
             if (newIndex < 0) newIndex = mockApplications.length - 1
         }
 
-        setSelectedApplication(mockApplications[newIndex])
-        setSelectedIndex(newIndex)
+        setCurrentApplication(mockApplications[newIndex])
+        setCurrentIndex(newIndex)
     }
 
-    function handleApprove() {
-        console.log('approved')
+    function handleAdmit() {
+        console.log('admitted')
+    }
+
+    function handleWaitlist() {
+        console.log('waitlisted')
     }
 
     function handleReject() {
@@ -98,7 +151,7 @@ export function ApplicationsSection() {
     return (
         <SectionFrame title="Application Management" description="Review and manage individual hackathon applications.">
 
-            <div className="flex flex-col gap-6 p-6 border-b">
+            <div className="flex flex-col gap-4 p-6 border-b">
 
                 {/* participant distribution bar */}
                 <div className="flex flex-col gap-2">
@@ -118,19 +171,19 @@ export function ApplicationsSection() {
 
                     <div className="flex h-4 w-full overflow-hidden">
                         <div
-                            className="bg-neutral-500"
+                            className="bg-neutral-600"
                             style={{ width: `${percentagePending}%` }}
                         />
                         <div
-                            className="bg-blue-500"
+                            className="bg-sky-600"
                             style={{ width: `${percentageWaitlisted}%` }}
                         />
                         <div
-                            className="bg-green-500"
+                            className="bg-green-600"
                             style={{ width: `${percentageAdmitted}%` }}
                         />
                         <div
-                            className="bg-red-500"
+                            className="bg-red-600"
                             style={{ width: `${percentageRejected}%` }}
                         />
                     </div>
@@ -138,29 +191,29 @@ export function ApplicationsSection() {
                     {/* counters */}
                     <div className="flex items-center text-xs gap-4">
                     <div className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-neutral-500" />
+                            <div className="h-2 w-2 rounded-full bg-neutral-600" />
                             <span className="text-muted-foreground">Pending ({amountPending})</span>
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-blue-500" />
+                            <div className="h-2 w-2 rounded-full bg-sky-600" />
                             <span className="text-muted-foreground">Waitlisted ({amountWaitlisted})</span>
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-green-500" />
+                            <div className="h-2 w-2 rounded-full bg-green-600" />
                             <span className="text-muted-foreground">Admitted ({amountAdmitted})</span>
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-red-500" />
+                            <div className="h-2 w-2 rounded-full bg-red-600" />
                             <span className="text-muted-foreground">Rejected ({amountRejected})</span>
                         </div>
                     </div>
                 </div>
 
                 {/* temp visual */}
-                {selectedApplication && (
+                {currentApplication && (
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
@@ -168,13 +221,13 @@ export function ApplicationsSection() {
                                 <div>
                                     <CardTitle>Application Review</CardTitle>
                                     <CardDescription>
-                                        Review application details below, and approve or reject
+                                        Review application details below, and admit or reject
                                     </CardDescription>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-muted-foreground">
-                                        {selectedIndex} of {mockApplications.length}
+                                        {currentIndex} of {mockApplications.length}
                                     </span>
 
                                     {/* nav */}
@@ -200,7 +253,7 @@ export function ApplicationsSection() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => setSelectedApplication(null)}
+                                        onClick={() => setCurrentApplication(null)}
                                     >
                                         <X className="h-4 w-4" />
                                     </Button>
@@ -220,28 +273,32 @@ export function ApplicationsSection() {
                                     <Separator className="mb-4" />
                                     <div className="space-y-4">
                                         <div>
+                                            <Label className="text-muted-foreground">ID</Label>
+                                            <p className="mt-1">{currentApplication.id}</p>
+                                        </div>
+                                        <div>
                                             <Label className="text-muted-foreground">Name</Label>
-                                            <p className="mt-1">{selectedApplication.applicantName}</p>
+                                            <p className="mt-1">{currentApplication.applicantName}</p>
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">Email</Label>
-                                            <p className="mt-1">{selectedApplication.email}</p>
+                                            <p className="mt-1">{currentApplication.email}</p>
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">School</Label>
                                             <p className="mt-1 flex items-center gap-1">
                                                 <GraduationCap className="h-3 w-3" />
-                                                {selectedApplication.school}
+                                                {currentApplication.school}
                                             </p>
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">Level of Study</Label>
-                                            <p className="mt-1">{selectedApplication.levelOfStudy}</p>
+                                            <p className="mt-1">{currentApplication.levelOfStudy}</p>
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">LinkedIn Profile</Label>
                                             <a
-                                                href={selectedApplication.linkedinUrl}
+                                                href={currentApplication.linkedinUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="mt-1 flex items-center gap-1 text-blue-600 hover:underline"
@@ -268,11 +325,11 @@ export function ApplicationsSection() {
                                         <div className="flex flex-col gap-4">
                                             <div>
                                                 <Label className="text-muted-foreground">T-Shirt Size</Label>
-                                                <p className="mt-1">{selectedApplication.tshirtSize}</p>
+                                                <p className="mt-1">{currentApplication.tshirtSize}</p>
                                             </div>
                                             <div>
                                                 <Label className="text-muted-foreground">Dietary Restrictions</Label>
-                                                <p className="mt-1">{listDietrestrictions(selectedApplication)}</p>
+                                                <p className="mt-1">{listDietrestrictions(currentApplication)}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -284,37 +341,37 @@ export function ApplicationsSection() {
                                         <Separator className="mb-4" />
 
                                         <div className="flex flex-col gap-4">
-                                            {selectedApplication.majorFieldOfStudy && (
+                                            {currentApplication.majorFieldOfStudy && (
                                                 <div>
                                                     <Label className="text-muted-foreground">Major/Field of Study</Label>
-                                                    <p className="mt-1">{selectedApplication.majorFieldOfStudy}</p>
+                                                    <p className="mt-1">{currentApplication.majorFieldOfStudy}</p>
                                                 </div>
                                             )}
-                                            {selectedApplication.gender && (
+                                            {currentApplication.gender && (
                                                 <div>
                                                     <Label className="text-muted-foreground">Gender</Label>
-                                                    <p className="mt-1">{selectedApplication.gender}</p>
+                                                    <p className="mt-1">{currentApplication.gender}</p>
                                                 </div>
                                             )}
-                                            {selectedApplication.pronouns && (
+                                            {currentApplication.pronouns && (
                                                 <div>
                                                     <Label className="text-muted-foreground">Pronouns</Label>
-                                                    <p className="mt-1">{selectedApplication.pronouns}</p>
+                                                    <p className="mt-1">{currentApplication.pronouns}</p>
                                                 </div>
                                             )}
-                                            {selectedApplication.raceEthnicity && (
+                                            {currentApplication.raceEthnicity && (
                                                 <div>
                                                     <Label className="text-muted-foreground">Race/Ethnicity</Label>
-                                                    <p className="mt-1">{selectedApplication.raceEthnicity}</p>
+                                                    <p className="mt-1">{currentApplication.raceEthnicity}</p>
                                                 </div>
                                             )}
-                                            {selectedApplication.sexualOrientation && selectedApplication.sexualOrientation !== 'Prefer not to say' && (
+                                            {currentApplication.sexualOrientation && currentApplication.sexualOrientation !== 'Prefer not to say' && (
                                                 <div>
                                                     <Label className="text-muted-foreground">Sexual Orientation</Label>
-                                                    <p className="mt-1">{selectedApplication.sexualOrientation}</p>
+                                                    <p className="mt-1">{currentApplication.sexualOrientation}</p>
                                                 </div>
                                             )}
-                                            {!selectedApplication.majorFieldOfStudy && !selectedApplication.gender && !selectedApplication.pronouns && !selectedApplication.raceEthnicity && (
+                                            {!currentApplication.majorFieldOfStudy && !currentApplication.gender && !currentApplication.pronouns && !currentApplication.raceEthnicity && (
                                                 <p className="text-sm text-muted-foreground">No demographic information provided</p>
                                             )}
                                         </div>
@@ -329,7 +386,7 @@ export function ApplicationsSection() {
                                         <div>
                                             <Label className="text-muted-foreground">Current Status</Label>
                                             <div className="mt-2">
-                                                {statusBadges[selectedApplication.status]}
+                                                {statusBadges[currentApplication.status]}
                                             </div>
                                         </div>
 
@@ -346,9 +403,13 @@ export function ApplicationsSection() {
                                         </div>
 
                                         <div className="flex flex-col gap-2 pt-2">
-                                            <Button onClick={handleApprove} className="w-full">
+                                            <Button onClick={handleAdmit} className="w-full bg-green-700 hover:bg-green-600">
                                                 <CheckCircle className="h-4 w-4 mr-2" />
-                                                Approve Application
+                                                Admit Application
+                                            </Button>
+                                            <Button onClick={handleWaitlist} className="w-full bg-sky-700 hover:bg-sky-600">
+                                                <Clock className="h-4 w-4 mr-2" />
+                                                Waitlist Application
                                             </Button>
                                             <Button variant="destructive" onClick={handleReject} className="w-full">
                                                 <XCircle className="h-4 w-4 mr-2" />
@@ -362,11 +423,83 @@ export function ApplicationsSection() {
                     </Card>
                 )}
 
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Search by [id, name, email, school]"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        
+                        <SelectContent>
+                            <SelectItem value="all">All Status ({totalApplicants})</SelectItem>
+                            <SelectItem value="pending">{statusBadges.pending} ({amountPending})</SelectItem>
+                            <SelectItem value="waitlisted">{statusBadges.waitlisted} ({amountWaitlisted})</SelectItem>
+                            <SelectItem value="admitted">{statusBadges.admitted} ({amountAdmitted})</SelectItem>
+                            <SelectItem value="rejected">{statusBadges.rejected} ({amountRejected})</SelectItem>
+                            <SelectItem value="selected">Selected ({selectedApplications.length})</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <p>Sort by</p>
+
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="w-full sm:w-[140px]">
+                            <SelectValue placeholder="Sort by value" />
+                        </SelectTrigger>
+                        
+                        <SelectContent>
+                            <SelectItem value="id">ID</SelectItem>
+                            <SelectItem value="timeSubmitted">Time Submitted</SelectItem>
+                            <SelectItem value="status">Status</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {selectedApplications.length > 0 &&
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Bulk Selected Applications ({selectedApplications.length})</CardTitle>
+                        <CardDescription>
+                            {selectedApplications.map(app => app.id).join(', ')}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-row gap-2">
+                            <Button onClick={handleAdmit} className="bg-green-700 hover:bg-green-600">
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Bulk Admit Application(s)
+                            </Button>
+                            <Button onClick={handleWaitlist} className="bg-sky-700 hover:bg-sky-600">
+                                <Clock className="h-4 w-4 mr-2" />
+                                Bulk Waitlist Application(s)
+                            </Button>
+                            <Button variant="destructive" onClick={handleReject}>
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Bulk Reject Application(s)
+                            </Button>
+                            <Button onClick={() => setSelectedApplications([])} className="bg-neutral-700 hover:bg-neutral-600">
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Clear Selected
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+                }
+
                 <Card>
                     <CardHeader>
                         <CardTitle>All Applications</CardTitle>
                         <CardDescription>
-                            Click on an application to view details and take action
+                            Double-click on an application to view details and take action
                         </CardDescription>
                     </CardHeader>
 
@@ -378,21 +511,21 @@ export function ApplicationsSection() {
                                     <TableHead>Applicant</TableHead>
                                     <TableHead>School</TableHead>
                                     <TableHead>Level of Study</TableHead>
-                                    <TableHead>Submitted</TableHead>
+                                    <TableHead>Time Submitted</TableHead>
                                     <TableHead>Status</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
-                                {mockApplications.map((application) => {
+                                {filteredApplications.map((application) => {
                                     const submittedDateTime = formatDateTime(application.submittedDate)
                                     const lastUpdatedDateTime = formatDateTime(application.lastUpdated)
-                                    const isSelected = selectedApplication?.id === application.id
+                                    const isSelected = currentApplication?.id === application.id
                                     return (
                                         <TableRow
                                             key={application.id}
-                                            className={`cursor-pointer hover:bg-muted ${isSelected ? 'bg-muted' : ''}`}
-                                            onClick={() => setSelectedApplication(application)}
+                                            className={`cursor-pointer hover:bg-accent-foreground ${isSelected ? 'bg-accent-foreground' : ''}`}
+                                            onDoubleClick={() => setCurrentApplication(application)}
                                         >
                                             <TableCell>
                                                 <p className="text-sm text-muted-foreground font-mono">
@@ -434,18 +567,27 @@ export function ApplicationsSection() {
                                                 <div>
                                                     {statusBadges[application.status]}
                                                     <p className="text-xs text-muted-foreground mt-1">
-                                                        Updated: {lastUpdatedDateTime.date} {lastUpdatedDateTime.time}
+                                                        {lastUpdatedDateTime.date} {lastUpdatedDateTime.time}
                                                     </p>
                                                 </div>
+                                            </TableCell>
+
+                                            <TableCell>
+                                                <Checkbox checked={selectedApplications.find(app => app.id == application.id) ? true : false} onCheckedChange={(checked) => {
+                                                    if (checked)
+                                                        setSelectedApplications([...selectedApplications, application])
+                                                    else
+                                                        setSelectedApplications(selectedApplications.filter(app => app.id != application.id))
+                                                }}></Checkbox>
                                             </TableCell>
                                         </TableRow>
                                     )
                                 })}
                             </TableBody>
                         </Table>
-
                     </CardContent>
                 </Card>
+
             </div>
         </SectionFrame>
     )
