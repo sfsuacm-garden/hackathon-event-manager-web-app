@@ -8,7 +8,7 @@ import { SectionFrame } from '../components/SectionFrame'
 
 // mock data
 const applicationStatus = [
-  { name: 'Approved', value: 156, color: '#16A249' },
+  { name: 'Admitted', value: 156, color: '#16A249' },
   { name: 'Pending', value: 89, color: '#E7B008' },
   { name: 'Rejected', value: 23, color: '#EF4343' },
   { name: 'Under Review', value: 42, color: '#2463EB' }
