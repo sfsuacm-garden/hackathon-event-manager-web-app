@@ -5,8 +5,9 @@ import { mockParticipants } from '@/dispositions/mockParticipants'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
 import { Input } from '@/components/shadcn/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select';
 
-import { Mail, Phone, GraduationCap, CheckCircle } from 'lucide-react'
+import { Mail, Phone, GraduationCap, User } from 'lucide-react'
 import { SectionFrame } from '../components/SectionFrame'
 
 export function ParticipantsSection() {
@@ -15,11 +16,23 @@ export function ParticipantsSection() {
 
     // calculate da check-in stats
     // may or may not all be used
-    const checkedInCount = mockParticipants.filter(p => p.checkedIn).length
-    const notCheckedInCount = mockParticipants.filter(p => !p.checkedIn).length
+    const amountCheckedIn = mockParticipants.filter(p => p.checkedIn).length
+    const amountNotCheckedIn = mockParticipants.filter(p => !p.checkedIn).length
     const totalParticipants = mockParticipants.length
-    const checkedInPercentage = (checkedInCount / totalParticipants) * 100
-    const notCheckedInPercentage = (notCheckedInCount / totalParticipants) * 100
+    const checkedInPercentage = (amountCheckedIn / totalParticipants) * 100
+    const notCheckedInPercentage = (amountNotCheckedIn / totalParticipants) * 100
+    
+    const filteredParticipants = mockParticipants.filter(participant => {
+        const matchesSearch =
+            participant.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            participant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            participant.teamName && participant.teamName.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const matchesStatus = checkInFilter === 'all' || participant.checkedIn.toString() === checkInFilter
+
+        return matchesSearch && matchesStatus
+    })
 
     return (
         <SectionFrame title="Participants Management" description="View and manage all confirmed-attending event participants.">
@@ -73,13 +86,27 @@ export function ParticipantsSection() {
                 {/* main table view */}
 
                 {/* searchbar */}
-                <div className="relative w-full">
-                    <Input
-                        type="text"
-                        placeholder="Search participants by [id, name, email, team]"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                    <div className="relative w-full">
+                        <Input
+                            type="text"
+                            placeholder="Search participants by [id, name, email]"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    <Select value={checkInFilter} onValueChange={setCheckInFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        
+                        <SelectContent>
+                            <SelectItem value="all">All Status ({totalParticipants})</SelectItem>
+                            <SelectItem value="true">Checked In ({amountCheckedIn})</SelectItem>
+                            <SelectItem value="false">Not Checked In ({amountNotCheckedIn})</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <Card>
@@ -98,12 +125,12 @@ export function ParticipantsSection() {
                                     <TableHead>Participant</TableHead>
                                     <TableHead>Contact</TableHead>
                                     <TableHead>Team</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead>Check In Status</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
-                                {mockParticipants.map((participant) => (
+                                {filteredParticipants.map((participant) => (
                                     <TableRow className="hover:cursor-pointer" key={participant.id}>
 
                                         <TableCell>
@@ -114,6 +141,7 @@ export function ParticipantsSection() {
 
                                         <TableCell>
                                             <div className="flex items-center gap-3">
+                                                <User className="h-4 w-4 text-muted-foreground mt-0.5" />
                                                 <div>{participant.name}</div>
                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                                     <GraduationCap className="h-3 w-3"/>
@@ -140,7 +168,7 @@ export function ParticipantsSection() {
                                         </TableCell>
 
                                         <TableCell>
-                                            {participant.checkedIn ? 'Checked In' : 'Not Checked In'}
+                                            <p className={participant.checkedIn ? 'text-green-500 font-semibold' : ''}>{participant.checkedIn ? 'Checked In' : 'Not Checked In'}</p>
                                         </TableCell>
 
                                     </TableRow>
