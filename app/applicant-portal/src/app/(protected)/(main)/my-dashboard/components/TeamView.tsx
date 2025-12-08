@@ -5,7 +5,6 @@
  * invite link, team members, and an option to leave the team.
  */
 import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/ui/alert';
-import { Button } from '@/components/shadcn/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/ui/tooltip';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { TEAM_MAX_MEMBERS } from '@/lib/constants';
@@ -15,6 +14,8 @@ import { useState } from 'react';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
 import TeamMemberCard from './MemberCard';
 import ShareTeamButton from './ShareTeamButton';
+import LeaveTeamButton from './LeaveTeamButton';
+import { toast } from 'sonner';
 
 export default function TeamView() {
   const utils = trpc.useUtils();
@@ -38,8 +39,8 @@ export default function TeamView() {
   });
 
   const handleLeaveTeam = () => {
-    //TODO: need to add a component for ARE YOU SURE dialogues
     leaveTeamMutation.mutate();
+    toast.success("Successfully left team...");
   };
 
   if (error) {
@@ -101,9 +102,7 @@ export default function TeamView() {
       )}
 
       {isTeam && !loading && isTeamManagementUnlocked && (
-        <Button variant="outline" size="lg" onClick={handleLeaveTeam}>
-          <Icons.logOut /> Leave Team
-        </Button>
+        <LeaveTeamButton handleLeaveTeam={handleLeaveTeam}/>
       )}
 
       {showLeaveTeamMutationFailError && (
