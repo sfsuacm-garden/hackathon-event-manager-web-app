@@ -6,7 +6,8 @@ import { Users, FileText, AlertCircle, MapPin, Clock, UsersRound, Calendar } fro
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { SectionFrame } from '../components/SectionFrame'
 
-import { mockApplications } from '@/dispositions/mockApplications'
+import { mockParticipants as mockApplications } from '@/dispositions/mockParticipants'
+import { mockTeams } from '@/dispositions/mockTeams'
 
 // mock data
 export function OverviewSection() {
@@ -53,7 +54,7 @@ export function OverviewSection() {
           <Alert className="">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-orange-400">
-              You have 67 pending applications requiring review and registration closes in 67 days.
+              You have {amountPending} pending applications requiring review and registration closes in 67 days.
             </AlertDescription>
           </Alert>
 
@@ -66,7 +67,8 @@ export function OverviewSection() {
               </CardHeader>
 
               <CardContent>
-                <div className="text-2xl">178 / 500</div>
+                {/* current arbit # for capacity */}
+                <div className="text-2xl">{amountAdmitted} / 500</div>
                 <Progress value={89} className="mt-2" />
                 <p className="text-xs text-muted-foreground mt-2">
                   89% capacity filled
@@ -80,7 +82,7 @@ export function OverviewSection() {
                 <UsersRound className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl">53</div>
+                <div className="text-2xl">{mockTeams.length}</div>
               </CardContent>
             </Card>
 
@@ -91,7 +93,7 @@ export function OverviewSection() {
               </CardHeader>
 
               <CardContent>
-                <div className="text-2xl">89</div>
+                <div className="text-2xl">{amountPending}</div>
                 <p className="text-xs text-muted-foreground">
                   Requires review
                 </p>

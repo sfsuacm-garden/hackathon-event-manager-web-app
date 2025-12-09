@@ -1,6 +1,8 @@
 // src/types/Participant.ts
 // import type { Application } from './Application'
 
+// TODO: application type should merge with this eventually
+
 export interface Participant {
     id: string
     name: string

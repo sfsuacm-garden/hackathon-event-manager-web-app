@@ -257,7 +257,7 @@ export const mockParticipants: Participant[] = [
 
     submittedDate: '2025-07-08T08:20:00',
     lastUpdated: '2025-07-08T08:20:00',
-    status: 'pending',
+    status: 'rejected',
     school: 'University of Washington',
     levelOfStudy: 'Undergraduate - Junior',
     countryOfResidence: 'United States',
