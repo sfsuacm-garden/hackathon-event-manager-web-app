@@ -1,8 +1,11 @@
 import { useState } from 'react'
 
-import { mockParticipants } from '@/dispositions/mockParticipants'
+import { mockParticipants, Participant } from '@/dispositions/mockParticipants'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
+import { Button } from '@/components/shadcn/ui/button'
+import { Dialog, DialogContent, DialogHeader } from '@/components/shadcn/ui/dialog'
+import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
 import { Input } from '@/components/shadcn/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select';
@@ -12,7 +15,9 @@ import { SectionFrame } from '../components/SectionFrame'
 
 export function ParticipantsSection() {
     const [searchQuery, setSearchQuery] = useState('')
+    const [selectedParticipant, setSelectedParticipant] = useState<Participant>()
     const [checkInFilter, setCheckInFilter] = useState<string>('all')
+    const [dialogOpen, setDialogOpen] = useState(false)
 
     // calculate da check-in stats
     // may or may not all be used
@@ -131,7 +136,10 @@ export function ParticipantsSection() {
 
                             <TableBody>
                                 {filteredParticipants.map((participant) => (
-                                    <TableRow className="hover:cursor-pointer" key={participant.id}>
+                                    <TableRow className="hover:cursor-pointer" key={participant.id} onClick={() => { 
+                                        setSelectedParticipant(participant)
+                                        setDialogOpen(true)
+                                    }}>
 
                                         <TableCell>
                                             <span className="text-sm text-muted-foreground font-mono">
@@ -182,8 +190,19 @@ export function ParticipantsSection() {
 
             </div>
 
-
-
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="overflow-auto">
+                    <DialogHeader>
+                        <DialogTitle>{selectedParticipant?.name}</DialogTitle>
+                        <DialogDescription></DialogDescription>
+                    </DialogHeader>
+                
+                    <div className="flex gap-4 justify-end">
+                        <Button>-</Button>
+                        <Button>Email Message</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
             
         </SectionFrame>
     )

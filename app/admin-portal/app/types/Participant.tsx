@@ -1,3 +1,6 @@
+// src/types/Participant.ts
+// import type { Application } from './Application'
+
 export interface Participant {
     id: string
     name: string
@@ -5,8 +8,10 @@ export interface Participant {
     phone: string
     school: string
 
-    teamName?: string
     isAdmin: boolean
     joinedDate: string
+    teamName: string
     checkedIn: boolean
+
+    // application: Application
 }

@@ -25,6 +25,14 @@ export default function Dashboard() {
   const [dismissedWarning, setDismissedWarning] = useState(false)
   const [currentSection, setCurrentSection] = useState<DashboardSection>('overview')
 
+  // temp solution :( atp inevitably should just replace components and use dynamic routes with query params
+  const [applicationSearchTerm, setApplicationSearchTerm] = useState<string>()
+
+  function handleSetApplicationSearchTerm(searchTerm: string) {
+    console.log(searchTerm)
+    setApplicationSearchTerm(searchTerm)
+  }
+
   function handleNavigate(page: DashboardSection) {
     setCurrentSection(page)
   }
@@ -40,8 +48,8 @@ export default function Dashboard() {
         <div className="flex min-h-screen items-center justify-center lg:px-[10%] py-[5%]">
 
           { currentSection == "overview" && <OverviewSection /> }
-          { currentSection == "teams" && <TeamsSection /> }
-          { currentSection == "applications" && <ApplicationsSection /> }
+          { currentSection == "teams" && <TeamsSection handleNavigate={handleNavigate} handleSetApplicationSearchTerm={handleSetApplicationSearchTerm} /> }
+          { currentSection == "applications" && <ApplicationsSection searchTerm={applicationSearchTerm} /> }
           { currentSection == "participants" && <ParticipantsSection /> }
 
           {/* decorative backdrop underlay */}

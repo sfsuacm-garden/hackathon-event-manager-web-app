@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { CheckCircle, XCircle, Clock, User, GraduationCap, ExternalLink, ChevronLeft, ChevronRight, X, Search } from 'lucide-react'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
 import { Badge } from '@/components/shadcn/ui/badge'
 import { Button } from '@/components/shadcn/ui/button'
@@ -14,10 +14,12 @@ import { SectionFrame } from '../components/SectionFrame'
 import { Input } from '@/components/shadcn/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/ui/select'
 
-import { mockApplications } from '@/dispositions/mockApplications'
+// part of combining mockParticipants data with applications, just reusing old reference names for plug-n-play compat
+// import { mockApplications } from '@/dispositions/mockApplications'
+import { mockParticipants as mockApplications, type Participant as Application } from '@/dispositions/mockParticipants'
 
 import { formatDateTime } from '@/lib/formatDateTime'
-import { Application } from '@/types/Application'
+// import { Application } from '@/types/Application'
 import { Checkbox } from '@/components/shadcn/ui/checkbox'
 
 const statusBadges = {
@@ -48,7 +50,8 @@ const statusBadges = {
     )
 }
 
-export function ApplicationsSection() {
+export function ApplicationsSection({ searchTerm }: { searchTerm?: string }) {
+
     // searchbar states
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -76,9 +79,10 @@ export function ApplicationsSection() {
     const filteredApplications = mockApplications.filter(application => {
         const matchesSearch =
             application.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            application.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            application.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             application.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            application.school.toLowerCase().includes(searchQuery.toLowerCase())
+            application.school.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            application.teamName.toLowerCase().includes(searchQuery.toLowerCase())
         
         const matchesStatus = statusFilter === 'all' || application.status === statusFilter || (statusFilter === 'selected' && selectedApplications.find(app => app.id == application.id) ? true : false)
 
@@ -87,10 +91,11 @@ export function ApplicationsSection() {
 
     filteredApplications.sort((app, otherApp) => {
         if (sortBy == 'id') {
-            if (app.id < otherApp.id) return -1
-            if (app.id > otherApp.id) return 1
+            // NOTE: casting to number assuming string type of id, can remove if alr int
+            if (Number(app.id) < Number(otherApp.id)) return -1
+            if (Number(app.id) > Number(otherApp.id)) return 1
         }
-        else if (sortBy == 'timeSubmitted') {
+        else if (sortBy == 'submitted') {
             const parsedAppDate = Date.parse(app.submittedDate)
             const parsedOtherAppDate = Date.parse(otherApp.submittedDate)
             if (parsedAppDate < parsedOtherAppDate) return -1
@@ -147,6 +152,12 @@ export function ApplicationsSection() {
         if (app.dietaryHalal) restrictions.push('Halal')
         return restrictions.length > 0 ? restrictions.join(', ') : 'None'
     }
+
+    useEffect(() => {
+        console.log(searchTerm)
+        if (!searchTerm) return
+        setSearchQuery(searchTerm)
+    }, [searchTerm])
 
     return (
         <SectionFrame title="Application Management" description="Review and manage individual hackathon applications.">
@@ -278,7 +289,7 @@ export function ApplicationsSection() {
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">Name</Label>
-                                            <p className="mt-1">{currentApplication.applicantName}</p>
+                                            <p className="mt-1">{currentApplication.name}</p>
                                         </div>
                                         <div>
                                             <Label className="text-muted-foreground">Email</Label>
@@ -306,6 +317,10 @@ export function ApplicationsSection() {
                                                 View Profile
                                                 <ExternalLink className="h-3 w-3" />
                                             </a>
+                                        </div>
+                                        <div>
+                                            <Label className="text-muted-foreground">Team</Label>
+                                            <p className="mt-1">{currentApplication.teamName}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -458,7 +473,7 @@ export function ApplicationsSection() {
                         
                         <SelectContent>
                             <SelectItem value="id">ID</SelectItem>
-                            <SelectItem value="timeSubmitted">Time Submitted</SelectItem>
+                            <SelectItem value="submitted">Time Submitted</SelectItem>
                             <SelectItem value="status">Status</SelectItem>
                         </SelectContent>
                     </Select>
@@ -501,6 +516,11 @@ export function ApplicationsSection() {
                         <CardDescription>
                             Double-click on an application to view details and take action
                         </CardDescription>
+                        <CardAction>
+                            <Button variant='secondary' onClick={() => { setSelectedApplications([...filteredApplications, ...selectedApplications]) }}>
+                                Select All
+                            </Button>
+                        </CardAction>
                     </CardHeader>
 
                     <CardContent>
@@ -510,8 +530,8 @@ export function ApplicationsSection() {
                                     <TableHead>ID</TableHead>
                                     <TableHead>Applicant</TableHead>
                                     <TableHead>School</TableHead>
-                                    <TableHead>Level of Study</TableHead>
-                                    <TableHead>Time Submitted</TableHead>
+                                    <TableHead>Team</TableHead>
+                                    <TableHead>Submitted</TableHead>
                                     <TableHead>Status</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -524,7 +544,7 @@ export function ApplicationsSection() {
                                     return (
                                         <TableRow
                                             key={application.id}
-                                            className={`cursor-pointer hover:bg-accent-foreground ${isSelected ? 'bg-accent-foreground' : ''}`}
+                                            className={`cursor-pointer hover:bg-accent-foreground ${isSelected ? 'outline-muted-foreground outline-4' : ''}`}
                                             onDoubleClick={() => setCurrentApplication(application)}
                                         >
                                             <TableCell>
@@ -537,7 +557,7 @@ export function ApplicationsSection() {
                                                 <div className="flex items-start gap-2">
                                                     <User className="h-4 w-4 text-muted-foreground mt-0.5" />
                                                     <div>
-                                                        <p>{application.applicantName}</p>
+                                                        <p>{application.name}</p>
                                                         <p className="text-sm text-muted-foreground">
                                                             {application.email}
                                                         </p>
@@ -553,7 +573,7 @@ export function ApplicationsSection() {
                                             </TableCell>
 
                                             <TableCell>
-                                                <p className="text-sm">{application.levelOfStudy}</p>
+                                                <p className="text-sm">{application.teamName}</p>
                                             </TableCell>
 
                                             <TableCell>

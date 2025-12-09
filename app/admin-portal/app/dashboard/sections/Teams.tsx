@@ -1,16 +1,20 @@
 import { useState } from 'react'
 
+import { Mail, Phone, GraduationCap, User } from 'lucide-react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/shadcn/ui/table'
 import { Input } from '@/components/shadcn/ui/input'
-import { Dialog, DialogContent } from '@/components/shadcn/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@/components/shadcn/ui/dialog'
 import { SectionFrame } from '../components/SectionFrame'
 
 import { mockTeams } from '@/dispositions/mockTeams'
 
 import { Team } from '@/types/Team'
+import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
+import { Button } from '@/components/shadcn/ui/button'
 
-export function TeamsSection() {
+export function TeamsSection({ handleNavigate, handleSetApplicationSearchTerm }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedTeam, setSelectedTeam] = useState<Team | undefined>(undefined)
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -52,7 +56,7 @@ export function TeamsSection() {
                     {/* main */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h3 className="font-semibold text-sm">Participant Distribution</h3>
+                            <h3 className="font-semibold text-sm">Participant-to-Teams Distribution</h3>
                             <p className="text-xs text-muted-foreground">
                                 {totalParticipants} total participants
                             </p>
@@ -169,7 +173,72 @@ export function TeamsSection() {
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="overflow-auto">
-                    team details including participants, admin-related tools like kick, create invite/add members directly
+                    <DialogHeader>
+                        <DialogTitle>{`Members of "${selectedTeam?.name}"`}</DialogTitle>
+                        <DialogDescription>Click to view team member&apos;s application.</DialogDescription>
+                    </DialogHeader>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>ID</TableHead>
+                                <TableHead>Participant</TableHead>
+                                <TableHead>Contact</TableHead>
+                                <TableHead>Check In Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+
+                        <TableBody>
+                            {selectedTeam?.participants.map((participant) => (
+                                <TableRow className="hover:cursor-pointer" key={participant.id} onClick={() => {
+                                    handleSetApplicationSearchTerm(participant.name)
+                                    handleNavigate('applications')
+                                }}>
+
+                                    <TableCell>
+                                        <span className="text-sm text-muted-foreground font-mono">
+                                            {participant.id}
+                                        </span>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <User className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                            <div>{participant.name}</div>
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <GraduationCap className="h-3 w-3"/>
+                                                {participant.school}
+                                            </div>
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-1 text-sm">
+                                                <Mail className="h-3 w-3 text-muted-foreground"/>
+                                                <span className="text-xs">{participant.email}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-sm">
+                                                <Phone className="h-3 w-3 text-muted-foreground" />
+                                                <span className="text-xs">{participant.phone}</span>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <p className={participant.checkedIn ? 'text-green-500 font-semibold' : ''}>{participant.checkedIn ? 'Checked In' : 'Not Checked In'}</p>
+                                    </TableCell>
+
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <div className="flex gap-4 justify-end">
+                        <Button onClick={() => {
+                            handleSetApplicationSearchTerm(selectedTeam?.name)
+                            handleNavigate('applications')
+                        }}>View team in Applications</Button>
+                        <Button>Email Message to Team</Button>
+                    </div>
                 </DialogContent>
             </Dialog>
 

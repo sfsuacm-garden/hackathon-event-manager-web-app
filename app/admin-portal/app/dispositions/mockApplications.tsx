@@ -5,7 +5,7 @@ import { Application } from "@/types/Application";
 // Mock data - only individual applications
 export const mockApplications: Application[] = [
   {
-    id: 'app-1',
+    id: '1',
     applicantName: 'John Doe',
     email: 'joed@example.com',
     submittedDate: '2025-07-18T14:30:00',
@@ -28,7 +28,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Prefer not to say'
   },
   {
-    id: 'app-2',
+    id: '2',
     applicantName: 'Jane Doe',
     email: 'jade@example.com',
     submittedDate: '2025-07-15T09:15:00',
@@ -51,7 +51,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Heterosexual'
   },
   {
-    id: 'app-3',
+    id: '3',
     applicantName: 'Joe Doe',
     email: 'joe.doe@example.com',
     submittedDate: '2025-07-28T16:45:00',
@@ -74,7 +74,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Prefer not to say'
   },
   {
-    id: 'app-4',
+    id: '4',
     applicantName: 'Joe Momma',
     email: 'joes.momp@example.com',
     submittedDate: '2025-08-01T11:20:00',
@@ -97,7 +97,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Prefer not to say'
   },
   {
-    id: 'app-5',
+    id: '5',
     applicantName: 'Alex Rivera',
     email: 'alex.r@example.com',
     submittedDate: '2025-08-03T13:05:00',
@@ -120,7 +120,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Bisexual'
   },
   {
-    id: 'app-6',
+    id: '6',
     applicantName: 'Mark Zuckerberg',
     email: 'mberg@example.com',
     submittedDate: '2025-08-09T10:00:00',
@@ -143,7 +143,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Prefer not to say'
   },
   {
-    id: 'app-7',
+    id: '7',
     applicantName: 'Manny Pacquiao',
     email: 'mp.ph@example.com',
     submittedDate: '2025-08-06T15:30:00',
@@ -166,7 +166,7 @@ export const mockApplications: Application[] = [
     sexualOrientation: 'Heterosexual'
   },
   {
-    id: 'app-8',
+    id: '8',
     applicantName: 'John Doe the 2nd',
     email: 'jdt2.m@example.com',
     submittedDate: '2025-08-07T08:45:00',
