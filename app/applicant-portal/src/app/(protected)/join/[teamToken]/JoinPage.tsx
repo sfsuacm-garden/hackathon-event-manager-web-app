@@ -9,7 +9,7 @@ import { Separator } from '@radix-ui/react-separator';
 import { useRouter } from 'next/navigation';
 import ErrorStateAlert from '../../(main)/components/ErrorStateAlert';
 import MemberPreview from './components/MemberPreviewCard';
-//import { useRouter } from "next/router";
+import { teamComparison } from '../../../../../../api/src/features/teams/teams.controller';
 
 export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const isUserOnTeam = true; // user is always on a team
@@ -17,11 +17,7 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
   const utils = trpc.useUtils();
   const router = useRouter();
 
-  const {
-    data: team,
-    isPending: loading,
-    error: previewError
-  } = trpc.teams.getTeamPreviewByInviteToken.useQuery(
+  const { data: team, isPending: loading } = trpc.teams.getTeamPreviewByInviteToken.useQuery(
     { teamToken: joinTeamToken as string },
     { enabled: Boolean(joinTeamToken) }
   );
@@ -52,48 +48,62 @@ export default function JoinPage({ joinTeamToken }: { joinTeamToken: string }) {
       </main>
     );
   }
+  
+  const sameTeam = trpc.teams.teamComparison.useQuery( 
+    { teamToken: joinTeamToken as string },
+  )
 
-  //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
-  if (previewError || joinTeamMutation.error || !team) {
-    // Determine error type for better messaging
-    let isInvalidLink = false;
-    let isServerError = false;
-    let isExpiredToken = false;
-
-    // check preview query error first (this tells us about invalid link, blacklist, or expired)
-    const previewErrMessage = previewError?.message?.toLowerCase() ?? '';
-    const joinErrMessage = joinTeamMutation.error?.message?.toLowerCase() ?? '';
-    const isKickedMember = previewErrMessage.includes('blacklist') || joinErrMessage.includes('blacklist');
-    const tokenExpired = previewErrMessage.includes('expired') || joinErrMessage.includes('expired');
-
-    if (tokenExpired) {
-      isExpiredToken = true;
-    } else if (previewError || isKickedMember || !team) {
-      isInvalidLink = true;
-    } else {
-      isServerError = true;
-    }
+  if (sameTeam) {
+    let isOnSameTeam = false;
 
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
         <ErrorStateAlert
           title={{
-            text: isExpiredToken
-              ? 'Invitation Link Expired'
-              : isInvalidLink
-                ? 'Invalid Team Invitation'
-                : 'Unable to Process Invitation'
+            text: isOnSameTeam ? 'Already on the team' : 'Unable to Process Invitation'
           }}
           description={{
-            text: isExpiredToken
-              ? 'This invitation link has expired. Please ask your team leader to send you a new invitation.'
-              : isInvalidLink
-                ? isKickedMember
-                  ? 'Invalid Team Invitation'
-                  : 'This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.'
-                : isServerError
-                  ? "We're experiencing technical difficulties. Please try again later."
-                  : 'Something went wrong while processing this team invitation. Please try again later.'
+            text: isOnSameTeam
+              ? 'You are already part of the team. Please join one you are not joined in yet.'
+              : 'Experiencing technical difficulties'
+          }}
+          callToAction={{
+            text: 'Back to Dashboard',
+            link: '/my-dashboard'
+          }}
+          variant="default"
+        />
+      </main>
+    );
+  }
+
+  //TODO enhance the error experience. Currently, this will be used to indicate that a team is in valid and/or an error. Would be worth having a conversation to seperate the two.
+  if (joinTeamMutation.error || !team) {
+    // Determine error type for better messaging
+    let isInvalidLink = false;
+    let isServerError = false;
+    const isKickedMember = joinTeamMutation.error?.message.toLowerCase().includes('blacklisted') ?? false;
+
+    if (!team || isKickedMember) {
+      isInvalidLink = true;
+    } else {
+      isServerError = true;
+    }
+
+    
+
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <ErrorStateAlert
+          title={{
+            text: isInvalidLink ? 'Invalid Team Invitation' : 'Unable to Process Invitation'
+          }}
+          description={{
+            text: isInvalidLink
+              ? 'This invitation link is invalid or has expired. Please ask your team leader to send you a new invitation.'
+              : isServerError
+                ? "We're experiencing technical difficulties. Please try again later."
+                : 'Something went wrong while processing this team invitation. Please try again later.'
           }}
           callToAction={{
             text: 'Back to Dashboard',

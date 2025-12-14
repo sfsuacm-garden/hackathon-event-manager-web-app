@@ -511,7 +511,26 @@ export async function getTeamFromTeamToken(token: string) {
   }
 }
 
+export async function teamComparison(teamId: string, teamId_userId: string) {
+  try {
+    if (teamId != teamId_userId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Team not matching'
+      });
+    }
+    return teamId;
 
+  } catch(error) {
+    if (error instanceof TRPCError) throw error;
+
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Could not fetch team from team token'
+    });
+
+  }
+}
 // HELPER FUNCTIONS
 // helper functions have a prisma client passed in because they can either be ran inside of a transaction
 // or outside of a transaction and I could not think of a better way to control that dual behavior.
