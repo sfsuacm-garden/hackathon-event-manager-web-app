@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin']
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export const metadata: Metadata = {
   title: 'SF Hacks 2026 Application Signup',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     ],
     locale: 'en_US',
     type: 'website',
-    url: baseUrl,
+    url: baseUrl
   }
 };
 
@@ -81,7 +81,7 @@ export default function RootLayout({
               rel="noopener noreferrer"
               className="absolute right-4 underline-offset-2 hover:underline transition-colors hover:text-foreground"
             >
-                Report a Bug
+              Report a Bug
             </Link>
           </footer>
           <Toaster />
