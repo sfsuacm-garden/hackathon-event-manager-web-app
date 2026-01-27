@@ -11,16 +11,17 @@ import { TEAM_MAX_MEMBERS } from '@/lib/constants';
 import { Icons } from '@/lib/icons';
 import { trpc } from '@/utils/trpc';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
+import LeaveTeamButton from './LeaveTeamButton';
 import TeamMemberCard from './MemberCard';
 import ShareTeamButton from './ShareTeamButton';
-import LeaveTeamButton from './LeaveTeamButton';
-import { toast } from 'sonner';
 
 export default function TeamView() {
   const utils = trpc.useUtils();
-  const isTeamManagementUnlocked = true; // how are we going to handle this globally or should this become a middleware lmao
+  const { data: event, isPending: eventLoading, error: eventError } = trpc.events.me.useQuery();
 
+  const isTeamManagementUnlocked = event?.isTeamManagementOpen == true;
   const { data: team, isLoading: loading, error } = trpc.teams.getOwnTeam.useQuery();
   const teamCount = team?.team.members.length ?? 0;
   const isTeam = teamCount > 1;
@@ -40,7 +41,7 @@ export default function TeamView() {
 
   const handleLeaveTeam = () => {
     leaveTeamMutation.mutate();
-    toast.success("Successfully left team...");
+    toast.success('Successfully left team...');
   };
 
   if (error) {
@@ -68,10 +69,10 @@ export default function TeamView() {
         disabled. */}
         <Tooltip>
           <TooltipTrigger asChild>
-            {(isTeamManagementUnlocked || !loading) && (
+            {(isTeamManagementUnlocked || !loading || !eventLoading) && (
               <ShareTeamButton
                 isTeamFull={isTeamFull}
-                isTeamManagementUnlocked={isTeamManagementUnlocked}
+                isTeamManagementUnlocked={isTeamManagementUnlocked && !eventError}
               />
             )}
           </TooltipTrigger>
@@ -102,7 +103,7 @@ export default function TeamView() {
       )}
 
       {isTeam && !loading && isTeamManagementUnlocked && (
-        <LeaveTeamButton handleLeaveTeam={handleLeaveTeam}/>
+        <LeaveTeamButton handleLeaveTeam={handleLeaveTeam} />
       )}
 
       {showLeaveTeamMutationFailError && (

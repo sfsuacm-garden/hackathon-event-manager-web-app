@@ -2,29 +2,31 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/shadcn/utils';
 
 import { LucideIcon } from 'lucide-react'; // optional type helper for icons
-
 export function RoleBlock({
   title,
   body,
   onPrimary,
   selected,
+  disabled = false,
   Icon
 }: {
   title: string;
   body: string;
   onPrimary: () => void;
-  primary: string;
   selected?: boolean;
-  Icon?: LucideIcon; // optional icon prop
+  disabled?: boolean;
+  Icon?: LucideIcon;
 }) {
   return (
     <Card
-      onClick={onPrimary}
+      onClick={disabled ? undefined : onPrimary}
       className={cn(
-        'cursor-pointer border-2 transition-all duration-300 ease-out',
-        selected
-          ? 'border-primary bg-primary/5'
-          : 'border-muted hover:border-primary/40 hover:bg-muted/30'
+        'border-2 transition-all duration-300 ease-out',
+        disabled ? 'cursor-not-allowed border-muted bg-muted/40 opacity-60' : 'cursor-pointer',
+        !disabled &&
+          (selected
+            ? 'border-primary bg-primary/5'
+            : 'border-muted hover:border-primary/40 hover:bg-muted/30')
       )}
     >
       <CardContent className="p-6">
@@ -34,7 +36,11 @@ export function RoleBlock({
             <div
               className={cn(
                 'mt-0.5 transition-colors duration-300',
-                selected ? 'text-accent' : 'text-accent group-hover:text-accent'
+                disabled
+                  ? 'text-muted-foreground'
+                  : selected
+                    ? 'text-accent'
+                    : 'text-accent group-hover:text-accent'
               )}
             >
               <Icon className="h-5 w-5" />

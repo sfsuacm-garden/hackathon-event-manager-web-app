@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import nProgress from 'nprogress';
 import { createContext, useContext, useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface BaseProtectedContextValue {
   user: User | null;
@@ -140,4 +141,34 @@ export const FullyProtectedProvider = ({ children }: { children: React.ReactNode
       {children}
     </FullyProtectedContext.Provider>
   );
+};
+
+export const TeamManagementProtectedProvider = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+
+  const { data: event, isLoading: eventLoading, error: eventError } = trpc.events.me.useQuery();
+
+  // Handle error
+  useEffect(() => {
+    if (eventError) {
+      toast.error('There was an error retrieving this event information. Refresh the page.');
+    }
+  }, [eventError]);
+
+  // Handle redirect
+  useEffect(() => {
+    if (!eventLoading && event && !event.isTeamManagementOpen) {
+      router.replace('/closed');
+    }
+  }, [eventLoading, event, router]);
+
+  if (eventLoading || eventError) {
+    return null;
+  }
+
+  if (!event?.isTeamManagementOpen) {
+    return null;
+  }
+
+  return <>{children}</>;
 };
