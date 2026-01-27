@@ -69,7 +69,7 @@ export default function TeamView() {
         disabled. */}
         <Tooltip>
           <TooltipTrigger asChild>
-            {(isTeamManagementUnlocked || !loading) && (
+            {(isTeamManagementUnlocked || !loading || !eventLoading) && (
               <ShareTeamButton
                 isTeamFull={isTeamFull}
                 isTeamManagementUnlocked={isTeamManagementUnlocked && !eventError}
