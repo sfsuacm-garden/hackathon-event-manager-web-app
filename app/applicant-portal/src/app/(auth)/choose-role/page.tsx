@@ -23,6 +23,10 @@ export default function ChooseRolePage() {
     router.push(url ?? `/auth`);
   }
 
+  if (!event?.isTeamManagementOpen && eventLoading == false) {
+    router.replace('/authenticate');
+  }
+
   return (
     <main className="mx-auto w-full max-w-3xl px-6 ">
       <EventHeader />
