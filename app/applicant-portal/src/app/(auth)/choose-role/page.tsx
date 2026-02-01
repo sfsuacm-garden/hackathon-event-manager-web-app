@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import EventHeader from '@/components/ui/event-header';
 import { Icons } from '@/lib/icons';
+import { trpc } from '@/utils/trpc';
 import { RoleBlock } from './components/RoleBlockCard';
 
 // TODO Currently roles are not being used. Would be good for future functionality.
@@ -11,6 +12,9 @@ export type Role = 'hacker' | 'judge' | 'mentor';
 
 export default function ChooseRolePage() {
   const router = useRouter();
+  const { data: event, isLoading: eventLoading, error: eventError } = trpc.events.me.useQuery();
+  const enableRoleSelection =
+    eventError != null || eventLoading || event?.isTeamManagementOpen != true;
 
   function handleRoleSelection(role: Role, url = '') {
     try {
@@ -27,8 +31,8 @@ export default function ChooseRolePage() {
           title="Participate as a Hacker!"
           body="Hackers at SF Hacks build innovative software projects, apps, or hardware solutions within a limited timeframe (typically 24–48 hours) by collaborating in teams to solve problems or create something new."
           onPrimary={() => handleRoleSelection('hacker', '/authenticate')}
-          primary="Sign up as a hacker"
           Icon={Icons.code}
+          disabled={enableRoleSelection}
         />
         <RoleBlock
           title="Participate as a Judge"
@@ -37,9 +41,9 @@ export default function ChooseRolePage() {
             //TODO: Add proper role selection link.
             handleRoleSelection('judge', 'https://tally.so/r/GxxKpL')
           }
-          primary="Sign up for Judging"
           Icon={Icons.gavel}
-          />
+          disabled={enableRoleSelection}
+        />
 
         {/* FOR FUTURE Launch
         <RoleBlock
