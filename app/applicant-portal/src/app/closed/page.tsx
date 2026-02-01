@@ -19,6 +19,11 @@ export default function ClosedPage() {
             Join our Discord for Updates!
           </a>
         </Button>
+        <Button asChild className="mt-6  " variant={'outline'}>
+          <a href="/my-dashboard" target="_blank" rel="noopener noreferrer">
+            Check Application Status Here
+          </a>
+        </Button>
       </div>
     </main>
   );
