@@ -5,9 +5,10 @@
 
 import { trpc } from '@/utils/trpc';
 import ErrorStateAlert from '../components/ErrorStateAlert';
+import TeamView from './components/TeamView';
 export default function MyDashboardView() {
   // ✅ All hooks at the top
-  const { error } = trpc.events.getById.useQuery({
+  const { data, isLoading, error } = trpc.events.getById.useQuery({
     id: process.env.NEXT_PUBLIC_EVENT_ID || ''
   });
   // ✅ Conditional rendering after all hooks
@@ -44,6 +45,7 @@ export default function MyDashboardView() {
         <div className="flex flex-col gap-2 items-center text-center">
           <h3 className="scroll-m-20 text-xl font-semibold tracking-tight">My Team</h3>
           <p>View and manage your application and your team.</p>
+          <TeamView />
         </div>
       </div>
     </main>
