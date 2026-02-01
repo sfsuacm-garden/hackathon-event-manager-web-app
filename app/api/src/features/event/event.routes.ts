@@ -20,6 +20,7 @@ export const eventRouter = t.router({
   // TODO
   me:  t.procedure.use(requireEvent).query(async ({ctx}) => {
     const event =  await getEventById(ctx.event.id);
+    event.isTeamManagementOpen = false
     return event
   }),
 });
