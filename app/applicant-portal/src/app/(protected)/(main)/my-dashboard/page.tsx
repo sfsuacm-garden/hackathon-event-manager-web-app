@@ -7,7 +7,7 @@ import { trpc } from '@/utils/trpc';
 import ErrorStateAlert from '../components/ErrorStateAlert';
 export default function MyDashboardView() {
   // ✅ All hooks at the top
-  const { data, isLoading, error } = trpc.events.getById.useQuery({
+  const { error } = trpc.events.getById.useQuery({
     id: process.env.NEXT_PUBLIC_EVENT_ID || ''
   });
   // ✅ Conditional rendering after all hooks
