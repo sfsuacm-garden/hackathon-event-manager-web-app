@@ -1,9 +1,13 @@
-import { AuthOnlyProvider } from '@/providers/ProtectedProvider';
+import { AuthOnlyProvider, TeamManagementProtectedProvider } from '@/providers/ProtectedProvider';
 
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <AuthOnlyProvider>{children}</AuthOnlyProvider>;
+  return (
+    <AuthOnlyProvider>
+      <TeamManagementProtectedProvider>{children}</TeamManagementProtectedProvider>
+    </AuthOnlyProvider>
+  );
 }
