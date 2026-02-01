@@ -3,18 +3,14 @@
  * My Dashboard Page
  */
 
-import { Skeleton } from '@/components/shadcn/ui/skeleton';
 import { trpc } from '@/utils/trpc';
 import ErrorStateAlert from '../components/ErrorStateAlert';
 import TeamView from './components/TeamView';
 export default function MyDashboardView() {
   // ✅ All hooks at the top
-  const { data, isLoading, error } = trpc.events.getById.useQuery({
+  const { error } = trpc.events.getById.useQuery({
     id: process.env.NEXT_PUBLIC_EVENT_ID || ''
   });
-
-  const isTeamManagementUnlocked = data?.isTeamManagementOpen ?? false;
-
   // ✅ Conditional rendering after all hooks
   if (error) {
     const isNotFound = false;
@@ -49,21 +45,7 @@ export default function MyDashboardView() {
         <div className="flex flex-col gap-2 items-center text-center">
           <h3 className="scroll-m-20 text-xl font-semibold tracking-tight">My Team</h3>
           <p>View and manage your application and your team.</p>
-          {isLoading ? (
-            <div>
-              <Skeleton className="h-4 w-60 rounded mt-2" />
-            </div>
-          ) : (
-            <div className="mt-4">
-              {!isTeamManagementUnlocked ? (
-                <p className="text-muted-foreground text-sm text-center">
-                  Teams are locked. This means your application for seeing if…
-                </p>
-              ) : (
-                <TeamView />
-              )}
-            </div>
-          )}
+          <TeamView />
         </div>
       </div>
     </main>
