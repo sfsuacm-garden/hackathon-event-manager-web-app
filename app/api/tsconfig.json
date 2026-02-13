@@ -36,5 +36,8 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force"
-  }
+  },
+  "include": [
+    "../api/src/**/*" // ← ADD THIS LINE
+  ]
 }
