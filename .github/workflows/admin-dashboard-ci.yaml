@@ -47,12 +47,12 @@ jobs:
         working-directory: ./app/api
 
       - name: Debug - Check if API types exist
-      run: |
-        echo "Checking for Prisma client..."
-        ls -la ./app/api/node_modules/.prisma/ || echo "No .prisma folder"
-        echo "Checking API dist..."
-        ls -la ./app/api/dist/ || echo "No dist folder"
-      working-directory: .
+        run: |
+          echo "Checking for Prisma client..."
+          ls -la ./app/api/node_modules/.prisma/ || echo "No .prisma folder"
+          echo "Checking API dist..."
+          ls -la ./app/api/dist/ || echo "No dist folder"
+        working-directory: .
 
       - name: Build API
         run: npm run build
