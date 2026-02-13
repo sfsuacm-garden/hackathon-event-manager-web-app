@@ -37,6 +37,10 @@ jobs:
         working-directory: ./app/applicant-portal
         # Installs project dependencies defined in package.json
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: ./app/api
+
       - name: Install dependencies for API
         run: npm install
         working-directory: ./app/api
