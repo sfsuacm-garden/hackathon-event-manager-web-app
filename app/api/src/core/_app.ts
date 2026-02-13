@@ -4,6 +4,7 @@ import { eventProfileRouter } from '../features/eventProfiles/eventProfile.route
 import { schoolsRouter } from '../features/schools/schools.routes';
 import { teamsRouter } from '../features/teams/teams.routes';
 import { userProfileRouter } from '../features/userProfile/userProfile.routes';
+import { checkInRouter } from '../features/checkIn/checkIn.routes';
 import { t } from './trpc';
 
 export const trpcRouter = t.router({
@@ -13,7 +14,8 @@ export const trpcRouter = t.router({
   applications: applicationRouter,
   schools: schoolsRouter,
   profile: userProfileRouter,
-  eventProfile: eventProfileRouter
+  eventProfile: eventProfileRouter,
+  checkIn: checkInRouter
 });
 
 export type AppRouter = typeof trpcRouter;
