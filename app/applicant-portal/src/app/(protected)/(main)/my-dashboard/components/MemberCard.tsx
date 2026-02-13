@@ -18,16 +18,22 @@ import { Avatar, AvatarFallback } from '@/components/shadcn/ui/avatar';
 import { Badge } from '@/components/shadcn/ui/badge';
 import { Button } from '@/components/shadcn/ui/button';
 import { Skeleton } from '@/components/shadcn/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/shadcn/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider
+} from '@/components/shadcn/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/shadcn/utils';
 import { trpc } from '@/utils/trpc';
-import { formatDateDifference} from '@/utils/formatDate';
+import { formatDateDifference } from '@/utils/formatDate';
 import { BadgeCheckIcon } from 'lucide-react';
 import { useState } from 'react';
 import StatusBadge from '../../../../../components/StatusBadge';
 import ErrorStateAlert from '../../components/ErrorStateAlert';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface TeamMember {
   teamId: string;
@@ -80,6 +86,9 @@ export default function TeamMemberCard({
   const userId = teamMemberInfo.userId;
 
   const [kickMutationSuccess, setKickMutationSuccess] = useState(true);
+  const [qrOpen, setQrOpen] = useState(false);
+  const isAccepted = applicationStatus === 'ACCEPTED';
+  const canShowQr = isMemberLoggedInUser && isAccepted;
 
   const utils = trpc.useUtils();
   const kickFromTeamMutation = trpc.teams.kickTeamMemberById.useMutation({
@@ -146,26 +155,28 @@ export default function TeamMemberCard({
                       {/* <AvatarImage src={member.avatarUrl} /> */}
                       <AvatarFallback>{memberInitials}</AvatarFallback>
                     </Avatar>
-                  )}                
-              </div>
+                  )}
+                </div>
                 <div className="space-y-1">
-                    {loading ? (
-                      <>
-                        <Skeleton className="h-[14px] w-24" />
-                        <Skeleton className="h-[14px] w-36" />
-                        <Skeleton className="h-[12px] w-20" />
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="text-sm font-semibold">
-                          {!isMemberLoggedInUser ? firstName + ' ' + lastName : 'You'}
-                          {isTeamAdmin && ' - Team Admin'}
-                        </h3>
-                        {/* <p className="text-sm">{email}</p> */}
-                        <div className="text-muted-foreground text-xs">Joined {formatDateDifference(joinedTeamDate)}</div>
-                      </>
-                    )}
-                    </div>
+                  {loading ? (
+                    <>
+                      <Skeleton className="h-[14px] w-24" />
+                      <Skeleton className="h-[14px] w-36" />
+                      <Skeleton className="h-[12px] w-20" />
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-sm font-semibold">
+                        {!isMemberLoggedInUser ? firstName + ' ' + lastName : 'You'}
+                        {isTeamAdmin && ' - Team Admin'}
+                      </h3>
+                      {/* <p className="text-sm">{email}</p> */}
+                      <div className="text-muted-foreground text-xs">
+                        Joined {formatDateDifference(joinedTeamDate)}
+                      </div>
+                    </>
+                  )}
+                </div>
                 <div className="flex gap-4 justify-end items-center">
                   {loading ? (
                     <Skeleton className="h-6 w-16 rounded-md" />
@@ -197,6 +208,35 @@ export default function TeamMemberCard({
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction onClick={handleKickTeam}>Remove</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+
+                      {canShowQr && (
+                        <AlertDialog open={qrOpen} onOpenChange={setQrOpen}>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Reveal QR Code
+                            </Button>
+                          </AlertDialogTrigger>
+
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Your Check-in QR</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Show this at check-in.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+
+                            <div className="flex justify-center py-2">
+                              <div className="bg-white p-3 rounded-md">
+                                <QRCodeCanvas value={userId} size={220} includeMargin />
+                              </div>
+                            </div>
+
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Close</AlertDialogCancel>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
