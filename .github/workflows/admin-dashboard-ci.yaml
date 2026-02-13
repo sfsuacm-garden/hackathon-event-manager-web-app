@@ -42,11 +42,6 @@ jobs:
         working-directory: ./app/api
         # Installs project dependencies defined in package.json
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-        working-directory: ./app/api
-
-
       - name: Build API
         run: npm run build
         working-directory: ./app/api
@@ -55,14 +50,6 @@ jobs:
         run: npm run lint
         working-directory: ./app/applicant-portal
         # Runs the ESLint command defined in package.json scripts to check code quality
-      
-      - name: Debug - Check if API types exist
-        run: |
-          echo "Checking for Prisma client..."
-          ls -la ./app/api/node_modules/.prisma/ || echo "No .prisma folder"
-          echo "Checking API dist..."
-          ls -la ./app/api/dist/ || echo "No dist folder"
-        working-directory: .
 
       - name: Build
         run: npm run build
